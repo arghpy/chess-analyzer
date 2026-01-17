@@ -5,6 +5,7 @@ int main(void)
 {
   InitWindow(800, 600, "Chess analyzer");
   SetTargetFPS(60);
+  SetWindowState(FLAG_WINDOW_RESIZABLE);
 
   while(!WindowShouldClose()) {
     BeginDrawing();
