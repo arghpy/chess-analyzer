@@ -3,7 +3,8 @@
 
 int main(void)
 {
-  InitWindow(800, 600, "Window name");
+  InitWindow(800, 600, "Chess analyzer");
+
   while(!WindowShouldClose()) {
     BeginDrawing();
     {
