@@ -4,6 +4,7 @@
 int main(void)
 {
   InitWindow(800, 600, "Chess analyzer");
+  SetTargetFPS(60);
 
   while(!WindowShouldClose()) {
     BeginDrawing();
