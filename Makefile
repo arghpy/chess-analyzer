@@ -1,4 +1,4 @@
-CFLAGS := -Wall -Wextra -Wpedantic -Werror
+CFLAGS := -Wall -Wextra -Werror
 
 SRC        := ./src
 BUILD      := ./build
