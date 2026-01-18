@@ -131,14 +131,14 @@ void draw_board(void)
   }
 }
 
-void draw_piece(Texture2D *piece, Rectangle rect)
+void draw_piece(Texture2D piece, Rectangle rect)
 {
   float square_size = rect.width;
 
   Rectangle source = {
     0, 0,
-    piece->width,
-    piece->height
+    piece.width,
+    piece.height
   };
 
   Rectangle dest = {
@@ -148,7 +148,36 @@ void draw_piece(Texture2D *piece, Rectangle rect)
     square_size
   };
 
-  DrawTexturePro( *piece, source, dest, (Vector2){0, 0}, 0.0f, WHITE);
+  DrawTexturePro(piece, source, dest, (Vector2){0, 0}, 0.0f, WHITE);
+}
+
+void draw_initial_position(void)
+{
+  // Black
+  draw_piece(chess_pieces[ROOK_B],   chess_board.chess_squares[0][0].r);
+  draw_piece(chess_pieces[KNIGHT_B], chess_board.chess_squares[0][1].r);
+  draw_piece(chess_pieces[BISHOP_B], chess_board.chess_squares[0][2].r);
+  draw_piece(chess_pieces[QUEEN_B],  chess_board.chess_squares[0][3].r);
+  draw_piece(chess_pieces[KING_B],   chess_board.chess_squares[0][4].r);
+  draw_piece(chess_pieces[BISHOP_B], chess_board.chess_squares[0][5].r);
+  draw_piece(chess_pieces[KNIGHT_B], chess_board.chess_squares[0][6].r);
+  draw_piece(chess_pieces[ROOK_B],   chess_board.chess_squares[0][7].r);
+
+  // White
+  draw_piece(chess_pieces[ROOK_W],   chess_board.chess_squares[7][0].r);
+  draw_piece(chess_pieces[KNIGHT_W], chess_board.chess_squares[7][1].r);
+  draw_piece(chess_pieces[BISHOP_W], chess_board.chess_squares[7][2].r);
+  draw_piece(chess_pieces[QUEEN_W],  chess_board.chess_squares[7][3].r);
+  draw_piece(chess_pieces[KING_W],   chess_board.chess_squares[7][4].r);
+  draw_piece(chess_pieces[BISHOP_W], chess_board.chess_squares[7][5].r);
+  draw_piece(chess_pieces[KNIGHT_W], chess_board.chess_squares[7][6].r);
+  draw_piece(chess_pieces[ROOK_W],   chess_board.chess_squares[7][7].r);
+
+  // Draw pawns
+  for (int i = 0; i < NS; i++) {
+    draw_piece(chess_pieces[PAWN_B], chess_board.chess_squares[1][i].r);
+    draw_piece(chess_pieces[PAWN_W], chess_board.chess_squares[6][i].r);
+  }
 }
 
 void draw_chess_board(Font *font)
@@ -156,4 +185,5 @@ void draw_chess_board(Font *font)
   update_chess_board();
   draw_board();
   draw_coordinates(font);
+  draw_initial_position();
 }
