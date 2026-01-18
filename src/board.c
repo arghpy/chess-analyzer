@@ -3,37 +3,10 @@
 #include <math.h>
 #include <stdio.h>
 
-#define NS 8
-
-typedef enum {
-  PAWN_B,
-  PAWN_W,
-  BISHOP_B,
-  BISHOP_W,
-  KING_B,
-  KING_W,
-  KNIGHT_B,
-  KNIGHT_W,
-  QUEEN_B,
-  QUEEN_W,
-  ROOK_B,
-  ROOK_W,
-
-  PIECE_COUNT
-} ChessPiece;
-
 Texture2D chess_pieces[PIECE_COUNT] = {0};
 
-typedef struct {
-  Rectangle r;
-  Color c;
-} ChessSquare;
-
-typedef struct {
-  ChessSquare chess_squares[NS][NS];
-} ChessBoard;
-
 ChessBoard chess_board = {0};
+float SQUARE_SIZE = 0.0f;
 
 typedef enum {
   LIGHT,
@@ -44,12 +17,6 @@ static const Color square_color[] = {
   [LIGHT] = (Color) { 0xED, 0xD4, 0xAE, 0xFF },
   [DARK]  = (Color) { 0xB9, 0x89, 0x65, 0xFF }
 };
-
-void unload_chess_pieces(void)
-{
-  for (int i = 0; i < PIECE_COUNT; i++)
-    UnloadTexture(chess_pieces[i]);
-}
 
 void load_chess_pieces(void)
 {
@@ -70,42 +37,86 @@ void load_chess_pieces(void)
     SetTextureFilter(chess_pieces[i], TEXTURE_FILTER_BILINEAR);
 }
 
-void update_chess_board(void)
+void unload_chess_pieces(void)
 {
-  float square_size = roundf(
+  for (int i = 0; i < PIECE_COUNT; i++)
+    UnloadTexture(chess_pieces[i]);
+}
+
+void init_chess_board(void)
+{
+  for (int y = 0; y < NS; y++) {
+    for (int x = 0; x < NS; x++) {
+      chess_board.squares[y][x].color = square_color[(x + y) % 2];
+      chess_board.squares[y][x].piece = NO_PIECE;
+    }
+  }
+
+  // Black
+  chess_board.squares[0][0].piece = ROOK_B;
+  chess_board.squares[0][1].piece = KNIGHT_B;
+  chess_board.squares[0][2].piece = BISHOP_B;
+  chess_board.squares[0][3].piece = QUEEN_B;
+  chess_board.squares[0][4].piece = KING_B;
+  chess_board.squares[0][5].piece = BISHOP_B;
+  chess_board.squares[0][6].piece = KNIGHT_B;
+  chess_board.squares[0][7].piece = ROOK_B;
+
+  // White
+  chess_board.squares[7][0].piece = ROOK_W;
+  chess_board.squares[7][1].piece = KNIGHT_W;
+  chess_board.squares[7][2].piece = BISHOP_W;
+  chess_board.squares[7][3].piece = QUEEN_W;
+  chess_board.squares[7][4].piece = KING_W;
+  chess_board.squares[7][5].piece = BISHOP_W;
+  chess_board.squares[7][6].piece = KNIGHT_W;
+  chess_board.squares[7][7].piece = ROOK_W;
+
+  // Pawns
+  for (int i = 0; i < NS; i++) {
+    chess_board.squares[1][i].piece = PAWN_B;
+    chess_board.squares[6][i].piece = PAWN_W;
+  }
+}
+
+void scale_chess_board(void)
+{
+  SQUARE_SIZE = roundf(
       GetScreenWidth() < GetScreenHeight()
       ? GetScreenWidth() / NS
       : GetScreenHeight() / NS
   );
 
-  for (int y = 0; y < NS; y++) {
-    for (int x = 0; x < NS; x++) {
-      chess_board.chess_squares[y][x].r = (Rectangle) {
-        .x      = x * square_size,
-        .y      = y * square_size,
-        .width  = square_size,
-        .height = square_size,
+  for (int y = 0; y < NS; y++)
+    for (int x = 0; x < NS; x++)
+      chess_board.squares[y][x].rect = (Rectangle) {
+        .x      = x * SQUARE_SIZE,
+        .y      = y * SQUARE_SIZE,
+        .width  = SQUARE_SIZE,
+        .height = SQUARE_SIZE,
       };
-      chess_board.chess_squares[y][x].c = square_color[(x + y) % 2];
-    }
-  }
 }
 
-void draw_coordinates(Font *font)
+void draw_board(void)
 {
-  float square_size = chess_board.chess_squares[0][0].r.width;
+  for (int y = 0; y < NS; y++)
+    for (int x = 0; x < NS; x++)
+      DrawRectangleRec(chess_board.squares[y][x].rect, chess_board.squares[y][x].color);
+}
 
+void draw_board_coordinates(Font *font)
+{
   char text[10];
   int square_spacing = 5;
-  float font_size = roundf(square_size * 0.3f);
+  float font_size = roundf(SQUARE_SIZE * 0.3f);
 
   // Numbers
   for (int y = 0; y < NS; y++) {
     snprintf(text, sizeof(text), "%d", NS - y);
 
     Vector2 pos = {
-      .x = chess_board.chess_squares[y][0].r.x + square_spacing,
-      .y = chess_board.chess_squares[y][0].r.y + square_spacing
+      .x = chess_board.squares[y][0].rect.x + square_spacing,
+      .y = chess_board.squares[y][0].rect.y + square_spacing
     };
     DrawTextEx(*font, text, pos, font_size, 0, square_color[(y + 1) % 2]);
   }
@@ -116,74 +127,46 @@ void draw_coordinates(Font *font)
     Vector2 text_size = MeasureTextEx(*font, text, font_size, 0);
 
     Vector2 pos = {
-      .x = chess_board.chess_squares[NS - 1][x].r.x + (square_size - text_size.x - square_spacing),
-      .y = chess_board.chess_squares[NS - 1][x].r.y + (square_size - text_size.y - square_spacing)
+      .x = chess_board.squares[NS - 1][x].rect.x + (SQUARE_SIZE - text_size.x - square_spacing),
+      .y = chess_board.squares[NS - 1][x].rect.y + (SQUARE_SIZE - text_size.y - square_spacing)
     };
     DrawTextEx(*font, text, pos, font_size, 0, square_color[x % 2]);
   }
 }
 
-void draw_board(void)
+void draw_piece(Texture2D *piece, Rectangle *rect)
 {
-  for (int y = 0; y < NS; y++) {
-    for (int x = 0; x < NS; x++)
-      DrawRectangleRec(chess_board.chess_squares[y][x].r, chess_board.chess_squares[y][x].c);
-  }
-}
-
-void draw_piece(Texture2D piece, Rectangle rect)
-{
-  float square_size = rect.width;
-
   Rectangle source = {
     0, 0,
-    piece.width,
-    piece.height
+    piece->width,
+    piece->height
   };
 
   Rectangle dest = {
-    rect.x,
-    rect.y,
-    square_size,
-    square_size
+    rect->x,
+    rect->y,
+    SQUARE_SIZE,
+    SQUARE_SIZE
   };
 
-  DrawTexturePro(piece, source, dest, (Vector2){0, 0}, 0.0f, WHITE);
+  DrawTexturePro(*piece, source, dest, (Vector2){0, 0}, 0.0f, WHITE);
 }
 
-void draw_initial_position(void)
+void draw_chess_pieces(void)
 {
-  // Black
-  draw_piece(chess_pieces[ROOK_B],   chess_board.chess_squares[0][0].r);
-  draw_piece(chess_pieces[KNIGHT_B], chess_board.chess_squares[0][1].r);
-  draw_piece(chess_pieces[BISHOP_B], chess_board.chess_squares[0][2].r);
-  draw_piece(chess_pieces[QUEEN_B],  chess_board.chess_squares[0][3].r);
-  draw_piece(chess_pieces[KING_B],   chess_board.chess_squares[0][4].r);
-  draw_piece(chess_pieces[BISHOP_B], chess_board.chess_squares[0][5].r);
-  draw_piece(chess_pieces[KNIGHT_B], chess_board.chess_squares[0][6].r);
-  draw_piece(chess_pieces[ROOK_B],   chess_board.chess_squares[0][7].r);
-
-  // White
-  draw_piece(chess_pieces[ROOK_W],   chess_board.chess_squares[7][0].r);
-  draw_piece(chess_pieces[KNIGHT_W], chess_board.chess_squares[7][1].r);
-  draw_piece(chess_pieces[BISHOP_W], chess_board.chess_squares[7][2].r);
-  draw_piece(chess_pieces[QUEEN_W],  chess_board.chess_squares[7][3].r);
-  draw_piece(chess_pieces[KING_W],   chess_board.chess_squares[7][4].r);
-  draw_piece(chess_pieces[BISHOP_W], chess_board.chess_squares[7][5].r);
-  draw_piece(chess_pieces[KNIGHT_W], chess_board.chess_squares[7][6].r);
-  draw_piece(chess_pieces[ROOK_W],   chess_board.chess_squares[7][7].r);
-
-  // Draw pawns
-  for (int i = 0; i < NS; i++) {
-    draw_piece(chess_pieces[PAWN_B], chess_board.chess_squares[1][i].r);
-    draw_piece(chess_pieces[PAWN_W], chess_board.chess_squares[6][i].r);
-  }
+  for (int y = 0; y < NS; y++)
+    for (int x = 0; x < NS; x++) {
+      Rectangle *rect = &chess_board.squares[y][x].rect;
+      ChessPiece type = chess_board.squares[y][x].piece;
+      Texture2D *piece = &chess_pieces[type];
+      draw_piece(piece, rect);
+    }
 }
 
 void draw_chess_board(Font *font)
 {
-  update_chess_board();
+  scale_chess_board();
   draw_board();
-  draw_coordinates(font);
-  draw_initial_position();
+  draw_board_coordinates(font);
+  draw_chess_pieces();
 }
