@@ -4,5 +4,7 @@
 #include "raylib.h"
 
 void draw_chess_board(Font *font);
+void load_chess_pieces(void);
+void unload_chess_pieces(void);
 
 #endif

@@ -5,6 +5,25 @@
 
 #define NS 8
 
+typedef enum {
+  PAWN_B,
+  PAWN_W,
+  BISHOP_B,
+  BISHOP_W,
+  KING_B,
+  KING_W,
+  KNIGHT_B,
+  KNIGHT_W,
+  QUEEN_B,
+  QUEEN_W,
+  ROOK_B,
+  ROOK_W,
+
+  PIECE_COUNT
+} ChessPiece;
+
+Texture2D chess_pieces[PIECE_COUNT] = {0};
+
 typedef struct {
   Rectangle r;
   Color c;
@@ -25,6 +44,31 @@ static const Color square_color[] = {
   [LIGHT] = (Color) { 0xED, 0xD4, 0xAE, 0xFF },
   [DARK]  = (Color) { 0xB9, 0x89, 0x65, 0xFF }
 };
+
+void unload_chess_pieces(void)
+{
+  for (int i = 0; i < PIECE_COUNT; i++)
+    UnloadTexture(chess_pieces[i]);
+}
+
+void load_chess_pieces(void)
+{
+  chess_pieces[PAWN_B]   = LoadTexture("./thirdparty/assets/pieces/pb.png");
+  chess_pieces[PAWN_W]   = LoadTexture("./thirdparty/assets/pieces/pw.png");
+  chess_pieces[BISHOP_B] = LoadTexture("./thirdparty/assets/pieces/bb.png");
+  chess_pieces[BISHOP_W] = LoadTexture("./thirdparty/assets/pieces/bw.png");
+  chess_pieces[KING_B]   = LoadTexture("./thirdparty/assets/pieces/kb.png");
+  chess_pieces[KING_W]   = LoadTexture("./thirdparty/assets/pieces/kw.png");
+  chess_pieces[KNIGHT_B] = LoadTexture("./thirdparty/assets/pieces/nb.png");
+  chess_pieces[KNIGHT_W] = LoadTexture("./thirdparty/assets/pieces/nw.png");
+  chess_pieces[QUEEN_B]  = LoadTexture("./thirdparty/assets/pieces/qb.png");
+  chess_pieces[QUEEN_W]  = LoadTexture("./thirdparty/assets/pieces/qw.png");
+  chess_pieces[ROOK_B]   = LoadTexture("./thirdparty/assets/pieces/rb.png");
+  chess_pieces[ROOK_W]   = LoadTexture("./thirdparty/assets/pieces/rw.png");
+
+  for (int i = 0; i < PIECE_COUNT; i++)
+    SetTextureFilter(chess_pieces[i], TEXTURE_FILTER_BILINEAR);
+}
 
 void update_chess_board(void)
 {
@@ -87,9 +131,28 @@ void draw_board(void)
   }
 }
 
+void draw_piece(Texture2D *piece, Rectangle rect)
+{
+  float square_size = rect.width;
+
+  Rectangle source = {
+    0, 0,
+    piece->width,
+    piece->height
+  };
+
+  Rectangle dest = {
+    rect.x,
+    rect.y,
+    square_size,
+    square_size
+  };
+
+  DrawTexturePro( *piece, source, dest, (Vector2){0, 0}, 0.0f, WHITE);
+}
+
 void draw_chess_board(Font *font)
 {
-  create_chess_board();
   update_chess_board();
   draw_board();
   draw_coordinates(font);
