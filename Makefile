@@ -2,6 +2,7 @@ CFLAGS := -Wall -Wextra -Werror
 
 SRC        := ./src
 BUILD      := ./build
+HEADERS    := ./include
 THIRDPARTY := ./thirdparty
 
 RAYLIB         := $(THIRDPARTY)/raylib-5.5_linux_amd64
@@ -10,7 +11,7 @@ RAYLIB_LIB     := $(RAYLIB)/lib
 RAYLIB_RPATH   := -Wl,-rpath=$(RAYLIB_LIB)
 RAYLIB_LINK    := raylib
 
-INCLUDES := -I$(RAYLIB_INCLUDE)
+INCLUDES := -I$(RAYLIB_INCLUDE) -I$(HEADERS)
 LIBS     := -L$(RAYLIB_LIB) -l$(RAYLIB_LINK) -lm $(RAYLIB_RPATH)
 
 SRCS := $(wildcard $(SRC)/*.c)

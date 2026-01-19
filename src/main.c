@@ -12,7 +12,7 @@ int main(void)
   SetTargetFPS(60);
   SetWindowState(FLAG_WINDOW_RESIZABLE);
 
-  char *font_path = "./thirdparty/assets/fonts/JetBrainsMono-Bold.ttf";
+  char *font_path = "./assets/fonts/JetBrainsMono-Bold.ttf";
   Font font = LoadFont(font_path);
   SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
