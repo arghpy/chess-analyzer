@@ -1,5 +1,7 @@
 # Functionality:
-- move pieces by dragging with mouse left button
+
+- move pieces by dragging with mouse left button [df45b00](feat: make it possible to drag pieces)
+
 - play back and forth the moves that have been played with arrows
 
 
@@ -9,8 +11,7 @@
 
 
 # Look & Feel:
-(9d83492 feat: change mouse cursor when hovering pieces)
-- change mouse cursor upon hovering over pieces
+- change mouse cursor upon hovering over pieces [9d83492](feat: change mouse cursor when hovering pieces)
     - ideas might include:
         - a bolder mouse cursor
         - changing entirely the cursor (like on chess.com)
