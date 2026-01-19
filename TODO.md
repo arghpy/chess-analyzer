@@ -2,6 +2,11 @@
 
 - move pieces by dragging with mouse left button [df45b00](feat: make it possible to drag pieces)
 
+- move pieces on squares:
+    - if an enemy piece is on that square, capture it
+    - if an ally piece is on that square, don't allow it
+    - if nothing is on that square, place the piece
+
 - play back and forth the moves that have been played with arrows
 
 
