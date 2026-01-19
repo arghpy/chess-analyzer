@@ -1,5 +1,7 @@
 #include "raylib.h"
 #include "board.h"
+#include "mouse.h"
+#include <stdbool.h>
 
 #define background_color ((Color){0x18, 0x18, 0x18, 0xFF})
 
@@ -22,6 +24,7 @@ int main(void)
     {
       ClearBackground(background_color);
       draw_chess_board(&font);
+      draw_mouse_cursor();
     }
     EndDrawing();
   }
