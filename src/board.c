@@ -20,18 +20,18 @@ static const Color square_color[] = {
 
 void load_chess_pieces(void)
 {
-  chess_pieces[PAWN_B]   = LoadTexture("./thirdparty/assets/pieces/pb.png");
-  chess_pieces[PAWN_W]   = LoadTexture("./thirdparty/assets/pieces/pw.png");
-  chess_pieces[BISHOP_B] = LoadTexture("./thirdparty/assets/pieces/bb.png");
-  chess_pieces[BISHOP_W] = LoadTexture("./thirdparty/assets/pieces/bw.png");
-  chess_pieces[KING_B]   = LoadTexture("./thirdparty/assets/pieces/kb.png");
-  chess_pieces[KING_W]   = LoadTexture("./thirdparty/assets/pieces/kw.png");
-  chess_pieces[KNIGHT_B] = LoadTexture("./thirdparty/assets/pieces/nb.png");
-  chess_pieces[KNIGHT_W] = LoadTexture("./thirdparty/assets/pieces/nw.png");
-  chess_pieces[QUEEN_B]  = LoadTexture("./thirdparty/assets/pieces/qb.png");
-  chess_pieces[QUEEN_W]  = LoadTexture("./thirdparty/assets/pieces/qw.png");
-  chess_pieces[ROOK_B]   = LoadTexture("./thirdparty/assets/pieces/rb.png");
-  chess_pieces[ROOK_W]   = LoadTexture("./thirdparty/assets/pieces/rw.png");
+  chess_pieces[PAWN_B]   = LoadTexture("./assets/pieces/pb.png");
+  chess_pieces[PAWN_W]   = LoadTexture("./assets/pieces/pw.png");
+  chess_pieces[BISHOP_B] = LoadTexture("./assets/pieces/bb.png");
+  chess_pieces[BISHOP_W] = LoadTexture("./assets/pieces/bw.png");
+  chess_pieces[KING_B]   = LoadTexture("./assets/pieces/kb.png");
+  chess_pieces[KING_W]   = LoadTexture("./assets/pieces/kw.png");
+  chess_pieces[KNIGHT_B] = LoadTexture("./assets/pieces/nb.png");
+  chess_pieces[KNIGHT_W] = LoadTexture("./assets/pieces/nw.png");
+  chess_pieces[QUEEN_B]  = LoadTexture("./assets/pieces/qb.png");
+  chess_pieces[QUEEN_W]  = LoadTexture("./assets/pieces/qw.png");
+  chess_pieces[ROOK_B]   = LoadTexture("./assets/pieces/rb.png");
+  chess_pieces[ROOK_W]   = LoadTexture("./assets/pieces/rw.png");
 
   for (int i = 0; i < PIECE_COUNT; i++)
     SetTextureFilter(chess_pieces[i], TEXTURE_FILTER_BILINEAR);

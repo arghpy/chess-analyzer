@@ -9,6 +9,7 @@
 
 
 # Look & Feel:
+(9d83492 feat: change mouse cursor when hovering pieces)
 - change mouse cursor upon hovering over pieces
     - ideas might include:
         - a bolder mouse cursor
