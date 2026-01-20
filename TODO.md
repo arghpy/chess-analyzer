@@ -3,6 +3,8 @@
 - move pieces by dragging with mouse left button [df45b00](feat: make it possible to drag pieces)
 
 - move pieces on squares:
+    - draw circles with the center in the middle of the square with a slightly lower radius
+        - when the mouse intersects with that circle, you can consider that square to be valid for placement
     - if an enemy piece is on that square, capture it
     - if an ally piece is on that square, don't allow it
     - if nothing is on that square, place the piece
