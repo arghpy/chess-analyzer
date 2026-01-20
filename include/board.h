@@ -58,6 +58,11 @@ typedef struct {
 typedef struct {
   ChessSquare squares[NS][NS];
   ChessPieceType turn;
+  ChessSquare *orig_dragged_piece;
+  ChessSquare dragged_piece;
+  bool hovering_piece;
+  bool dragging_piece;
+  bool piece_placed;
 } ChessBoard;
 
 extern ChessBoard chess_board;
