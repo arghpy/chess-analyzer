@@ -1,14 +1,6 @@
 # Functionality:
 
-- move pieces by dragging with mouse left button [df45b00](feat: make it possible to drag pieces)
-
-- move pieces on squares:
-    - draw circles with the center in the middle of the square with a slightly lower radius
-        - when the mouse intersects with that circle, you can consider that square to be valid for placement
-    - if an enemy piece is on that square, capture it
-    - if an ally piece is on that square, don't allow it
-    - if nothing is on that square, place the piece
-
+- make it turn based. once white, once black
 - play back and forth the moves that have been played with arrows
 
 
@@ -18,11 +10,6 @@
 
 
 # Look & Feel:
-- change mouse cursor upon hovering over pieces [9d83492](feat: change mouse cursor when hovering pieces)
-    - ideas might include:
-        - a bolder mouse cursor
-        - changing entirely the cursor (like on chess.com)
-
 - making squares red on right mouse button click and then back
 
 - drawing arrows between squares with right mouse button
