@@ -1,6 +1,5 @@
 # Functionality:
 
-- make it turn based. once white, once black
 - play back and forth the moves that have been played with arrows
 
 
