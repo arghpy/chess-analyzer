@@ -1,16 +1,49 @@
 #include "mouse.h"
 #include "board.h"
 #include "raylib.h"
+#include <stdio.h>
 
 
 bool hovering_piece = false;
 bool dragging_piece = false;
+bool piece_placed = false;
 
 // Those need to be globals to persist between frames
 ChessSquare *orig_dragged_piece = {0};
 ChessSquare dragged_piece = {0};
 
-void draw_dragging(void)
+void change_chess_board_turn(void)
+{
+  if (chess_board.turn == W) chess_board.turn = B;
+  else chess_board.turn = W;
+}
+
+void place_piece(void)
+{
+  for (int y = 0; y < NS; y++) {
+    for (int x = 0; x < NS; x++) {
+      Circle c      = chess_board.squares[y][x].CenterProximity;
+      ChessPiece cp = chess_board.squares[y][x].piece;
+      if (CheckCollisionPointCircle(GetMousePosition(), c.center, c.r)) {
+        if (
+            (get_piece_type(dragged_piece.piece) == chess_board.turn) &&
+            (get_piece_type(cp) != get_piece_type(dragged_piece.piece))
+            ) {
+          chess_board.squares[y][x].piece = dragged_piece.piece;
+          piece_placed = true;
+          change_chess_board_turn();
+          break;
+        }
+      }
+    }
+    if (piece_placed) break;
+  }
+  if (!piece_placed)
+    orig_dragged_piece->piece = dragged_piece.piece;
+  piece_placed = false; // Reset
+}
+
+void draw_drag_and_place(void)
 {
   if (!dragging_piece) {
     for (int y = 0; y < NS; y++) {
@@ -28,10 +61,6 @@ void draw_dragging(void)
       if (dragging_piece) break;
     }
   }
-  if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-    dragging_piece = false;
-    orig_dragged_piece->piece = dragged_piece.piece;
-  }
 
   if (dragging_piece) {
     Vector2 mouse_pos = GetMousePosition();
@@ -44,6 +73,12 @@ void draw_dragging(void)
     ChessPiece type = dragged_piece.piece;
     Texture2D *piece = &chess_pieces[type];
     draw_piece(piece, &rect);
+  }
+
+  if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+    dragging_piece = false;
+
+    place_piece();
   }
 }
 
@@ -60,11 +95,11 @@ void draw_mouse_cursor(void)
     if (hovering_piece) break;
   }
 
-  draw_dragging();
+  draw_drag_and_place();
 
   SetMouseCursor(
       hovering_piece || dragging_piece ?
       MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT
       );
-  hovering_piece = false;
+  hovering_piece = false; // Reset
 }
