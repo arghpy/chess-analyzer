@@ -12,31 +12,52 @@ void init_chess_board(void);
 void draw_piece(Texture2D *piece, Rectangle *rect);
 
 typedef enum {
-  PAWN_B,
   PAWN_W,
-  BISHOP_B,
   BISHOP_W,
-  KING_B,
   KING_W,
-  KNIGHT_B,
   KNIGHT_W,
-  QUEEN_B,
   QUEEN_W,
-  ROOK_B,
   ROOK_W,
+
+  END_W,
+
+  PAWN_B,
+  BISHOP_B,
+  KING_B,
+  KNIGHT_B,
+  QUEEN_B,
+  ROOK_B,
+
+  END_B,
+
   NO_PIECE,
 
   PIECE_COUNT
 } ChessPiece;
 
+typedef enum {
+  W,
+  B,
+  N
+} ChessPieceType;
+
+ChessPieceType get_piece_type(ChessPiece piece);
+
+typedef struct {
+  Vector2 center;
+  float r;
+} Circle;
+
 typedef struct {
   Rectangle rect;
   ChessPiece piece;
   Color color;
+  Circle CenterProximity;
 } ChessSquare;
 
 typedef struct {
   ChessSquare squares[NS][NS];
+  ChessPieceType turn;
 } ChessBoard;
 
 extern ChessBoard chess_board;

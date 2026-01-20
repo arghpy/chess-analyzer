@@ -18,6 +18,13 @@ static const Color square_color[] = {
   [DARK]  = (Color) { 0xB9, 0x89, 0x65, 0xFF }
 };
 
+ChessPieceType get_piece_type(ChessPiece piece)
+{
+  if (piece < END_W) return W;
+  else if (piece > END_W && piece < END_B) return B;
+  else return N;
+}
+
 void load_chess_pieces(void)
 {
   chess_pieces[PAWN_B]   = LoadTexture("./assets/pieces/pb.png");
@@ -45,6 +52,7 @@ void unload_chess_pieces(void)
 
 void init_chess_board(void)
 {
+  chess_board.turn = W;
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
       chess_board.squares[y][x].color = square_color[(x + y) % 2];
@@ -88,13 +96,21 @@ void scale_chess_board(void)
   );
 
   for (int y = 0; y < NS; y++)
-    for (int x = 0; x < NS; x++)
+    for (int x = 0; x < NS; x++) {
       chess_board.squares[y][x].rect = (Rectangle) {
         .x      = x * SQUARE_SIZE,
         .y      = y * SQUARE_SIZE,
         .width  = SQUARE_SIZE,
         .height = SQUARE_SIZE,
       };
+      chess_board.squares[y][x].CenterProximity = (Circle) {
+        .center = (Vector2) {
+          .x = x * SQUARE_SIZE + SQUARE_SIZE / 2,
+          .y = y * SQUARE_SIZE + SQUARE_SIZE / 2
+        },
+        .r = SQUARE_SIZE / 3,
+      };
+    }
 }
 
 void draw_board(void)
