@@ -73,12 +73,11 @@ void draw_drag_and_place(void)
     ChessPiece type = dragged_piece.piece;
     Texture2D *piece = &chess_pieces[type];
     draw_piece(piece, &rect);
-  }
 
-  if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-    dragging_piece = false;
-
-    place_piece();
+    if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
+      chess_board.dragging_piece = false;
+      place_piece();
+    }
   }
 }
 
