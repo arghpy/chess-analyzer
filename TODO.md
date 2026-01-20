@@ -4,7 +4,6 @@
 
 
 ## Rules
-- white has a turn and then black has a turn
 - legal rules for pieces
 
 
