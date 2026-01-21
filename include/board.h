@@ -8,8 +8,9 @@
 void draw_chess_board(Font *font);
 void load_chess_pieces(void);
 void unload_chess_pieces(void);
-void init_chess_board(void);
+void load_starting_position(void);
 void draw_piece(Texture2D *piece, Rectangle *rect);
+void flip_board(void);
 
 typedef enum {
   PAWN_W,
@@ -62,6 +63,7 @@ typedef struct {
   bool hovering_piece;
   bool dragging_piece;
   bool piece_placed;
+  bool flipped;
 } ChessBoard;
 
 extern ChessBoard chess_board;
