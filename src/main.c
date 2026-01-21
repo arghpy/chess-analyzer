@@ -17,11 +17,15 @@ int main(void)
   SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
   { // Initializing
-    init_chess_board();
+    load_starting_position();
     load_chess_pieces();
   }
 
   while(!WindowShouldClose()) {
+    if (IsKeyPressed(KEY_SPACE)) {
+      chess_board.flipped = !chess_board.flipped;
+      flip_board();
+    }
     BeginDrawing();
     {
       ClearBackground(background_color);

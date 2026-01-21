@@ -18,6 +18,17 @@ static const Color square_color[] = {
   [DARK]  = (Color) { 0xB9, 0x89, 0x65, 0xFF }
 };
 
+void flip_board(void)
+{
+  for (int y = 0; y < NS / 2; y++) {
+    for (int x = 0; x < NS; x++) {
+      ChessSquare tmp = chess_board.squares[y][x];
+      chess_board.squares[y][x] = chess_board.squares[NS - 1 - y][NS - 1 - x];
+      chess_board.squares[NS - 1 - y][NS - 1 - x] = tmp;
+    }
+  }
+}
+
 ChessPieceType get_piece_color(ChessPiece piece)
 {
   if (piece < END_W) return W;
@@ -50,9 +61,9 @@ void unload_chess_pieces(void)
     UnloadTexture(chess_pieces[i]);
 }
 
-void init_chess_board(void)
+// TODO: load starting position based on FEN
+void load_starting_position(void)
 {
-  chess_board.color_turn = W;
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
       chess_board.squares[y][x].color = square_color[(x + y) % 2];
@@ -128,7 +139,7 @@ void draw_board_coordinates(Font *font)
 
   // Numbers
   for (int y = 0; y < NS; y++) {
-    snprintf(text, sizeof(text), "%d", NS - y);
+    snprintf(text, sizeof(text), "%d", chess_board.flipped ? y + 1 : NS - y);
 
     Vector2 pos = {
       .x = chess_board.squares[y][0].rect.x + square_spacing,
@@ -139,7 +150,8 @@ void draw_board_coordinates(Font *font)
 
   // Letters
   for (int x = 0; x < NS; x++) {
-    snprintf(text, sizeof(text), "%c", 'a' + x);
+    snprintf(text, sizeof(text), "%c", chess_board.flipped ? 'h' - x : 'a' + x);
+
     Vector2 text_size = MeasureTextEx(*font, text, font_size, 0);
 
     Vector2 pos = {
