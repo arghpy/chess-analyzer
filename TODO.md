@@ -14,4 +14,3 @@
     - same action should remove the arrows on that direction/path
 
 - switch table view (from white's view/from black's view)
-- make pieces smaller to highlight better the coordinates
