@@ -16,8 +16,10 @@ int main(void)
   Font font = LoadFont(font_path);
   SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
-  init_chess_board();
-  load_chess_pieces();
+  { // Initializing
+    init_chess_board();
+    load_chess_pieces();
+  }
 
   while(!WindowShouldClose()) {
     BeginDrawing();
@@ -29,8 +31,7 @@ int main(void)
     EndDrawing();
   }
 
-  // Closing everything
-  {
+  { // Closing everything
     unload_chess_pieces();
     UnloadFont(font);
     CloseWindow();
