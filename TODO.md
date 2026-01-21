@@ -5,6 +5,13 @@
 
 ## Rules
 - legal rules for pieces
+    - pawn
+    - horse
+    - bishop
+    - rook
+    - queen
+    - king
+    - checks
 
 
 # Look & Feel:
