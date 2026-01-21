@@ -31,8 +31,6 @@ typedef enum {
   END_B,
 
   NO_PIECE,
-
-  PIECE_COUNT
 } ChessPiece;
 
 typedef enum {
@@ -41,7 +39,7 @@ typedef enum {
   N
 } ChessPieceType;
 
-ChessPieceType get_piece_type(ChessPiece piece);
+ChessPieceType get_piece_color(ChessPiece piece);
 
 typedef struct {
   Vector2 center;
@@ -57,16 +55,17 @@ typedef struct {
 
 typedef struct {
   ChessSquare squares[NS][NS];
-  ChessPieceType turn;
-  ChessSquare *orig_dragged_piece;
-  ChessSquare dragged_piece;
+  ChessPieceType color_turn;
+  ChessSquare *src;
+  ChessSquare src_copy;
+  ChessSquare *dst;
   bool hovering_piece;
   bool dragging_piece;
   bool piece_placed;
 } ChessBoard;
 
 extern ChessBoard chess_board;
-extern Texture2D chess_pieces[PIECE_COUNT];
+extern Texture2D chess_pieces[END_B];
 extern float SQUARE_SIZE;
 
 #endif

@@ -5,8 +5,8 @@
 
 void change_chess_board_turn(void)
 {
-  if (chess_board.turn == W) chess_board.turn = B;
-  else chess_board.turn = W;
+  if (chess_board.color_turn == W) chess_board.color_turn = B;
+  else chess_board.color_turn = W;
 }
 
 void place_piece(void)
@@ -17,10 +17,10 @@ void place_piece(void)
       ChessPiece cp = chess_board.squares[y][x].piece;
       if (CheckCollisionPointCircle(GetMousePosition(), c.center, c.r)) {
         if (
-            (get_piece_type(chess_board.dragged_piece.piece) == chess_board.turn) &&
-            (get_piece_type(cp) != get_piece_type(chess_board.dragged_piece.piece))
+            (get_piece_color(chess_board.src_copy.piece) == chess_board.color_turn) &&
+            (get_piece_color(cp) != get_piece_color(chess_board.src_copy.piece))
             ) {
-          chess_board.squares[y][x].piece = chess_board.dragged_piece.piece;
+          chess_board.squares[y][x].piece = chess_board.src_copy.piece;
           chess_board.piece_placed = true;
           change_chess_board_turn();
           break;
@@ -30,7 +30,7 @@ void place_piece(void)
     if (chess_board.piece_placed) break;
   }
   if (!chess_board.piece_placed)
-    chess_board.orig_dragged_piece->piece = chess_board.dragged_piece.piece;
+    chess_board.src->piece = chess_board.src_copy.piece;
   chess_board.piece_placed = false; // Reset
 }
 
@@ -39,10 +39,10 @@ void draw_drag_and_place(void)
   if (!chess_board.dragging_piece) {
     for (int y = 0; y < NS; y++) {
       for (int x = 0; x < NS; x++) {
-        chess_board.dragged_piece = chess_board.squares[y][x];
-        chess_board.orig_dragged_piece = &chess_board.squares[y][x];
-        if (CheckCollisionPointRec(GetMousePosition(), chess_board.dragged_piece.rect) &&
-            (chess_board.dragged_piece.piece != NO_PIECE)
+        chess_board.src_copy = chess_board.squares[y][x];
+        chess_board.src = &chess_board.squares[y][x];
+        if (CheckCollisionPointRec(GetMousePosition(), chess_board.src_copy.rect) &&
+            (chess_board.src_copy.piece != NO_PIECE)
             ) {
           if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             chess_board.dragging_piece = true;
@@ -58,12 +58,12 @@ void draw_drag_and_place(void)
   if (chess_board.dragging_piece) {
     Vector2 mouse_pos = GetMousePosition();
     Rectangle rect = {
-      .x      = mouse_pos.x - chess_board.dragged_piece.rect.width / 2,
-      .y      = mouse_pos.y - chess_board.dragged_piece.rect.height / 2,
-      .width  = chess_board.dragged_piece.rect.width,
-      .height = chess_board.dragged_piece.rect.height
+      .x      = mouse_pos.x - chess_board.src_copy.rect.width / 2,
+      .y      = mouse_pos.y - chess_board.src_copy.rect.height / 2,
+      .width  = chess_board.src_copy.rect.width,
+      .height = chess_board.src_copy.rect.height
     };
-    ChessPiece type = chess_board.dragged_piece.piece;
+    ChessPiece type = chess_board.src_copy.piece;
     Texture2D *piece = &chess_pieces[type];
     draw_piece(piece, &rect);
 

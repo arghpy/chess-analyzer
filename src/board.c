@@ -3,7 +3,7 @@
 #include <math.h>
 #include <stdio.h>
 
-Texture2D chess_pieces[PIECE_COUNT] = {0};
+Texture2D chess_pieces[END_B] = {0};
 
 ChessBoard chess_board = {0};
 float SQUARE_SIZE = 0.0f;
@@ -18,7 +18,7 @@ static const Color square_color[] = {
   [DARK]  = (Color) { 0xB9, 0x89, 0x65, 0xFF }
 };
 
-ChessPieceType get_piece_type(ChessPiece piece)
+ChessPieceType get_piece_color(ChessPiece piece)
 {
   if (piece < END_W) return W;
   else if (piece > END_W && piece < END_B) return B;
@@ -40,19 +40,19 @@ void load_chess_pieces(void)
   chess_pieces[ROOK_B]   = LoadTexture("./assets/pieces/rb.png");
   chess_pieces[ROOK_W]   = LoadTexture("./assets/pieces/rw.png");
 
-  for (int i = 0; i < PIECE_COUNT; i++)
+  for (int i = 0; i < END_B; i++)
     SetTextureFilter(chess_pieces[i], TEXTURE_FILTER_BILINEAR);
 }
 
 void unload_chess_pieces(void)
 {
-  for (int i = 0; i < PIECE_COUNT; i++)
+  for (int i = 0; i < END_B; i++)
     UnloadTexture(chess_pieces[i]);
 }
 
 void init_chess_board(void)
 {
-  chess_board.turn = W;
+  chess_board.color_turn = W;
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
       chess_board.squares[y][x].color = square_color[(x + y) % 2];
