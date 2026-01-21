@@ -152,6 +152,8 @@ void draw_board_coordinates(Font *font)
 
 void draw_piece(Texture2D *piece, Rectangle *rect)
 {
+  float piece_size = SQUARE_SIZE * 0.9;
+
   Rectangle source = {
     0, 0,
     piece->width,
@@ -159,10 +161,10 @@ void draw_piece(Texture2D *piece, Rectangle *rect)
   };
 
   Rectangle dest = {
-    rect->x,
-    rect->y,
-    SQUARE_SIZE,
-    SQUARE_SIZE
+    rect->x + (SQUARE_SIZE / 2 - piece_size / 2),
+    rect->y + (SQUARE_SIZE / 2 - piece_size / 2),
+    piece_size,
+    piece_size
   };
 
   DrawTexturePro(*piece, source, dest, (Vector2){0, 0}, 0.0f, WHITE);
