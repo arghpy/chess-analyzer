@@ -30,9 +30,13 @@ int main(void)
     {
       ClearBackground(background_color);
       draw_chess_board(&font);
-      draw_mouse_cursor();
+      draw_moving_piece();
+      set_mouse_cursor();
     }
     EndDrawing();
+
+    // Reset
+    chess_board.hovering_piece = false;
   }
 
   { // Closing everything

@@ -3,5 +3,6 @@
 
 #include <stdbool.h>
 
-void draw_mouse_cursor(void);
+void draw_moving_piece(void);
+void set_mouse_cursor(void);
 #endif

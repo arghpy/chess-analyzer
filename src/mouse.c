@@ -74,7 +74,7 @@ void draw_drag_and_place(void)
   }
 }
 
-void draw_mouse_cursor(void)
+void check_hovering(void)
 {
   ChessSquare *square = NULL;
   for (int y = 0; y < NS; y++) {
@@ -87,12 +87,18 @@ void draw_mouse_cursor(void)
     }
     if (chess_board.hovering_piece) break;
   }
+}
 
-  draw_drag_and_place();
-
+void set_mouse_cursor(void)
+{
   SetMouseCursor(
       chess_board.hovering_piece || chess_board.dragging_piece ?
       MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT
       );
-  chess_board.hovering_piece = false; // Reset
+}
+
+void draw_moving_piece(void)
+{
+  check_hovering();
+  draw_drag_and_place();
 }
