@@ -14,7 +14,7 @@ RAYLIB_LINK    := raylib
 INCLUDES := -I$(RAYLIB_INCLUDE) -I$(HEADERS)
 LIBS     := -L$(RAYLIB_LIB) -l$(RAYLIB_LINK) -lm $(RAYLIB_RPATH)
 
-SRCS := $(wildcard $(SRC)/*.c)
+SRCS := $(shell find $(SRC) -name '*.c')
 OBJS := $(SRCS:$(SRC)/%.c=$(BUILD)/%.o)
 
 TARGET := $(BUILD)/main
@@ -28,7 +28,7 @@ $(TARGET): $(OBJS)
 	$(CC) $^ -o $@ $(LIBS)
 
 $(BUILD)/%.o: $(SRC)/%.c
-	mkdir -p $(BUILD)
+	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
 debug: CFLAGS += -ggdb
