@@ -3,6 +3,7 @@
 #include "raylib.h"
 #include <stdio.h>
 #include "rules/knight.h"
+#include "rules/bishop.h"
 
 bool is_legal_move(void)
 {
@@ -13,6 +14,7 @@ bool is_legal_move(void)
     case PAWN:
       break;
     case BISHOP:
+      legal_move = bishop_is_legal_move();
       break;
     case KING:
       break;
@@ -45,7 +47,7 @@ void place_piece(void)
       if (CheckCollisionPointCircle(GetMousePosition(), chess_board.dest->CenterProximity.center, chess_board.dest->CenterProximity.r)) {
         if (
             (chess_board.src_copy.piece.color == chess_board.color_turn) &&
-            (chess_board.dest->piece.color != chess_board.src_copy.piece.color) &&
+            (chess_board.dest->piece.color != chess_board.src_copy.piece.color) && // TODO: this is a general move rule - separate function
             is_legal_move()
             ) {
           chess_board.squares[y][x].piece = chess_board.src_copy.piece;
