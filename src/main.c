@@ -1,6 +1,6 @@
 #include "raylib.h"
 #include "board.h"
-#include "mouse.h"
+#include "move.h"
 #include <stdbool.h>
 
 #define background_color ((Color){0x18, 0x18, 0x18, 0xFF})
