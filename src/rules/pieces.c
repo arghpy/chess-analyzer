@@ -20,9 +20,9 @@ bool bishop_is_legal_move(void)
   float dx = fabsf(chess_board.dest->rect.x - chess_board.src->rect.x);
   float dy = fabsf(chess_board.dest->rect.y - chess_board.src->rect.y);
 
-  int dx_sign = (chess_board.dest->rect.x - chess_board.src->rect.x) < 0 ?
+  int x_step = (chess_board.dest->rect.x - chess_board.src->rect.x) < 0 ?
                 -1 : 1;
-  int dy_sign = (chess_board.dest->rect.y - chess_board.src->rect.y) < 0 ?
+  int y_step = (chess_board.dest->rect.y - chess_board.src->rect.y) < 0 ?
                 -1 : 1;
 
   ptrdiff_t s_index = chess_board.src - &chess_board.squares[0][0];
@@ -40,8 +40,8 @@ bool bishop_is_legal_move(void)
       if (chess_board.squares[ys][xs].piece.type != NO_PIECE)
         return false;
 
-      ys += dy_sign;
-      xs += dx_sign;
+      ys += y_step;
+      xs += x_step;
     }
 
     return true;
