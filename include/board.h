@@ -61,7 +61,7 @@ typedef struct {
   ChessSquare squares[NS][NS];
   ChessPieceColor color_turn;
   ChessSquare *src;
-  ChessSquare src_copy;
+  ChessPiece src_piece;
   ChessSquare *dest;
   bool hovering_piece;
   bool dragging_piece;
