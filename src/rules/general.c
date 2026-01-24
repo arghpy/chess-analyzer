@@ -5,12 +5,12 @@ bool no_move(float dx, float dy)
   return (dx == 0 && dy == 0);
 }
 
-bool capture_ally(ChessSquare *src, ChessSquare *dest)
+bool capture_ally(ChessPiece *src, ChessPiece *dest)
 {
-  return (src->piece.color == dest->piece.color);
+  return (src->color == dest->color);
 }
 
-bool correct_color_turn(ChessSquare *src)
+bool correct_color_turn(ChessPiece *piece)
 {
-  return (src->piece.color == chess_board.color_turn);
+  return (piece->color == chess_board.color_turn);
 }
