@@ -2,8 +2,8 @@
 #include "board.h"
 #include "raylib.h"
 #include <stdio.h>
-#include "rules/knight.h"
-#include "rules/bishop.h"
+#include "rules/pieces.h"
+#include "rules/general.h"
 
 bool is_legal_move(void)
 {
@@ -46,8 +46,8 @@ void place_piece(void)
       chess_board.dest = &chess_board.squares[y][x];
       if (CheckCollisionPointCircle(GetMousePosition(), chess_board.dest->CenterProximity.center, chess_board.dest->CenterProximity.r)) {
         if (
-            (chess_board.src_copy.piece.color == chess_board.color_turn) &&
-            (chess_board.dest->piece.color != chess_board.src_copy.piece.color) && // TODO: this is a general move rule - separate function
+            (correct_color_turn(&chess_board.src_copy)) &&
+            (! capture_ally(chess_board.dest, &chess_board.src_copy)) &&
             is_legal_move()
             ) {
           chess_board.squares[y][x].piece = chess_board.src_copy.piece;
