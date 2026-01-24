@@ -24,6 +24,7 @@ bool is_legal_move(void)
     case QUEEN:
       break;
     case ROOK:
+      legal_move = rook_is_legal_move();
       break;
     case NO_PIECE:
       break;
