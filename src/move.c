@@ -22,6 +22,7 @@ bool is_legal_move(void)
       legal_move = knight_is_legal_move();
       break;
     case QUEEN:
+      legal_move = queen_is_legal_move();
       break;
     case ROOK:
       legal_move = rook_is_legal_move();
