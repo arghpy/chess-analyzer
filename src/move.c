@@ -1,7 +1,6 @@
 #include "move.h"
 #include "board.h"
 #include "raylib.h"
-#include <stdio.h>
 #include "rules/pieces.h"
 #include "rules/general.h"
 
@@ -48,7 +47,7 @@ void place_piece(void)
     for (int x = 0; x < NS; x++) {
       chess_board.dest = &chess_board.squares[y][x];
       if (CheckCollisionPointCircle(GetMousePosition(), chess_board.dest->center_proximity.center, chess_board.dest->center_proximity.r)) {
-        if ( correct_color_turn() && !capture_ally() && is_legal_move()) {
+        if (correct_color_turn() && !capture_ally() && !capture_king() && is_legal_move()) {
           chess_board.squares[y][x].piece = chess_board.src_piece;
           chess_board.piece_placed = true;
           change_chess_board_turn();
