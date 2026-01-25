@@ -122,7 +122,7 @@ void scale_chess_board(void)
         .width  = SQUARE_SIZE,
         .height = SQUARE_SIZE,
       };
-      chess_board.squares[y][x].CenterProximity = (Circle) {
+      chess_board.squares[y][x].center_proximity = (Circle) {
         .center = (Vector2) {
           .x = x * SQUARE_SIZE + SQUARE_SIZE / 2,
           .y = y * SQUARE_SIZE + SQUARE_SIZE / 2
@@ -170,7 +170,7 @@ void draw_board_coordinates(Font *font)
   }
 }
 
-void draw_piece(ChessSquare *square)
+void draw_piece(const ChessSquare *square)
 {
   float piece_size = SQUARE_SIZE * 0.9;
 

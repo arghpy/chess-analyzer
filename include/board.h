@@ -53,7 +53,7 @@ typedef struct {
 typedef struct {
   Rectangle rect;
   ChessPiece piece;
-  Circle CenterProximity;
+  Circle center_proximity;
   Color board_color;
 } ChessSquare;
 
@@ -75,7 +75,7 @@ extern ChessBoard chess_board;
 extern Texture2D chess_pieces_texture[TEXTURE_COUNT];
 extern float SQUARE_SIZE;
 
-void draw_piece(ChessSquare *square);
+void draw_piece(const ChessSquare *square);
 void draw_chess_board(Font *font);
 void load_chess_pieces(void);
 void unload_chess_pieces(void);
