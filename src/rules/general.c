@@ -1,6 +1,6 @@
 #include "rules/general.h"
 
-bool no_move(float dx, float dy)
+bool still_on_src_square(float dx, float dy)
 {
   return (dx == 0 && dy == 0);
 }

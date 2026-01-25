@@ -17,6 +17,7 @@ bool is_legal_move(void)
       legal_move = bishop_is_legal_move();
       break;
     case KING:
+      legal_move = king_is_legal_move();
       break;
     case KNIGHT:
       legal_move = knight_is_legal_move();
