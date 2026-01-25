@@ -47,12 +47,8 @@ void place_piece(void)
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
       chess_board.dest = &chess_board.squares[y][x];
-      if (CheckCollisionPointCircle(GetMousePosition(), chess_board.dest->CenterProximity.center, chess_board.dest->CenterProximity.r)) {
-        if (
-            (correct_color_turn(&chess_board.src_piece)) &&
-            (!capture_ally(&chess_board.src_piece, &chess_board.dest->piece)) &&
-            is_legal_move()
-            ) {
+      if (CheckCollisionPointCircle(GetMousePosition(), chess_board.dest->center_proximity.center, chess_board.dest->center_proximity.r)) {
+        if ( correct_color_turn() && !capture_ally() && is_legal_move()) {
           chess_board.squares[y][x].piece = chess_board.src_piece;
           chess_board.piece_placed = true;
           change_chess_board_turn();
@@ -73,9 +69,10 @@ void draw_drag_and_place(void)
     for (int y = 0; y < NS; y++) {
       for (int x = 0; x < NS; x++) {
         chess_board.src_piece = chess_board.squares[y][x].piece;
-        chess_board.src      = &chess_board.squares[y][x];
-        if (CheckCollisionPointRec(GetMousePosition(), chess_board.src->rect) &&
-            (chess_board.src_piece.type != NO_PIECE)
+        chess_board.src       = &chess_board.squares[y][x];
+        ChessSquare square    = chess_board.squares[y][x];
+        if (CheckCollisionPointRec(GetMousePosition(), square.rect) &&
+            (square.piece.type != NO_PIECE)
             ) {
           if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
             chess_board.dragging_piece = true;
@@ -108,12 +105,11 @@ void draw_drag_and_place(void)
 
 void check_hovering(void)
 {
-  ChessSquare *square = NULL;
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
-      square = &chess_board.squares[y][x];
-      if (CheckCollisionPointRec(GetMousePosition(), square->rect) &&
-          (square->piece.type != NO_PIECE)) {
+      ChessSquare square = chess_board.squares[y][x];
+      if (CheckCollisionPointRec(GetMousePosition(), square.rect) &&
+          (square.piece.type != NO_PIECE)) {
         chess_board.hovering_piece = true;
         break;
       }
