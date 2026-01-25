@@ -63,6 +63,11 @@ void reset_chess_square(ChessSquare *square)
 // TODO: load starting position based on FEN
 void load_starting_position(void)
 {
+  chess_board.w_s_can_castle = true;
+  chess_board.w_l_can_castle = true;
+  chess_board.b_s_can_castle = true;
+  chess_board.b_l_can_castle = true;
+
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
       chess_board.squares[y][x].board_color = square_color[(x + y) % 2];
