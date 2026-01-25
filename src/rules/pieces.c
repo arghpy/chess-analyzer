@@ -83,6 +83,28 @@ bool rook_is_legal_move(void)
         ys += y_step;
       }
     }
+    // Prevent castling if it moved from src:
+    //  - long side:  0,0 || 7,0
+    //  - short side: 0,7 || 7,7
+    // TODO: part of the most awful pieces of code. CHANGE
+    if (!chess_board.flipped) {
+      if ((ys == 0 && xs == 0) || (ys == (NS - 1) && xs == 0)) {
+        if (chess_board.src_piece.color == W) chess_board.w_l_can_castle = false;
+        else chess_board.b_l_can_castle = false;
+      } else if ((ys == 0 && xs == (NS - 1)) || (ys == (NS - 1) && xs == (NS - 1))) {
+        if (chess_board.src_piece.color == W) chess_board.w_s_can_castle = false;
+        else chess_board.b_s_can_castle = false;
+      }
+    } else {
+      if ((ys == 0 && xs == 0) || (ys == (NS - 1) && xs == 0)) {
+        if (chess_board.src_piece.color == W) chess_board.w_s_can_castle = false;
+        else chess_board.b_s_can_castle = false;
+      } else if ((ys == 0 && xs == (NS - 1)) || (ys == (NS - 1) && xs == (NS - 1))) {
+        if (chess_board.src_piece.color == W) chess_board.w_l_can_castle = false;
+        else chess_board.b_l_can_castle = false;
+      }
+    }
+
     return true;
   } else return false;
 }
@@ -178,16 +200,132 @@ bool king_is_legal_move(void)
           return false;
       }
     }
+    // Cannot castle anymore
+    if (chess_board.src_piece.color == W) {
+      chess_board.w_s_can_castle = false;
+      chess_board.w_l_can_castle = false;
+    }
+    if (chess_board.src_piece.color == B) {
+      chess_board.b_s_can_castle = false;
+      chess_board.b_l_can_castle = false;
+    }
+
     return true;
-  // } else if (dy == 0 && abs(xs - xd) == 2) {
-  //   if ((chess_board.src_piece.color == W && !chess_board.w_castled) ||
-  //       (chess_board.src_piece.color == B && !chess_board.b_castled)) {
-  //     int x = xs;
-  //     while (x != xd) {
-  //       if (chess_board.squares[yd][x].piece.type != NO_PIECE)
-  //         return false;
-  //       x += x_step;
-  //     }
-  //   }
+  } else if (dy == 0 && abs(xs - xd) == 2) {
+    // TODO: part of the most awful pieces of code. CHANGE
+    if (x_step > 0) {
+      if (!chess_board.flipped) {
+        if ((chess_board.src_piece.color == W && chess_board.w_s_can_castle) ||
+            (chess_board.src_piece.color == B && chess_board.b_s_can_castle)) {
+          int x = xs;
+          while (x != (NS - 1)) {
+            if (chess_board.squares[yd][x].piece.type != NO_PIECE)
+              return false;
+            x += x_step;
+          }
+          if (chess_board.src_piece.color == W) {
+            if (chess_board.squares[7][7].piece.color != W) return false;
+            if (chess_board.squares[7][7].piece.type != ROOK) return false;
+            chess_board.squares[7][5].piece.type  = ROOK;
+            chess_board.squares[7][5].piece.color = W;
+            reset_chess_square(&chess_board.squares[7][7]);
+            chess_board.w_l_can_castle = false;
+            chess_board.w_s_can_castle = false;
+          } else {
+            if (chess_board.squares[0][7].piece.color != B) return false;
+            if (chess_board.squares[0][7].piece.type != ROOK) return false;
+            chess_board.squares[0][5].piece.type  = ROOK;
+            chess_board.squares[0][5].piece.color = B;
+            reset_chess_square(&chess_board.squares[0][7]);
+            chess_board.b_l_can_castle = false;
+            chess_board.b_s_can_castle = false;
+          }
+        } else return false;
+      } else {
+        if ((chess_board.src_piece.color == W && chess_board.w_l_can_castle) ||
+            (chess_board.src_piece.color == B && chess_board.b_l_can_castle)) {
+          int x = xs;
+          while (x != (NS - 1)) {
+            if (chess_board.squares[yd][x].piece.type != NO_PIECE)
+              return false;
+            x += x_step;
+          }
+          if (chess_board.src_piece.color == W) {
+            if (chess_board.squares[0][7].piece.color != W) return false;
+            if (chess_board.squares[0][7].piece.type != ROOK) return false;
+            chess_board.squares[0][4].piece.type  = ROOK;
+            chess_board.squares[0][4].piece.color = W;
+            reset_chess_square(&chess_board.squares[0][7]);
+            chess_board.w_l_can_castle = false;
+            chess_board.w_s_can_castle = false;
+          } else {
+            if (chess_board.squares[7][7].piece.color != B) return false;
+            if (chess_board.squares[7][7].piece.type != ROOK) return false;
+            chess_board.squares[7][4].piece.type  = ROOK;
+            chess_board.squares[7][4].piece.color = B;
+            reset_chess_square(&chess_board.squares[7][7]);
+            chess_board.b_l_can_castle = false;
+            chess_board.b_s_can_castle = false;
+          }
+        } else return false;
+      }
+    } else {
+      if (!chess_board.flipped) {
+        if ((chess_board.src_piece.color == W && chess_board.w_l_can_castle) ||
+            (chess_board.src_piece.color == B && chess_board.b_l_can_castle)) {
+          int x = xs;
+          while (x != 1) {
+            if (chess_board.squares[yd][x].piece.type != NO_PIECE)
+              return false;
+            x += x_step;
+          }
+          if (chess_board.src_piece.color == W) {
+            if (chess_board.squares[7][0].piece.color != W) return false;
+            if (chess_board.squares[7][0].piece.type != ROOK) return false;
+            chess_board.squares[7][3].piece.type  = ROOK;
+            chess_board.squares[7][3].piece.color = W;
+            reset_chess_square(&chess_board.squares[7][0]);
+            chess_board.w_l_can_castle = false;
+            chess_board.w_s_can_castle = false;
+          } else {
+            if (chess_board.squares[0][0].piece.color != B) return false;
+            if (chess_board.squares[0][0].piece.type != ROOK) return false;
+            chess_board.squares[0][3].piece.type  = ROOK;
+            chess_board.squares[0][3].piece.color = B;
+            reset_chess_square(&chess_board.squares[0][0]);
+            chess_board.b_l_can_castle = false;
+            chess_board.b_s_can_castle = false;
+          }
+        } else return false;
+      } else {
+        if ((chess_board.src_piece.color == W && chess_board.w_s_can_castle) ||
+            (chess_board.src_piece.color == B && chess_board.b_s_can_castle)) {
+          int x = xs;
+          while (x != 1) {
+            if (chess_board.squares[yd][x].piece.type != NO_PIECE)
+              return false;
+            x += x_step;
+          }
+          if (chess_board.src_piece.color == W) {
+            if (chess_board.squares[0][0].piece.color != W) return false;
+            if (chess_board.squares[0][0].piece.type != ROOK) return false;
+            chess_board.squares[0][2].piece.type  = ROOK;
+            chess_board.squares[0][2].piece.color = W;
+            reset_chess_square(&chess_board.squares[0][0]);
+            chess_board.w_l_can_castle = false;
+            chess_board.w_s_can_castle = false;
+          } else {
+            if (chess_board.squares[7][0].piece.color != B) return false;
+            if (chess_board.squares[7][0].piece.type != ROOK) return false;
+            chess_board.squares[7][2].piece.type  = ROOK;
+            chess_board.squares[7][2].piece.color = B;
+            reset_chess_square(&chess_board.squares[7][0]);
+            chess_board.b_l_can_castle = false;
+            chess_board.b_s_can_castle = false;
+          }
+        } else return false;
+      }
+    }
+    return true;
   } else return false;
 }
