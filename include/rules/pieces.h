@@ -6,5 +6,6 @@ bool knight_is_legal_move(void);
 bool bishop_is_legal_move(void);
 bool rook_is_legal_move(void);
 bool queen_is_legal_move(void);
+bool king_is_legal_move(void);
 
 #endif

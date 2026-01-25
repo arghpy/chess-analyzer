@@ -67,6 +67,8 @@ typedef struct {
   bool dragging_piece;
   bool piece_placed;
   bool flipped;
+  bool w_castled;
+  bool b_castled;
 } ChessBoard;
 
 extern ChessBoard chess_board;
