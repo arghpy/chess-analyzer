@@ -15,6 +15,7 @@
 
 
 # Look & Feel:
+- highlight src and dest squares of last moves
 - making squares red on right mouse button click and then back
 
 - drawing arrows between squares with right mouse button
