@@ -29,6 +29,14 @@ void flip_board(void)
   }
 }
 
+void load_pawn_promotions(void)
+{
+  chess_board.promotions[0].piece.type = QUEEN;
+  chess_board.promotions[1].piece.type = KNIGHT;
+  chess_board.promotions[2].piece.type = ROOK;
+  chess_board.promotions[3].piece.type = BISHOP;
+}
+
 void load_chess_pieces(void)
 {
   chess_pieces_texture[PAWN_W]   = LoadTexture("./assets/pieces/pw.png");

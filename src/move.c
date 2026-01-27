@@ -3,6 +3,8 @@
 #include "raylib.h"
 #include "rules/pieces.h"
 #include "rules/general.h"
+#include <stddef.h>
+#include <stdio.h>
 
 bool is_legal_move(void)
 {
@@ -11,6 +13,7 @@ bool is_legal_move(void)
   // Check if legal move
   switch (chess_board.src_piece.type) {
     case PAWN:
+      legal_move = pawn_is_legal_move();
       break;
     case BISHOP:
       legal_move = bishop_is_legal_move();
@@ -50,6 +53,16 @@ void place_piece(void)
         if (correct_color_turn() && !capture_ally() && !capture_king() && is_legal_move()) {
           chess_board.squares[y][x].piece = chess_board.src_piece;
           chess_board.piece_placed = true;
+
+          if (chess_board.dest->piece.type == PAWN) {
+            ptrdiff_t d_index = chess_board.dest - &chess_board.squares[0][0];
+            int yd = d_index / NS;
+
+            if (yd == 0 || yd == (NS - 1)) {
+              chess_board.promote = true;
+              promote_pawn(chess_board.dest);
+            }
+          }
           change_chess_board_turn();
           break;
         }
@@ -98,11 +111,16 @@ void draw_drag_and_place(void)
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
       chess_board.dragging_piece = false;
       place_piece();
+      if (chess_board.enpassant_allowed) {
+        if (chess_board.enpassant_allowed_by->piece.color == chess_board.color_turn) {
+          chess_board.enpassant_allowed = false;
+        }
+      }
     }
   }
 }
 
-void check_hovering(void)
+void check_pieces_hovering(void)
 {
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
@@ -120,13 +138,15 @@ void check_hovering(void)
 void set_mouse_cursor(void)
 {
   SetMouseCursor(
-      chess_board.hovering_piece || chess_board.dragging_piece ?
+      chess_board.hovering_promotion || chess_board.hovering_piece || chess_board.dragging_piece ?
       MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT
       );
 }
 
 void draw_moving_piece(void)
 {
-  check_hovering();
-  draw_drag_and_place();
+  if (!chess_board.promote) {
+    check_pieces_hovering();
+    draw_drag_and_place();
+  }
 }

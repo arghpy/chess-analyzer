@@ -71,6 +71,11 @@ typedef struct {
   bool w_l_can_castle;
   bool b_s_can_castle;
   bool b_l_can_castle;
+  bool enpassant_allowed;
+  ChessSquare *enpassant_allowed_by;
+  bool promote;
+  ChessSquare promotions[4];
+  bool hovering_promotion;
 } ChessBoard;
 
 extern ChessBoard chess_board;
@@ -79,6 +84,7 @@ extern float SQUARE_SIZE;
 
 void draw_piece(const ChessSquare *square);
 void draw_chess_board(Font *font);
+void load_pawn_promotions(void);
 void load_chess_pieces(void);
 void unload_chess_pieces(void);
 void load_starting_position(void);
