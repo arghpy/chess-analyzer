@@ -1,6 +1,7 @@
 #include "raylib.h"
 #include "board.h"
 #include "move.h"
+#include "rules/pieces.h"
 #include <stdbool.h>
 
 #define background_color ((Color){0x18, 0x18, 0x18, 0xFF})
@@ -19,6 +20,7 @@ int main(void)
   { // Initializing
     load_starting_position();
     load_chess_pieces();
+    load_pawn_promotions();
   }
 
   while(!WindowShouldClose()) {
@@ -31,12 +33,16 @@ int main(void)
       ClearBackground(background_color);
       draw_chess_board(&font);
       draw_moving_piece();
+
+      if (chess_board.promote) promote_pawn(chess_board.dest);
+
       set_mouse_cursor();
     }
     EndDrawing();
 
     // Reset
     chess_board.hovering_piece = false;
+    chess_board.hovering_promotion = false;
   }
 
   { // Closing everything

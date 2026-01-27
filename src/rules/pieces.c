@@ -3,6 +3,7 @@
 #include "board.h"
 #include <math.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <stdlib.h>
 
 bool knight_is_legal_move(void)
@@ -327,5 +328,127 @@ bool king_is_legal_move(void)
       }
     }
     return true;
+  } else return false;
+}
+
+void select_for_promotion(void)
+{
+  for (int i = 0; i < NS; i++) {
+      ChessSquare square = chess_board.promotions[i];
+      if (CheckCollisionPointRec(GetMousePosition(), square.rect) &&
+          (square.piece.type != NO_PIECE)) {
+
+        chess_board.hovering_promotion = true;
+        if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          chess_board.hovering_piece = false;
+          chess_board.promote = false;
+          chess_board.dest->piece = chess_board.promotions[i].piece;
+          break;
+        }
+      }
+  }
+}
+
+void promote_pawn(ChessSquare *promotion_square)
+{
+  int y_step = (promotion_square->rect.y - chess_board.src->rect.y) < 0 ?
+                -1 : 1;
+
+  ptrdiff_t d_index = promotion_square - &chess_board.squares[0][0];
+  int yd = d_index / NS;
+  int xd = d_index % NS;
+
+  for (int i = 0; i < 4; i++) {
+    chess_board.promotions[i].rect = (Rectangle) {
+      .x      = xd * SQUARE_SIZE,
+      .y      = (yd - y_step * i) * SQUARE_SIZE,
+      .width  = SQUARE_SIZE,
+      .height = SQUARE_SIZE,
+    };
+    chess_board.promotions[i].center_proximity = (Circle) {
+      .center = (Vector2) {
+        .x = xd * SQUARE_SIZE + SQUARE_SIZE / 2,
+        .y = (yd - y_step * i) * SQUARE_SIZE + SQUARE_SIZE / 2
+      },
+        .r = SQUARE_SIZE / 2.5f,
+    };
+    chess_board.promotions[i].piece.color = promotion_square->piece.color == W ? W : B;
+    DrawRectangleRec(chess_board.promotions[i].rect, RAYWHITE);
+    DrawRectangleLinesEx(chess_board.promotions[i].rect, 2.0f, GRAY);
+    draw_piece(&chess_board.promotions[i]);
+  }
+  select_for_promotion();
+}
+
+bool pawn_is_legal_move(void)
+{
+  float dx = fabsf(chess_board.dest->rect.x - chess_board.src->rect.x);
+  float dy = fabsf(chess_board.dest->rect.y - chess_board.src->rect.y);
+
+  int x_step = (chess_board.dest->rect.x - chess_board.src->rect.x) < 0 ?
+                -1 : 1;
+  int y_step = (chess_board.dest->rect.y - chess_board.src->rect.y) < 0 ?
+                -1 : 1;
+
+  ptrdiff_t s_index = chess_board.src - &chess_board.squares[0][0];
+  int ys = s_index / NS;
+  int xs = s_index % NS;
+
+  ptrdiff_t d_index = chess_board.dest - &chess_board.squares[0][0];
+  int yd = d_index / NS;
+  int xd = d_index % NS;
+
+  if (still_on_src_square(dx, dy)) return false;
+
+  // Allow it to only go forward
+  if (chess_board.src_piece.color == W && y_step > 0) return false;
+  if (chess_board.src_piece.color == B && y_step < 0) return false;
+
+  if (dx == 0) {
+    bool allow_2_squares = false;
+
+    // 2 move square allowed
+    if (ys == 1 || ys == 6) allow_2_squares = true;
+
+    if (dy == 2*SQUARE_SIZE) {
+      if (!allow_2_squares) return false;
+      int x = xs;
+      while (x != xd) {
+        if (chess_board.squares[yd][x].piece.type != NO_PIECE)
+          return false;
+        x += x_step;
+      }
+
+      // En passant
+      if (chess_board.squares[yd][xd - 1].piece.type == PAWN &&
+          chess_board.squares[yd][xd - 1].piece.color != chess_board.src_piece.color) {
+        chess_board.enpassant_allowed = true;
+        chess_board.enpassant_allowed_by = chess_board.dest;
+      }
+
+      if (chess_board.squares[yd][xd + 1].piece.type == PAWN &&
+          chess_board.squares[yd][xd + 1].piece.color != chess_board.src_piece.color) {
+        chess_board.enpassant_allowed = true;
+        chess_board.enpassant_allowed_by = chess_board.dest;
+      }
+
+      return true;
+    }
+
+    if (dy != SQUARE_SIZE) return false;
+    if (chess_board.squares[yd][xd].piece.type != NO_PIECE) return false;
+
+    return true;
+  } else if ((dx == dy) && (abs(xs - xd) == 1 || abs(ys - yd) == 1)) {
+    if (!chess_board.enpassant_allowed) {
+      if (chess_board.squares[yd][xd].piece.type == NO_PIECE) return false;
+      else return true;
+    } else {
+      if (chess_board.enpassant_allowed_by == &chess_board.squares[yd - y_step][xd]) {
+        reset_chess_square(&chess_board.squares[yd - y_step][xd]);
+        chess_board.enpassant_allowed = false;
+        return true;
+      } else return false;
+    }
   } else return false;
 }
