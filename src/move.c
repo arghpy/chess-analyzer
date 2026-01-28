@@ -44,25 +44,61 @@ void change_chess_board_turn(void)
   else chess_board.color_turn = W;
 }
 
+Color ApplyTint(Color base, Color tint)
+{
+  Color out = {
+    .r = (unsigned char)((base.r * tint.r) / 255),
+    .g = (unsigned char)((base.g * tint.g) / 255),
+    .b = (unsigned char)((base.b * tint.b) / 255),
+    .a = base.a
+  };
+  return out;
+}
+
 void place_piece(void)
 {
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
-      chess_board.dest = &chess_board.squares[y][x];
-      if (CheckCollisionPointCircle(GetMousePosition(), chess_board.dest->center_proximity.center, chess_board.dest->center_proximity.r)) {
+      chess_board.c_dest = &chess_board.squares[y][x];
+      if (CheckCollisionPointCircle(GetMousePosition(), chess_board.c_dest->center_proximity.center, chess_board.c_dest->center_proximity.r)) {
         if (correct_color_turn() && !capture_ally() && !capture_king() && is_legal_move()) {
+          // Reset original colors
+          if (chess_board.p_src != NULL) {
+            ptrdiff_t p_s_index = chess_board.p_src - &chess_board.squares[0][0];
+            int ys = p_s_index / NS;
+            int xs = p_s_index % NS;
+
+            chess_board.p_src->board_color = square_color[(xs + ys) % 2];
+          }
+
+          if (chess_board.p_dest != NULL) {
+            ptrdiff_t p_d_index = chess_board.p_dest - &chess_board.squares[0][0];
+            int yd = p_d_index / NS;
+            int xd = p_d_index % NS;
+
+            chess_board.p_dest->board_color = square_color[(xd + yd) % 2];
+          }
+
           chess_board.squares[y][x].piece = chess_board.src_piece;
           chess_board.piece_placed = true;
 
-          if (chess_board.dest->piece.type == PAWN) {
-            ptrdiff_t d_index = chess_board.dest - &chess_board.squares[0][0];
+          if (chess_board.c_dest->piece.type == PAWN) {
+            ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
             int yd = d_index / NS;
 
             if (yd == 0 || yd == (NS - 1)) {
               chess_board.promote = true;
-              promote_pawn(chess_board.dest);
+              promote_pawn(chess_board.c_dest);
             }
           }
+          chess_board.p_src  = chess_board.c_src;
+          chess_board.p_dest = chess_board.c_dest;
+
+          chess_board.p_src->board_color  = ColorIsEqual(chess_board.p_src->board_color, square_color[LIGHT_TILE]) ?
+                                            (Color){0xF6, 0xEA, 0x72, 0xFF} : (Color){0xDD, 0xC3, 0x4C, 0xFF};
+          chess_board.p_dest->board_color = ColorIsEqual(chess_board.p_dest->board_color, square_color[LIGHT_TILE]) ?
+                                            (Color){0xF6, 0xEA, 0x72, 0xFF} : (Color){0xDD, 0xC3, 0x4C, 0xFF};
+
           change_chess_board_turn();
           break;
         }
@@ -71,7 +107,7 @@ void place_piece(void)
     if (chess_board.piece_placed) break;
   }
   if (!chess_board.piece_placed)
-    chess_board.src->piece = chess_board.src_piece;
+    chess_board.c_src->piece = chess_board.src_piece;
   chess_board.piece_placed = false; // Reset
 }
 
@@ -81,7 +117,7 @@ void draw_drag_and_place(void)
     for (int y = 0; y < NS; y++) {
       for (int x = 0; x < NS; x++) {
         chess_board.src_piece = chess_board.squares[y][x].piece;
-        chess_board.src       = &chess_board.squares[y][x];
+        chess_board.c_src       = &chess_board.squares[y][x];
         ChessSquare square    = chess_board.squares[y][x];
         if (CheckCollisionPointRec(GetMousePosition(), square.rect) &&
             (square.piece.type != NO_PIECE)
@@ -99,7 +135,7 @@ void draw_drag_and_place(void)
 
   if (chess_board.dragging_piece) {
     Vector2 mouse_pos = GetMousePosition();
-    Rectangle square = chess_board.src->rect;
+    Rectangle square = chess_board.c_src->rect;
     square.x      = mouse_pos.x - SQUARE_SIZE / 2;
     square.y      = mouse_pos.y - SQUARE_SIZE / 2;
 

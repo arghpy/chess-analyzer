@@ -60,9 +60,11 @@ typedef struct {
 typedef struct {
   ChessSquare squares[NS][NS];
   ChessPieceColor color_turn;
-  ChessSquare *src;
+  ChessSquare *c_src;
+  ChessSquare *p_src;
   ChessPiece src_piece;
-  ChessSquare *dest;
+  ChessSquare *c_dest;
+  ChessSquare *p_dest;
   bool hovering_piece;
   bool dragging_piece;
   bool piece_placed;
@@ -78,9 +80,15 @@ typedef struct {
   bool hovering_promotion;
 } ChessBoard;
 
+typedef enum {
+  LIGHT_TILE,
+  DARK_TILE
+} BoardColor;
+
 extern ChessBoard chess_board;
 extern Texture2D chess_pieces_texture[TEXTURE_COUNT];
 extern float SQUARE_SIZE;
+extern const Color square_color[];
 
 void draw_piece(const ChessSquare *square);
 void draw_chess_board(Font *font);

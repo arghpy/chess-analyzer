@@ -8,12 +8,7 @@ Texture2D chess_pieces_texture[TEXTURE_COUNT] = {0};
 ChessBoard chess_board = {0};
 float SQUARE_SIZE = 0.0f;
 
-typedef enum {
-  LIGHT_TILE,
-  DARK_TILE
-} BoardColor;
-
-static const Color square_color[] = {
+const Color square_color[] = {
   [LIGHT_TILE] = (Color) { 0xED, 0xD4, 0xAE, 0xFF },
   [DARK_TILE]  = (Color) { 0xB9, 0x89, 0x65, 0xFF }
 };
