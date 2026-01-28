@@ -8,12 +8,12 @@ bool still_on_src_square(float dx, float dy)
 
 bool capture_king(void)
 {
-  return (chess_board.dest->piece.type == KING);
+  return (chess_board.c_dest->piece.type == KING);
 }
 
 bool capture_ally(void)
 {
-  return (chess_board.src_piece.color == chess_board.dest->piece.color);
+  return (chess_board.src_piece.color == chess_board.c_dest->piece.color);
 }
 
 bool correct_color_turn(void)

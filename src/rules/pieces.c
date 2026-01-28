@@ -8,8 +8,8 @@
 
 bool knight_is_legal_move(void)
 {
-  float dx = fabsf(chess_board.dest->rect.x - chess_board.src->rect.x);
-  float dy = fabsf(chess_board.dest->rect.y - chess_board.src->rect.y);
+  float dx = fabsf(chess_board.c_dest->rect.x - chess_board.c_src->rect.x);
+  float dy = fabsf(chess_board.c_dest->rect.y - chess_board.c_src->rect.y);
 
   if (still_on_src_square(dx, dy)) return false;
   if ((dx == SQUARE_SIZE && dy == 2*SQUARE_SIZE) || (dx == 2*SQUARE_SIZE && dy == SQUARE_SIZE))
@@ -19,19 +19,19 @@ bool knight_is_legal_move(void)
 
 bool bishop_is_legal_move(void)
 {
-  float dx = fabsf(chess_board.dest->rect.x - chess_board.src->rect.x);
-  float dy = fabsf(chess_board.dest->rect.y - chess_board.src->rect.y);
+  float dx = fabsf(chess_board.c_dest->rect.x - chess_board.c_src->rect.x);
+  float dy = fabsf(chess_board.c_dest->rect.y - chess_board.c_src->rect.y);
 
-  int x_step = (chess_board.dest->rect.x - chess_board.src->rect.x) < 0 ?
+  int x_step = (chess_board.c_dest->rect.x - chess_board.c_src->rect.x) < 0 ?
                 -1 : 1;
-  int y_step = (chess_board.dest->rect.y - chess_board.src->rect.y) < 0 ?
+  int y_step = (chess_board.c_dest->rect.y - chess_board.c_src->rect.y) < 0 ?
                 -1 : 1;
 
-  ptrdiff_t s_index = chess_board.src - &chess_board.squares[0][0];
+  ptrdiff_t s_index = chess_board.c_src - &chess_board.squares[0][0];
   int ys = s_index / NS;
   int xs = s_index % NS;
 
-  ptrdiff_t d_index = chess_board.dest - &chess_board.squares[0][0];
+  ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
 
@@ -52,19 +52,19 @@ bool bishop_is_legal_move(void)
 
 bool rook_is_legal_move(void)
 {
-  float dx = fabsf(chess_board.dest->rect.x - chess_board.src->rect.x);
-  float dy = fabsf(chess_board.dest->rect.y - chess_board.src->rect.y);
+  float dx = fabsf(chess_board.c_dest->rect.x - chess_board.c_src->rect.x);
+  float dy = fabsf(chess_board.c_dest->rect.y - chess_board.c_src->rect.y);
 
-  int x_step = (chess_board.dest->rect.x - chess_board.src->rect.x) < 0 ?
+  int x_step = (chess_board.c_dest->rect.x - chess_board.c_src->rect.x) < 0 ?
                 -1 : 1;
-  int y_step = (chess_board.dest->rect.y - chess_board.src->rect.y) < 0 ?
+  int y_step = (chess_board.c_dest->rect.y - chess_board.c_src->rect.y) < 0 ?
                 -1 : 1;
 
-  ptrdiff_t s_index = chess_board.src - &chess_board.squares[0][0];
+  ptrdiff_t s_index = chess_board.c_src - &chess_board.squares[0][0];
   int ys = s_index / NS;
   int xs = s_index % NS;
 
-  ptrdiff_t d_index = chess_board.dest - &chess_board.squares[0][0];
+  ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
 
@@ -112,19 +112,19 @@ bool rook_is_legal_move(void)
 
 bool queen_is_legal_move(void)
 {
-  float dx = fabsf(chess_board.dest->rect.x - chess_board.src->rect.x);
-  float dy = fabsf(chess_board.dest->rect.y - chess_board.src->rect.y);
+  float dx = fabsf(chess_board.c_dest->rect.x - chess_board.c_src->rect.x);
+  float dy = fabsf(chess_board.c_dest->rect.y - chess_board.c_src->rect.y);
 
-  int x_step = (chess_board.dest->rect.x - chess_board.src->rect.x) < 0 ?
+  int x_step = (chess_board.c_dest->rect.x - chess_board.c_src->rect.x) < 0 ?
     -1 : 1;
-  int y_step = (chess_board.dest->rect.y - chess_board.src->rect.y) < 0 ?
+  int y_step = (chess_board.c_dest->rect.y - chess_board.c_src->rect.y) < 0 ?
     -1 : 1;
 
-  ptrdiff_t s_index = chess_board.src - &chess_board.squares[0][0];
+  ptrdiff_t s_index = chess_board.c_src - &chess_board.squares[0][0];
   int ys = s_index / NS;
   int xs = s_index % NS;
 
-  ptrdiff_t d_index = chess_board.dest - &chess_board.squares[0][0];
+  ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
 
@@ -162,22 +162,22 @@ bool queen_is_legal_move(void)
 
 bool king_is_legal_move(void)
 {
-  float dx = fabsf(chess_board.dest->rect.x - chess_board.src->rect.x);
-  float dy = fabsf(chess_board.dest->rect.y - chess_board.src->rect.y);
+  float dx = fabsf(chess_board.c_dest->rect.x - chess_board.c_src->rect.x);
+  float dy = fabsf(chess_board.c_dest->rect.y - chess_board.c_src->rect.y);
 
-  int x_step = (chess_board.dest->rect.x - chess_board.src->rect.x) < 0 ?
+  int x_step = (chess_board.c_dest->rect.x - chess_board.c_src->rect.x) < 0 ?
                 -1 : 1;
-  int y_step = (chess_board.dest->rect.y - chess_board.src->rect.y) < 0 ?
+  int y_step = (chess_board.c_dest->rect.y - chess_board.c_src->rect.y) < 0 ?
                 -1 : 1;
 
   (void)x_step;
   (void)y_step;
 
-  ptrdiff_t s_index = chess_board.src - &chess_board.squares[0][0];
+  ptrdiff_t s_index = chess_board.c_src - &chess_board.squares[0][0];
   int ys = s_index / NS;
   int xs = s_index % NS;
 
-  ptrdiff_t d_index = chess_board.dest - &chess_board.squares[0][0];
+  ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
 
@@ -342,7 +342,7 @@ void select_for_promotion(void)
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           chess_board.hovering_piece = false;
           chess_board.promote = false;
-          chess_board.dest->piece = chess_board.promotions[i].piece;
+          chess_board.c_dest->piece = chess_board.promotions[i].piece;
           break;
         }
       }
@@ -351,7 +351,7 @@ void select_for_promotion(void)
 
 void promote_pawn(ChessSquare *promotion_square)
 {
-  int y_step = (promotion_square->rect.y - chess_board.src->rect.y) < 0 ?
+  int y_step = (promotion_square->rect.y - chess_board.c_src->rect.y) < 0 ?
                 -1 : 1;
 
   ptrdiff_t d_index = promotion_square - &chess_board.squares[0][0];
@@ -382,19 +382,19 @@ void promote_pawn(ChessSquare *promotion_square)
 
 bool pawn_is_legal_move(void)
 {
-  float dx = fabsf(chess_board.dest->rect.x - chess_board.src->rect.x);
-  float dy = fabsf(chess_board.dest->rect.y - chess_board.src->rect.y);
+  float dx = fabsf(chess_board.c_dest->rect.x - chess_board.c_src->rect.x);
+  float dy = fabsf(chess_board.c_dest->rect.y - chess_board.c_src->rect.y);
 
-  int x_step = (chess_board.dest->rect.x - chess_board.src->rect.x) < 0 ?
+  int x_step = (chess_board.c_dest->rect.x - chess_board.c_src->rect.x) < 0 ?
                 -1 : 1;
-  int y_step = (chess_board.dest->rect.y - chess_board.src->rect.y) < 0 ?
+  int y_step = (chess_board.c_dest->rect.y - chess_board.c_src->rect.y) < 0 ?
                 -1 : 1;
 
-  ptrdiff_t s_index = chess_board.src - &chess_board.squares[0][0];
+  ptrdiff_t s_index = chess_board.c_src - &chess_board.squares[0][0];
   int ys = s_index / NS;
   int xs = s_index % NS;
 
-  ptrdiff_t d_index = chess_board.dest - &chess_board.squares[0][0];
+  ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
 
@@ -423,13 +423,13 @@ bool pawn_is_legal_move(void)
       if (chess_board.squares[yd][xd - 1].piece.type == PAWN &&
           chess_board.squares[yd][xd - 1].piece.color != chess_board.src_piece.color) {
         chess_board.enpassant_allowed = true;
-        chess_board.enpassant_allowed_by = chess_board.dest;
+        chess_board.enpassant_allowed_by = chess_board.c_dest;
       }
 
       if (chess_board.squares[yd][xd + 1].piece.type == PAWN &&
           chess_board.squares[yd][xd + 1].piece.color != chess_board.src_piece.color) {
         chess_board.enpassant_allowed = true;
-        chess_board.enpassant_allowed_by = chess_board.dest;
+        chess_board.enpassant_allowed_by = chess_board.c_dest;
       }
 
       return true;
