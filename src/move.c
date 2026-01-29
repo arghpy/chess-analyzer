@@ -44,17 +44,6 @@ void change_chess_board_turn(void)
   else chess_board.color_turn = W;
 }
 
-Color ApplyTint(Color base, Color tint)
-{
-  Color out = {
-    .r = (unsigned char)((base.r * tint.r) / 255),
-    .g = (unsigned char)((base.g * tint.g) / 255),
-    .b = (unsigned char)((base.b * tint.b) / 255),
-    .a = base.a
-  };
-  return out;
-}
-
 void place_piece(void)
 {
   for (int y = 0; y < NS; y++) {
