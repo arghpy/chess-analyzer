@@ -1,9 +1,9 @@
 #include "rules/general.h"
 #include "board.h"
 
-bool still_on_src_square(float dx, float dy)
+bool still_on_src_square(void)
 {
-  return (dx == 0 && dy == 0);
+  return (chess_board.c_src == chess_board.c_dest);
 }
 
 bool capture_king(void)
