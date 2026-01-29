@@ -61,7 +61,11 @@ void place_piece(void)
     for (int x = 0; x < NS; x++) {
       chess_board.c_dest = &chess_board.squares[y][x];
       if (CheckCollisionPointCircle(GetMousePosition(), chess_board.c_dest->center_proximity.center, chess_board.c_dest->center_proximity.r)) {
-        if (correct_color_turn() && !capture_ally() && !capture_king() && is_legal_move()) {
+        if (correct_color_turn() &&
+            !capture_ally() &&
+            !capture_king() &&
+            !still_on_src_square() && 
+            is_legal_move()) {
           // Reset original colors
           if (chess_board.p_src != NULL) {
             ptrdiff_t p_s_index = chess_board.p_src - &chess_board.squares[0][0];

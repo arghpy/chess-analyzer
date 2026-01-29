@@ -1,9 +1,7 @@
 #include "rules/pieces.h"
-#include "rules/general.h"
 #include "board.h"
 #include <math.h>
 #include <stddef.h>
-#include <stdio.h>
 #include <stdlib.h>
 
 bool knight_is_legal_move(void)
@@ -11,7 +9,6 @@ bool knight_is_legal_move(void)
   float dx = fabsf(chess_board.c_dest->rect.x - chess_board.c_src->rect.x);
   float dy = fabsf(chess_board.c_dest->rect.y - chess_board.c_src->rect.y);
 
-  if (still_on_src_square(dx, dy)) return false;
   if ((dx == SQUARE_SIZE && dy == 2*SQUARE_SIZE) || (dx == 2*SQUARE_SIZE && dy == SQUARE_SIZE))
     return true;
   else return false;
@@ -34,8 +31,6 @@ bool bishop_is_legal_move(void)
   ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
-
-  if (still_on_src_square(dx, dy)) return false;
 
   if (dx == dy) {
     while (ys != yd || xs != xd) {
@@ -67,8 +62,6 @@ bool rook_is_legal_move(void)
   ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
-
-  if (still_on_src_square(dx, dy)) return false;
 
   if (dx == 0 || dy == 0) {
     if (ys == yd) {
@@ -128,8 +121,6 @@ bool queen_is_legal_move(void)
   int yd = d_index / NS;
   int xd = d_index % NS;
 
-  if (still_on_src_square(dx, dy)) return false;
-
   // Check for rook move
   if (dx == 0 || dy == 0) {
     if (ys == yd) {
@@ -180,8 +171,6 @@ bool king_is_legal_move(void)
   ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
-
-  if (still_on_src_square(dx, dy)) return false;
 
   // General movement
   if (((dx == 0 || dy == 0) && (abs(xs - xd) == 1 || abs(ys - yd) == 1)) ||
@@ -397,8 +386,6 @@ bool pawn_is_legal_move(void)
   ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
-
-  if (still_on_src_square(dx, dy)) return false;
 
   // Allow it to only go forward
   if (chess_board.src_piece.color == W && y_step > 0) return false;
