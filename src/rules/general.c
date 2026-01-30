@@ -1,5 +1,5 @@
 #include "rules/general.h"
-#include "board.h"
+#include "init.h"
 
 bool still_on_src_square(void)
 {

@@ -1,9 +1,14 @@
-#ifndef BOARD_H
-#define BOARD_H
+#ifndef INIT_H
+#define INIT_H
 
 #include "raylib.h"
 
 #define NS 8
+
+typedef enum {
+  LIGHT_TILE,
+  DARK_TILE
+} BoardColor;
 
 typedef enum {
   PAWN_W,
@@ -35,9 +40,9 @@ typedef enum {
 } ChessPieceType;
 
 typedef enum {
+  N,
   W,
   B,
-  N
 } ChessPieceColor;
 
 typedef struct {
@@ -58,6 +63,23 @@ typedef struct {
 } ChessSquare;
 
 typedef struct {
+  bool hovering_piece;
+  bool dragging_piece;
+  bool placed_piece;
+  bool enpassant_allowed;
+  ChessSquare *enpassant_allowed_by;
+  bool promote;
+  bool hovering_promotion;
+} States;
+
+typedef struct {
+  bool w_s_can_castle;
+  bool w_l_can_castle;
+  bool b_s_can_castle;
+  bool b_l_can_castle;
+} Castle;
+
+typedef struct {
   ChessSquare squares[NS][NS];
   ChessPieceColor color_turn;
   ChessSquare *c_src;
@@ -65,38 +87,19 @@ typedef struct {
   ChessPiece src_piece;
   ChessSquare *c_dest;
   ChessSquare *p_dest;
-  bool hovering_piece;
-  bool dragging_piece;
-  bool piece_placed;
-  bool flipped;
-  bool w_s_can_castle;
-  bool w_l_can_castle;
-  bool b_s_can_castle;
-  bool b_l_can_castle;
-  bool enpassant_allowed;
-  ChessSquare *enpassant_allowed_by;
-  bool promote;
-  ChessSquare promotions[4];
-  bool hovering_promotion;
+  States state;
+  Castle castle;
+  bool board_flipped;
 } ChessBoard;
 
-typedef enum {
-  LIGHT_TILE,
-  DARK_TILE
-} BoardColor;
-
 extern ChessBoard chess_board;
-extern Texture2D chess_pieces_texture[TEXTURE_COUNT];
-extern float SQUARE_SIZE;
+extern Texture2D chess_pieces_texture[];
 extern const Color square_color[];
+extern ChessSquare piece_promotions[];
 
-void draw_piece(const ChessSquare *square);
-void draw_chess_board(Font *font);
+void load_starting_position(void);
 void load_pawn_promotions(void);
 void load_chess_pieces(void);
 void unload_chess_pieces(void);
-void load_starting_position(void);
-void flip_board(void);
-void reset_chess_square(ChessSquare *square);
 
 #endif
