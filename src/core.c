@@ -1,10 +1,9 @@
-#include "move.h"
-#include "board.h"
+#include "core.h"
+#include "render.h"
 #include "raylib.h"
 #include "rules/pieces.h"
 #include "rules/general.h"
 #include <stddef.h>
-#include <stdio.h>
 
 bool is_legal_move(void)
 {
@@ -73,14 +72,14 @@ void place_piece(void)
           }
 
           chess_board.squares[y][x].piece = chess_board.src_piece;
-          chess_board.piece_placed = true;
+          chess_board.state.placed_piece = true;
 
           if (chess_board.c_dest->piece.type == PAWN) {
             ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
             int yd = d_index / NS;
 
             if (yd == 0 || yd == (NS - 1)) {
-              chess_board.promote = true;
+              chess_board.state.promote = true;
               promote_pawn(chess_board.c_dest);
             }
           }
@@ -97,16 +96,16 @@ void place_piece(void)
         }
       }
     }
-    if (chess_board.piece_placed) break;
+    if (chess_board.state.placed_piece) break;
   }
-  if (!chess_board.piece_placed)
+  if (!chess_board.state.placed_piece)
     chess_board.c_src->piece = chess_board.src_piece;
-  chess_board.piece_placed = false; // Reset
+  chess_board.state.placed_piece = false; // Reset
 }
 
 void draw_drag_and_place(void)
 {
-  if (!chess_board.dragging_piece) {
+  if (!chess_board.state.dragging_piece) {
     for (int y = 0; y < NS; y++) {
       for (int x = 0; x < NS; x++) {
         chess_board.src_piece = chess_board.squares[y][x].piece;
@@ -116,17 +115,17 @@ void draw_drag_and_place(void)
             (square.piece.type != NO_PIECE)
             ) {
           if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-            chess_board.dragging_piece = true;
+            chess_board.state.dragging_piece = true;
             reset_chess_square(&chess_board.squares[y][x]);
             break;
           }
         }
       }
-      if (chess_board.dragging_piece) break;
+      if (chess_board.state.dragging_piece) break;
     }
   }
 
-  if (chess_board.dragging_piece) {
+  if (chess_board.state.dragging_piece) {
     Vector2 mouse_pos = GetMousePosition();
     Rectangle square = chess_board.c_src->rect;
     square.x      = mouse_pos.x - SQUARE_SIZE / 2;
@@ -138,11 +137,11 @@ void draw_drag_and_place(void)
     draw_piece(&moving_piece);
 
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
-      chess_board.dragging_piece = false;
+      chess_board.state.dragging_piece = false;
       place_piece();
-      if (chess_board.enpassant_allowed) {
-        if (chess_board.enpassant_allowed_by->piece.color == chess_board.color_turn) {
-          chess_board.enpassant_allowed = false;
+      if (chess_board.state.enpassant_allowed) {
+        if (chess_board.state.enpassant_allowed_by->piece.color == chess_board.color_turn) {
+          chess_board.state.enpassant_allowed = false;
         }
       }
     }
@@ -156,26 +155,32 @@ void check_pieces_hovering(void)
       ChessSquare square = chess_board.squares[y][x];
       if (CheckCollisionPointRec(GetMousePosition(), square.rect) &&
           (square.piece.type != NO_PIECE)) {
-        chess_board.hovering_piece = true;
+        chess_board.state.hovering_piece = true;
         break;
       }
     }
-    if (chess_board.hovering_piece) break;
+    if (chess_board.state.hovering_piece) break;
   }
 }
 
 void set_mouse_cursor(void)
 {
   SetMouseCursor(
-      chess_board.hovering_promotion || chess_board.hovering_piece || chess_board.dragging_piece ?
+      chess_board.state.hovering_promotion || chess_board.state.hovering_piece || chess_board.state.dragging_piece ?
       MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT
       );
 }
 
 void draw_moving_piece(void)
 {
-  if (!chess_board.promote) {
+  if (!chess_board.state.promote) {
     check_pieces_hovering();
     draw_drag_and_place();
   }
+}
+
+void reset_chess_square(ChessSquare *square)
+{
+  square->piece.type = NO_PIECE;
+  square->piece.color = N;
 }
