@@ -5,6 +5,12 @@
 
 float SQUARE_SIZE = 0.0f;
 
+Color color_occupied_square(const ChessSquare *s)
+{
+  return ColorIsEqual(s->board_color, square_color[LIGHT_TILE]) ?
+    (Color){0xF6, 0xEA, 0x72, 0xFF} : (Color){0xDD, 0xC3, 0x4C, 0xFF};
+}
+
 void flip_board(void)
 {
   for (int y = 0; y < NS / 2; y++) {
