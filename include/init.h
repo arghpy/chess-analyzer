@@ -70,6 +70,8 @@ typedef struct {
   ChessSquare *enpassant_allowed_by;
   bool promote;
   bool hovering_promotion;
+  bool is_check;
+  bool is_checkmate;
 } States;
 
 typedef struct {

@@ -38,7 +38,16 @@ bool is_legal_move(ChessSquare *src, ChessSquare *dest, ChessPieceType type)
   return legal_move;
 }
 
-bool is_check(void)
+bool valid_move(ChessSquare *src, ChessSquare *dest)
+{
+  return (correct_color_turn() &&
+      !capture_ally(dest) &&
+      !capture_king(dest) &&
+      !still_on_src_square(src, dest) &&
+      is_legal_move(src, dest, chess_board.src_piece.type));
+}
+
+bool verify_check(ChessPieceColor verify_color)
 {
   bool check = false;
   ChessSquare *ally_king = NULL;
@@ -46,7 +55,7 @@ bool is_check(void)
   for (int y = 0; y < NS; y++) {
     for (int x = 0; x < NS; x++) {
       ChessSquare *s = &chess_board.squares[y][x];
-      if (s->piece.color == chess_board.color_turn && s->piece.type == KING)
+      if (s->piece.color == verify_color && s->piece.type == KING)
         ally_king = s;
       if (ally_king != NULL) break;
     }
@@ -66,19 +75,76 @@ bool is_check(void)
   return check;
 }
 
+bool verify_checkmate(ChessPieceColor verify_color)
+{
+  bool checkmate = true;
+
+  // Iterate over all enemy pieces:
+  // - try to make all the moves with them
+  // - if they are legal and is still check, continue
+  // - when no more enemy pieces are left to verify -> checkmate
+  for (int y = 0; y < NS; y++) {
+    for (int x = 0; x < NS; x++) {
+      ChessSquare *enemy = &chess_board.squares[y][x];
+      ChessPiece enemy_copy = chess_board.squares[y][x].piece;
+      if (enemy->piece.color == verify_color) {
+        for (int j = 0; j < NS; j++) {
+          for (int i = 0; i < NS; i++) {
+            ChessSquare *square = &chess_board.squares[j][i];
+            ChessPiece square_copy = chess_board.squares[j][i].piece;
+
+            if ((enemy->piece.color != square->piece.color) &&
+                !capture_king(square) &&
+                !still_on_src_square(enemy, square) &&
+                is_legal_move(enemy, square, enemy->piece.type)) {
+              // Add piece to square and empty enemy
+              square->piece = enemy_copy;
+              reset_chess_square(enemy);
+
+              if (verify_check(square->piece.color)) {
+                square->piece = square_copy;
+                enemy->piece = enemy_copy;
+              } else {
+                square->piece = square_copy;
+                enemy->piece = enemy_copy;
+                checkmate = false;
+                break;
+              }
+            }
+          }
+          if (!checkmate) break;
+        }
+      }
+      if (!checkmate) break;
+    }
+    if (!checkmate) break;
+  }
+  chess_board.state.is_checkmate = checkmate;
+  return checkmate;
+}
+
+void gave_check(void)
+{
+  ChessSquare *enemy_king = NULL;
+
+  for (int y = 0; y < NS; y++) {
+    for (int x = 0; x < NS; x++) {
+      ChessSquare *s = &chess_board.squares[y][x];
+      if (s->piece.color != chess_board.color_turn && s->piece.type == KING)
+        enemy_king = s;
+      if (enemy_king != NULL) break;
+    }
+    if (enemy_king != NULL) break;
+  }
+
+  if (is_legal_move(chess_board.c_dest, enemy_king, chess_board.c_dest->piece.type))
+    chess_board.state.is_check = true;
+}
+
 void change_chess_board_turn(void)
 {
   if (chess_board.color_turn == W) chess_board.color_turn = B;
   else chess_board.color_turn = W;
-}
-
-bool valid_move(ChessSquare *src, ChessSquare *dest)
-{
-  return (correct_color_turn() &&
-      !capture_ally(dest) &&
-      !capture_king(dest) &&
-      !still_on_src_square(src, dest) &&
-      is_legal_move(src, dest, chess_board.src_piece.type));
 }
 
 void place_piece(void)
@@ -94,46 +160,47 @@ void place_piece(void)
           chess_board.c_dest->piece = chess_board.src_piece;
           chess_board.state.placed_piece = true;
 
-          if (is_check()) {
+          if (verify_check(chess_board.src_piece.color)) {
             chess_board.c_dest->piece = chess_board.dest_piece;
             chess_board.state.placed_piece = false;
             break;
-          } else {
-            // Reset original colors
-            if (chess_board.p_src != NULL) {
-              ptrdiff_t p_s_index = chess_board.p_src - &chess_board.squares[0][0];
-              int ys = p_s_index / NS;
-              int xs = p_s_index % NS;
+          } else chess_board.state.is_check = false;
+          gave_check();
 
-              chess_board.p_src->board_color = square_color[(xs + ys) % 2];
-            }
+          // Reset original colors
+          if (chess_board.p_src != NULL) {
+            ptrdiff_t p_s_index = chess_board.p_src - &chess_board.squares[0][0];
+            int ys = p_s_index / NS;
+            int xs = p_s_index % NS;
 
-            if (chess_board.p_dest != NULL) {
-              ptrdiff_t p_d_index = chess_board.p_dest - &chess_board.squares[0][0];
-              int yd = p_d_index / NS;
-              int xd = p_d_index % NS;
-
-              chess_board.p_dest->board_color = square_color[(xd + yd) % 2];
-            }
-
-            if (chess_board.c_dest->piece.type == PAWN) {
-              ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
-              int yd = d_index / NS;
-
-              if (yd == 0 || yd == (NS - 1)) {
-                chess_board.state.promote = true;
-                promote_pawn(chess_board.c_src, chess_board.c_dest);
-              }
-            }
-            chess_board.p_src  = chess_board.c_src;
-            chess_board.p_dest = chess_board.c_dest;
-
-            chess_board.p_src->board_color  = color_occupied_square(chess_board.p_src);
-            chess_board.p_dest->board_color = color_occupied_square(chess_board.p_dest);
-
-            change_chess_board_turn();
-            break;
+            chess_board.p_src->board_color = square_color[(xs + ys) % 2];
           }
+
+          if (chess_board.p_dest != NULL) {
+            ptrdiff_t p_d_index = chess_board.p_dest - &chess_board.squares[0][0];
+            int yd = p_d_index / NS;
+            int xd = p_d_index % NS;
+
+            chess_board.p_dest->board_color = square_color[(xd + yd) % 2];
+          }
+
+          if (chess_board.c_dest->piece.type == PAWN) {
+            ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
+            int yd = d_index / NS;
+
+            if (yd == 0 || yd == (NS - 1)) {
+              chess_board.state.promote = true;
+              promote_pawn(chess_board.c_src, chess_board.c_dest);
+            }
+          }
+          chess_board.p_src  = chess_board.c_src;
+          chess_board.p_dest = chess_board.c_dest;
+
+          chess_board.p_src->board_color  = color_occupied_square(chess_board.p_src);
+          chess_board.p_dest->board_color = color_occupied_square(chess_board.p_dest);
+
+          change_chess_board_turn();
+          break;
         }
       }
     }
@@ -180,6 +247,7 @@ void draw_drag_and_place(void)
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
       chess_board.state.dragging_piece = false;
       place_piece();
+      if (chess_board.state.is_check) verify_checkmate(chess_board.color_turn);
       if (chess_board.state.enpassant_allowed) {
         if (chess_board.state.enpassant_allowed_by->piece.color == chess_board.color_turn) {
           chess_board.state.enpassant_allowed = false;
