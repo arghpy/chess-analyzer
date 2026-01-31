@@ -169,7 +169,6 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
   int y_step = (dest->rect.y - src->rect.y) < 0 ?
                 -1 : 1;
 
-  (void)x_step;
   (void)y_step;
 
   ptrdiff_t s_index = src - &chess_board.squares[0][0];
@@ -191,9 +190,9 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
     int rcx = (xd + 1) <= (NS - 1) ? xd + 1 : xd;
     int rcy = (yd + 1) <= (NS - 1) ? yd + 1 : yd;
 
-    for (int x = lcx; x <= rcx; x++) {
-      for (int y = lcy; y <= rcy; y++) {
-        if (x == xd && y == yd) continue;
+    for (int y = lcy; y <= rcy; y++) {
+      for (int x = lcx; x <= rcx; x++) {
+        if (x == xs && y == ys) continue;
         if (chess_board.squares[y][x].piece.type == KING)
           return false;
       }
