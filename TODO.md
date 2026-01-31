@@ -4,14 +4,7 @@
 
 
 ## Rules
-- legal rules for pieces
-    - pawn
-    - horse
-    - bishop
-    - rook
-    - queen
-    - king
-    - checks
+- implement stalemate
 
 
 # Look & Feel:
