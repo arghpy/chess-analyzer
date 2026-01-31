@@ -5,6 +5,7 @@
 
 ## Rules
 - implement stalemate
+- implement draw by repetition
 
 
 # Look & Feel:
