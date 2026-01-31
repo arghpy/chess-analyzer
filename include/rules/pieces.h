@@ -4,12 +4,12 @@
 #include "init.h"
 #include <stdbool.h>
 
-bool knight_is_legal_move(void);
-bool bishop_is_legal_move(void);
-bool rook_is_legal_move(void);
-bool queen_is_legal_move(void);
-bool king_is_legal_move(void);
-bool pawn_is_legal_move(void);
-void promote_pawn(ChessSquare *promotion_square);
+bool knight_is_legal_move(const ChessSquare *src, const ChessSquare *dest);
+bool bishop_is_legal_move(const ChessSquare *src, const ChessSquare *dest);
+bool rook_is_legal_move(const ChessSquare *src, const ChessSquare *dest);
+bool queen_is_legal_move(const ChessSquare *src, const ChessSquare *dest);
+bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest);
+bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest);
+void promote_pawn(const ChessSquare *src, ChessSquare *promotion_square);
 
 #endif

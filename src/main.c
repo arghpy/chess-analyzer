@@ -35,7 +35,7 @@ int main(void)
       draw_chess_board(&font);
       draw_moving_piece();
 
-      if (chess_board.state.promote) promote_pawn(chess_board.c_dest);
+      if (chess_board.state.promote) promote_pawn(chess_board.c_src, chess_board.c_dest);
 
       set_mouse_cursor();
     }

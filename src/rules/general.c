@@ -1,19 +1,19 @@
 #include "rules/general.h"
 #include "init.h"
 
-bool still_on_src_square(void)
+bool still_on_src_square(const ChessSquare *src, const ChessSquare *dest)
 {
-  return (chess_board.c_src == chess_board.c_dest);
+  return (src == dest);
 }
 
-bool capture_king(void)
+bool capture_king(const ChessSquare *dest)
 {
-  return (chess_board.c_dest->piece.type == KING);
+  return (dest->piece.type == KING);
 }
 
-bool capture_ally(void)
+bool capture_ally(const ChessSquare *dest)
 {
-  return (chess_board.src_piece.color == chess_board.c_dest->piece.color);
+  return (chess_board.src_piece.color == dest->piece.color);
 }
 
 bool correct_color_turn(void)

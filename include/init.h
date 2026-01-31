@@ -85,6 +85,7 @@ typedef struct {
   ChessSquare *c_src;
   ChessSquare *p_src;
   ChessPiece src_piece;
+  ChessPiece dest_piece;
   ChessSquare *c_dest;
   ChessSquare *p_dest;
   States state;
