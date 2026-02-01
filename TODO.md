@@ -1,6 +1,8 @@
 # Functionality:
 
 - play back and forth the moves that have been played with arrows
+- on reverse, it seems that I cannot move: pawns
+- colors are messed if you keep reversing
 
 
 ## Rules
