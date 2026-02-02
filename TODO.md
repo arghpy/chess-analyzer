@@ -1,7 +1,6 @@
 # Functionality:
 
 - play back and forth the moves that have been played with arrows
-- colors are messed if you keep reversing
 
 
 ## Rules
