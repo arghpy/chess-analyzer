@@ -395,8 +395,13 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest)
   int xd = d_index % NS;
 
   // Allow it to only go forward
-  if (chess_board.src_piece.color == W && y_step > 0) return false;
-  if (chess_board.src_piece.color == B && y_step < 0) return false;
+  if (!chess_board.board_flipped) {
+    if (chess_board.src_piece.color == W && y_step > 0) return false;
+    if (chess_board.src_piece.color == B && y_step < 0) return false;
+  } else {
+    if (chess_board.src_piece.color == W && y_step < 0) return false;
+    if (chess_board.src_piece.color == B && y_step > 0) return false;
+  }
 
   if (dx == 0) {
     bool allow_2_squares = false;
