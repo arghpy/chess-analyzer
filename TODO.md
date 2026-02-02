@@ -13,3 +13,8 @@
 
 - drawing arrows between squares with right mouse button
     - same action should remove the arrows on that direction/path
+
+
+# Coding
+- see how to write clangd interpreted documentation for the functions
+    - it would be best if you can write it in the header files
