@@ -183,7 +183,13 @@ void place_piece(void)
 
             chess_board.p_dest->board_color = square_color[(xd + yd) % 2];
           }
+          chess_board.p_src  = chess_board.c_src;
+          chess_board.p_dest = chess_board.c_dest;
 
+          chess_board.p_src->board_color  = color_occupied_square(chess_board.p_src);
+          chess_board.p_dest->board_color = color_occupied_square(chess_board.p_dest);
+
+          // Check promotion
           if (chess_board.c_dest->piece.type == PAWN) {
             ptrdiff_t d_index = chess_board.c_dest - &chess_board.squares[0][0];
             int yd = d_index / NS;
@@ -193,11 +199,6 @@ void place_piece(void)
               promote_pawn(chess_board.c_src, chess_board.c_dest);
             }
           }
-          chess_board.p_src  = chess_board.c_src;
-          chess_board.p_dest = chess_board.c_dest;
-
-          chess_board.p_src->board_color  = color_occupied_square(chess_board.p_src);
-          chess_board.p_dest->board_color = color_occupied_square(chess_board.p_dest);
 
           change_chess_board_turn();
           break;
