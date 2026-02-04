@@ -33,7 +33,7 @@ int main(void)
     {
       ClearBackground(background_color);
       draw_chess_board(&font);
-      if (!chess_board.state.is_checkmate) {
+      if (!chess_board.state.is_checkmate && !chess_board.state.is_stalemate) {
         draw_moving_piece();
         if (chess_board.state.promote) promote_pawn(chess_board.c_src, chess_board.c_dest);
       }

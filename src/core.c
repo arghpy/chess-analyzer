@@ -113,7 +113,7 @@ void draw_drag_and_place(void)
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
       chess_board.state.dragging_piece = false;
       place_piece();
-      if (chess_board.state.is_check) verify_checkmate(chess_board.color_turn);
+      verify_if_any_legal_move(chess_board.color_turn);
       if (chess_board.state.enpassant_allowed) {
         if (chess_board.state.enpassant_allowed_by->piece.color == chess_board.color_turn) {
           chess_board.state.enpassant_allowed = false;
