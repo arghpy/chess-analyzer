@@ -94,7 +94,7 @@ void gave_check(void)
     if (enemy_king != NULL) break;
   }
 
-  if (is_legal_move(chess_board.c_dest, enemy_king, chess_board.c_dest->piece.type))
+  if (is_legal_move(chess_board.moving.c_dest, enemy_king, chess_board.moving.c_dest->piece.type))
     chess_board.state.is_check = true;
 }
 
@@ -104,7 +104,7 @@ bool valid_move(ChessSquare *src, ChessSquare *dest)
       !capture_ally(dest) &&
       !capture_king(dest) &&
       !still_on_src_square(src, dest) &&
-      is_legal_move(src, dest, chess_board.src_piece.type));
+      is_legal_move(src, dest, chess_board.moving.src_piece.type));
 }
 
 bool is_legal_move(ChessSquare *src, ChessSquare *dest, ChessPieceType type)
@@ -151,10 +151,10 @@ bool capture_king(const ChessSquare *dest)
 
 bool capture_ally(const ChessSquare *dest)
 {
-  return (chess_board.src_piece.color == dest->piece.color);
+  return (chess_board.moving.src_piece.color == dest->piece.color);
 }
 
 bool correct_color_turn(void)
 {
-  return (chess_board.src_piece.color == chess_board.color_turn);
+  return (chess_board.moving.src_piece.color == chess_board.color_turn);
 }

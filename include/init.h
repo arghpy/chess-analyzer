@@ -66,14 +66,32 @@ typedef struct {
   bool hovering_piece;
   bool dragging_piece;
   bool placed_piece;
-  bool enpassant_allowed;
-  ChessSquare *enpassant_allowed_by;
   bool promote;
   bool hovering_promotion;
   bool is_check;
   bool is_checkmate;
   bool is_stalemate;
+  bool fifty_moves_triggered;
+  bool w_moved;
+  bool b_moved;
+  bool captured;
 } States;
+
+typedef struct {
+  bool allowed;
+  ChessPieceColor allowed_by_color;
+  ChessSquare *square;
+} EnPassant;
+
+typedef struct {
+  ChessSquare *c_src;
+  ChessSquare *p_src;
+  ChessPiece src_piece;
+  ChessPiece dest_piece;
+  ChessSquare *c_dest;
+  ChessSquare *p_dest;
+  ChessPiece captured_piece;
+} MovingPieces;
 
 typedef struct {
   bool w_s_can_castle;
@@ -85,15 +103,13 @@ typedef struct {
 typedef struct {
   ChessSquare squares[NS][NS];
   ChessPieceColor color_turn;
-  ChessSquare *c_src;
-  ChessSquare *p_src;
-  ChessPiece src_piece;
-  ChessPiece dest_piece;
-  ChessSquare *c_dest;
-  ChessSquare *p_dest;
   States state;
   Castle castle;
   bool board_flipped;
+  int halfmoves;
+  int fullmoves;
+  MovingPieces moving;
+  EnPassant enpassant;
 } ChessBoard;
 
 extern ChessBoard chess_board;
@@ -101,9 +117,9 @@ extern Texture2D chess_pieces_texture[];
 extern const Color square_color[];
 extern ChessSquare piece_promotions[];
 
-void load_starting_position(void);
+bool load_starting_position(void);
 void load_pawn_promotions(void);
-void load_chess_pieces(void);
+bool load_chess_pieces(void);
 void unload_chess_pieces(void);
 
 #endif
