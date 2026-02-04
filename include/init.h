@@ -72,6 +72,7 @@ typedef struct {
   bool hovering_promotion;
   bool is_check;
   bool is_checkmate;
+  bool is_stalemate;
 } States;
 
 typedef struct {

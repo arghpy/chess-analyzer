@@ -32,9 +32,9 @@ bool verify_check(ChessPieceColor verify_color)
   return check;
 }
 
-bool verify_checkmate(ChessPieceColor verify_color)
+void verify_if_any_legal_move(ChessPieceColor verify_color)
 {
-  bool checkmate = true;
+  bool no_legal_move = true;
 
   // Iterate over all enemy pieces:
   // - try to make all the moves with them
@@ -64,20 +64,20 @@ bool verify_checkmate(ChessPieceColor verify_color)
               } else {
                 square->piece = square_copy;
                 enemy->piece = enemy_copy;
-                checkmate = false;
+                no_legal_move = false;
                 break;
               }
             }
           }
-          if (!checkmate) break;
+          if (!no_legal_move) break;
         }
       }
-      if (!checkmate) break;
+      if (!no_legal_move) break;
     }
-    if (!checkmate) break;
+    if (!no_legal_move) break;
   }
-  chess_board.state.is_checkmate = checkmate;
-  return checkmate;
+  if (chess_board.state.is_check) chess_board.state.is_checkmate = no_legal_move;
+  else chess_board.state.is_stalemate = no_legal_move;
 }
 
 void gave_check(void)
