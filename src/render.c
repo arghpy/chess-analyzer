@@ -21,20 +21,28 @@ void flip_board(void)
       chess_board.squares[NS - 1 - y][NS - 1 - x] = tmp;
     }
   }
-  if (chess_board.p_src != NULL) {
-    ptrdiff_t p_s_index = chess_board.p_src - &chess_board.squares[0][0];
+  if (chess_board.moving.p_src != NULL) {
+    ptrdiff_t p_s_index = chess_board.moving.p_src - &chess_board.squares[0][0];
     int ys = p_s_index / NS;
     int xs = p_s_index % NS;
 
-    chess_board.p_src = &chess_board.squares[NS - 1 - ys][NS - 1 - xs];
+    chess_board.moving.p_src = &chess_board.squares[NS - 1 - ys][NS - 1 - xs];
   }
 
-  if (chess_board.p_dest != NULL) {
-    ptrdiff_t p_d_index = chess_board.p_dest - &chess_board.squares[0][0];
+  if (chess_board.moving.p_dest != NULL) {
+    ptrdiff_t p_d_index = chess_board.moving.p_dest - &chess_board.squares[0][0];
     int yd = p_d_index / NS;
     int xd = p_d_index % NS;
 
-    chess_board.p_dest = &chess_board.squares[NS - 1 - yd][NS - 1 - xd];
+    chess_board.moving.p_dest = &chess_board.squares[NS - 1 - yd][NS - 1 - xd];
+  }
+
+  if (chess_board.enpassant.square != NULL) {
+    ptrdiff_t e_index = chess_board.enpassant.square - &chess_board.squares[0][0];
+    int y = e_index / NS;
+    int x = e_index % NS;
+
+    chess_board.enpassant.square = &chess_board.squares[NS - 1 - y][NS - 1 - x];
   }
 }
 

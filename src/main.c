@@ -3,6 +3,7 @@
 #include "render.h"
 #include "core.h"
 #include "rules/pieces.h"
+#include "rules/general.h"
 #include <stdbool.h>
 
 #define background_color ((Color){0x18, 0x18, 0x18, 0xFF})
@@ -18,33 +19,39 @@ int main(void)
   Font font = LoadFont(font_path);
   SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
 
+  bool init = true;
+
   { // Initializing
-    load_starting_position();
-    load_chess_pieces();
+    if (!load_starting_position()) init = false;
+    if (!load_chess_pieces())      init = false;
     load_pawn_promotions();
   }
 
-  while(!WindowShouldClose()) {
-    if (IsKeyPressed(KEY_SPACE)) {
-      chess_board.board_flipped = !chess_board.board_flipped;
-      flip_board();
-    }
-    BeginDrawing();
-    {
-      ClearBackground(background_color);
-      draw_chess_board(&font);
-      if (!chess_board.state.is_checkmate && !chess_board.state.is_stalemate) {
-        draw_moving_piece();
-        if (chess_board.state.promote) promote_pawn(chess_board.c_src, chess_board.c_dest);
+  if (init) {
+    while(!WindowShouldClose()) {
+      if (IsKeyPressed(KEY_SPACE)) {
+        chess_board.board_flipped = !chess_board.board_flipped;
+        flip_board();
       }
+      BeginDrawing();
+      {
+        ClearBackground(background_color);
+        draw_chess_board(&font);
+        if (!chess_board.state.is_checkmate && !chess_board.state.is_stalemate && !chess_board.state.fifty_moves_triggered) {
+          draw_moving_piece();
+          if (chess_board.state.promote) promote_pawn(chess_board.moving.c_src, chess_board.moving.c_dest);
+        }
 
-      set_mouse_cursor();
+        set_mouse_cursor();
+      }
+      EndDrawing();
+
+      // Reset
+      chess_board.state.placed_piece = false;
+      chess_board.state.hovering_piece = false;
+      chess_board.state.hovering_promotion = false;
+      chess_board.state.captured = false;
     }
-    EndDrawing();
-
-    // Reset
-    chess_board.state.hovering_piece = false;
-    chess_board.state.hovering_promotion = false;
   }
 
   { // Closing everything
