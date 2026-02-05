@@ -4,6 +4,7 @@
 
 
 ## Rules
+- implement 50-move rule (draw)
 - implement draw by repetition (most probably using FEN and creating some kind of dictionary):
     - maybe for creating a "dict" you can:
         - create a dynamic array
@@ -11,6 +12,7 @@
 
 
 # Look & Feel:
+- do something better with the error messages
 - making squares red on right mouse button click and then back
 
 - drawing arrows between squares with right mouse button
