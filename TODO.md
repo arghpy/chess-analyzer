@@ -12,6 +12,7 @@
 
 
 # Look & Feel:
+- system tray
 - do something better with the error messages
 - making squares red on right mouse button click and then back
 
