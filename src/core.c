@@ -1,4 +1,5 @@
 #include "core.h"
+#include "fen.h"
 #include "render.h"
 #include "raylib.h"
 #include "rules/pieces.h"
@@ -126,6 +127,7 @@ void draw_drag_and_place(void)
 
       // Record which color piece moved
       if (chess_board.state.placed_piece) {
+        generate_fen_position();
         if      (chess_board.moving.src_piece.color == W) chess_board.state.w_moved = true;
         else if (chess_board.moving.src_piece.color == B) chess_board.state.b_moved = true;
 

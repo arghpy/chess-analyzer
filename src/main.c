@@ -3,7 +3,6 @@
 #include "render.h"
 #include "core.h"
 #include "rules/pieces.h"
-#include "rules/general.h"
 #include <stdbool.h>
 
 #define background_color ((Color){0x18, 0x18, 0x18, 0xFF})

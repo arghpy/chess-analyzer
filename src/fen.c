@@ -3,12 +3,13 @@
 #include "init.h"
 #include <assert.h>
 #include <ctype.h>
+#include <stddef.h>
 #include <stdio.h>
 #include <string.h>
 
 bool load_fen_position(const char* fen_pos)
 {
-  char fen[100];
+  char fen[256];
   strcpy(fen, fen_pos);
 
   // Get the sections
@@ -223,4 +224,110 @@ bool load_fen_position(const char* fen_pos)
   }
   chess_board.fullmoves = fullmoves[0] - '0';
   return true;
+}
+
+void generate_fen_position()
+{
+  char fen[256] = {0};
+
+  int j = !chess_board.board_flipped ? 0 : NS - 1;
+  // Process each rank
+  for (; !chess_board.board_flipped ? j < NS : j >= 0; !chess_board.board_flipped ? j++ : j--) {
+    int i = !chess_board.board_flipped ? 0 : NS - 1;
+
+    char rank[20] = {0};
+    for (; !chess_board.board_flipped ? i < NS : i >= 0; !chess_board.board_flipped ? i++ : i--) {
+      ChessSquare *s = &chess_board.squares[j][i];
+      switch(s->piece.type) {
+        case NO_PIECE:
+          strcat(rank, "0");
+          break;
+        case PAWN:
+          if (s->piece.color == W) strcat(rank, "P");
+          else strcat(rank, "p");
+          break;
+        case BISHOP:
+          if (s->piece.color == W) strcat(rank, "B");
+          else strcat(rank, "b");
+          break;
+        case KING:
+          if (s->piece.color == W) strcat(rank, "K");
+          else strcat(rank, "k");
+          break;
+        case KNIGHT:
+          if (s->piece.color == W) strcat(rank, "N");
+          else strcat(rank, "n");
+          break;
+        case QUEEN:
+          if (s->piece.color == W) strcat(rank, "Q");
+          else strcat(rank, "q");
+          break;
+        case ROOK:
+          if (s->piece.color == W) strcat(rank, "R");
+          else strcat(rank, "r");
+          break;
+        case PIECE_COUNT:
+          break;
+      }
+    }
+    // Transform '0's in numbers for empty spaces
+    char rank_tmp[50] = {0};
+
+    for (size_t i = 0; i < strlen(rank); i++) {
+      if (rank[i] != '0') strncat(rank_tmp, &rank[i], 1);
+      else {
+        size_t empty_c = 0;
+        char empty_buf[5];
+        size_t k = i;
+
+        for (;k < strlen(rank) && rank[k] == '0'; k++) empty_c++;
+        snprintf(empty_buf, sizeof(empty_buf), "%zu", empty_c);
+        strcat(rank_tmp, empty_buf);
+        i += empty_c - 1;
+      }
+    }
+    strcpy(rank, rank_tmp);
+    if (j != (NS - 1) || j != 0) strcat(rank, "/");
+    strcat(fen, rank);
+  }
+
+  // Active color
+  if      (chess_board.color_turn == W) strcat(fen, " w ");
+  else if (chess_board.color_turn == B) strcat(fen, " b ");
+
+  // Castling
+  if (chess_board.castle.w_s_can_castle) strcat(fen, "K");
+  if (chess_board.castle.w_l_can_castle) strcat(fen, "Q");
+  if (chess_board.castle.b_s_can_castle) strcat(fen, "k");
+  if (chess_board.castle.b_l_can_castle) strcat(fen, "q");
+  if (!chess_board.castle.w_s_can_castle &&
+      !chess_board.castle.w_l_can_castle &&
+      !chess_board.castle.b_s_can_castle &&
+      !chess_board.castle.b_l_can_castle) strcat(fen, "-");
+
+  // Enpassant
+  strcat(fen, " ");
+
+  char *row    = "abcdefgh";
+  char *column = "12345678";
+
+  if (chess_board.enpassant.allowed && chess_board.enpassant.square != NULL) {
+    ptrdiff_t index = chess_board.enpassant.square - &chess_board.squares[0][0];
+    int y = index / NS;
+    int x = index % NS;
+
+    if (!chess_board.board_flipped) y = NS - y - 1;
+    else x = NS - x - 1;
+    strncat(fen, &row[x], 1);
+    strncat(fen, &column[y], 1);
+  } else strcat(fen, "-");
+
+  // Half moves and Full moves
+  char halfmoves[10] = {0};
+  char fullmoves[10] = {0};
+  snprintf(halfmoves, sizeof(halfmoves), " %d", chess_board.halfmoves);
+  snprintf(fullmoves, sizeof(fullmoves), " %d", chess_board.fullmoves);
+
+  strcat(fen, halfmoves);
+  strcat(fen, fullmoves);
 }
