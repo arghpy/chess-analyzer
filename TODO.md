@@ -4,7 +4,6 @@
 
 
 ## Rules
-- implement 50-move rule (draw)
 - implement draw by repetition (most probably using FEN and creating some kind of dictionary):
     - maybe for creating a "dict" you can:
         - create a dynamic array
