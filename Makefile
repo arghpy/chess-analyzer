@@ -11,7 +11,9 @@ RAYLIB_LIB     := $(RAYLIB)/lib
 RAYLIB_RPATH   := -Wl,-rpath=$(RAYLIB_LIB)
 RAYLIB_LINK    := raylib
 
-INCLUDES := -I$(RAYLIB_INCLUDE) -I$(HEADERS)
+UTILS := $(THIRDPARTY)/utils/c
+
+INCLUDES := -I$(RAYLIB_INCLUDE) -I$(HEADERS) -I$(UTILS)
 LIBS     := -L$(RAYLIB_LIB) -l$(RAYLIB_LINK) -lm $(RAYLIB_RPATH)
 
 SRCS := $(shell find $(SRC) -name '*.c')
