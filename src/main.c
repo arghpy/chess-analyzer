@@ -1,3 +1,4 @@
+#include "fen.h"
 #include "raylib.h"
 #include "init.h"
 #include "render.h"
@@ -36,7 +37,7 @@ int main(void)
       {
         ClearBackground(background_color);
         draw_chess_board(&font);
-        if (!chess_board.state.is_checkmate && !chess_board.state.is_stalemate && !chess_board.state.fifty_moves_triggered) {
+        if (!chess_board.result.checkmate && !chess_board.result.draw) {
           draw_moving_piece();
           if (chess_board.state.promote) promote_pawn(chess_board.moving.c_src, chess_board.moving.c_dest);
         }
@@ -54,6 +55,7 @@ int main(void)
   }
 
   { // Closing everything
+    ut_da_free(&positions);
     unload_chess_pieces();
     UnloadFont(font);
     CloseWindow();

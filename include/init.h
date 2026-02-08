@@ -69,13 +69,15 @@ typedef struct {
   bool promote;
   bool hovering_promotion;
   bool is_check;
-  bool is_checkmate;
-  bool is_stalemate;
-  bool fifty_moves_triggered;
   bool w_moved;
   bool b_moved;
   bool captured;
 } States;
+
+typedef struct {
+  bool checkmate;
+  bool draw;
+} Results;
 
 typedef struct {
   bool allowed;
@@ -110,6 +112,7 @@ typedef struct {
   int fullmoves;
   MovingPieces moving;
   EnPassant enpassant;
+  Results result;
 } ChessBoard;
 
 extern ChessBoard chess_board;
