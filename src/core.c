@@ -143,7 +143,7 @@ void draw_drag_and_place(void)
           chess_board.halfmoves = 0;
         else chess_board.halfmoves += 1;
 
-        chess_board.state.fifty_moves_triggered = (chess_board.halfmoves == 50);
+        chess_board.result.draw = (chess_board.result.draw ? chess_board.result.draw : chess_board.halfmoves == 50);
       }
     }
   }

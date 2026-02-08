@@ -7,6 +7,38 @@
 #include <stdio.h>
 #include <string.h>
 
+Positions positions = {0};
+
+void iterate_fen_positions()
+{
+  printf("\n\n--------------------------------------------------\n");
+    for (size_t i = 0; i < positions.count; i++) {
+      printf("%d: %s\n", positions.items[i].c, positions.items[i].fen_p);
+    }
+  printf("--------------------------------------------------\n");
+}
+
+void add_fen_position(const char* fen)
+{
+  Position p = {0};
+  p.c = 1;
+  strcpy(p.fen_p, fen);
+
+  if (positions.count == 0) ut_da_push(&positions, p);
+  else {
+    bool found = false;
+    for (size_t i = 0; i < positions.count; i++) {
+      if (strcmp(p.fen_p, positions.items[i].fen_p) == 0) {
+        found = true;
+        positions.items[i].c++;
+        if (positions.items[i].c == 3) chess_board.result.draw = true;
+        if (found || chess_board.result.draw) break;
+      }
+    }
+    if (!found) ut_da_push(&positions, p);
+  }
+}
+
 bool load_fen_position(const char* fen_pos)
 {
   char fen[256];
@@ -321,6 +353,7 @@ void generate_fen_position()
     strncat(fen, &row[x], 1);
     strncat(fen, &column[y], 1);
   } else strcat(fen, "-");
+  add_fen_position(fen);
 
   // Half moves and Full moves
   char halfmoves[10] = {0};
