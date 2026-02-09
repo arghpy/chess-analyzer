@@ -14,6 +14,7 @@ typedef struct {
 typedef ut_da_declare(Position) Positions;
 extern Positions positions;
 
+void iterate_fen_positions();
 bool load_fen_position(const char* fen);
 void generate_fen_position();
 

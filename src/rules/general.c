@@ -76,8 +76,10 @@ void verify_if_any_legal_move(ChessPieceColor verify_color)
     }
     if (!no_legal_move) break;
   }
-  if (chess_board.state.is_check) chess_board.result.checkmate = no_legal_move;
-  else chess_board.result.draw = no_legal_move;
+  if (no_legal_move) {
+    if (chess_board.state.is_check) chess_board.result = CHECKMATE;
+    else                            chess_board.result = DRAW;
+  }
 }
 
 void gave_check(void)

@@ -6,8 +6,6 @@
 #include "rules/pieces.h"
 #include <stdbool.h>
 
-#define background_color ((Color){0x18, 0x18, 0x18, 0xFF})
-
 int main(void)
 {
   SetTraceLogLevel(LOG_ERROR);
@@ -33,14 +31,15 @@ int main(void)
         chess_board.board_flipped = !chess_board.board_flipped;
         flip_board();
       }
+      if(IsKeyPressed(KEY_P)) iterate_fen_positions();
       BeginDrawing();
       {
         ClearBackground(background_color);
         draw_chess_board(&font);
-        if (!chess_board.result.checkmate && !chess_board.result.draw) {
+        if (chess_board.result == NONE) {
           draw_moving_piece();
           if (chess_board.state.promote) promote_pawn(chess_board.moving.c_src, chess_board.moving.c_dest);
-        }
+        } else draw_result(&font);
 
         set_mouse_cursor();
       }

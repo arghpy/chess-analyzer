@@ -6,6 +6,47 @@
 
 float SQUARE_SIZE = 0.0f;
 
+void draw_result(const Font *font)
+{
+  bool draw = false;
+  char text[10];
+  float font_size = roundf(SQUARE_SIZE * 0.8f);
+
+  switch(chess_board.result) {
+    case NONE: break;
+    case CHECKMATE: {
+                      draw = true;
+                      snprintf(text, sizeof(text), "%s",
+                          chess_board.color_turn == W ?
+                          "BLACK WON" : "WHITE WON");
+                      break;
+                    }
+    case DRAW:      {
+                      draw = true;
+                      snprintf(text, sizeof(text), "%s", "DRAW");
+                      break;
+                    }
+  }
+  if (draw) {
+    float rsize = NS * SQUARE_SIZE / 2;
+    Rectangle r = {
+      .x      = rsize - rsize / 2,
+      .y      = rsize - rsize / 2,
+      .width  = rsize,
+      .height = rsize,
+    };
+    DrawRectangleRounded(r, 0.20f, 90, background_color);
+    DrawRectangleRoundedLinesEx(r, 0.20f, 90, 2.0f, WHITE);
+
+    Vector2 text_size = MeasureTextEx(*font, text, font_size, 0);
+    Vector2 pos = {
+      .x = r.x + rsize / 2 - text_size.x / 2,
+      .y = r.y + rsize / 5
+    };
+    DrawTextEx(*font, text, pos, font_size, 0, WHITE);
+  }
+}
+
 Color color_occupied_square(const ChessSquare *s)
 {
   return ColorIsEqual(s->board_color, square_color[LIGHT_TILE]) ?
@@ -79,7 +120,7 @@ void draw_board(void)
       DrawRectangleRec(chess_board.squares[y][x].rect, chess_board.squares[y][x].board_color);
 }
 
-void draw_board_coordinates(Font *font)
+void draw_board_coordinates(const Font *font)
 {
   char text[10];
   int square_spacing = 5;
@@ -146,7 +187,7 @@ void draw_chess_pieces(void)
   }
 }
 
-void draw_chess_board(Font *font)
+void draw_chess_board(const Font *font)
 {
   scale_chess_board();
   draw_board();

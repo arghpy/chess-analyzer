@@ -74,10 +74,11 @@ typedef struct {
   bool captured;
 } States;
 
-typedef struct {
-  bool checkmate;
-  bool draw;
-} Results;
+typedef enum {
+  NONE,
+  CHECKMATE,
+  DRAW,
+} Result;
 
 typedef struct {
   bool allowed;
@@ -112,7 +113,9 @@ typedef struct {
   int fullmoves;
   MovingPieces moving;
   EnPassant enpassant;
-  Results result;
+  Result result;
+  ChessPieceColor won;
+  ChessPieceColor lost;
 } ChessBoard;
 
 extern ChessBoard chess_board;
