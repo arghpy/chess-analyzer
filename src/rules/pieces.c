@@ -47,7 +47,7 @@ bool bishop_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
   } else return false;
 }
 
-bool rook_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
+bool rook_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const ChessPiece src_piece)
 {
   float dx = fabsf(dest->rect.x - src->rect.x);
   float dy = fabsf(dest->rect.y - src->rect.y);
@@ -87,18 +87,18 @@ bool rook_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
     // TODO: part of the most awful pieces of code. CHANGE
     if (!chess_board.board_flipped) {
       if ((ys == 0 && xs == 0) || (ys == (NS - 1) && xs == 0)) {
-        if (chess_board.moving.src_piece.color == W) chess_board.castle.w_l_can_castle = false;
+        if (src_piece.color == W) chess_board.castle.w_l_can_castle = false;
         else chess_board.castle.b_l_can_castle = false;
       } else if ((ys == 0 && xs == (NS - 1)) || (ys == (NS - 1) && xs == (NS - 1))) {
-        if (chess_board.moving.src_piece.color == W) chess_board.castle.w_s_can_castle = false;
+        if (src_piece.color == W) chess_board.castle.w_s_can_castle = false;
         else chess_board.castle.b_s_can_castle = false;
       }
     } else {
       if ((ys == 0 && xs == 0) || (ys == (NS - 1) && xs == 0)) {
-        if (chess_board.moving.src_piece.color == W) chess_board.castle.w_s_can_castle = false;
+        if (src_piece.color == W) chess_board.castle.w_s_can_castle = false;
         else chess_board.castle.b_s_can_castle = false;
       } else if ((ys == 0 && xs == (NS - 1)) || (ys == (NS - 1) && xs == (NS - 1))) {
-        if (chess_board.moving.src_piece.color == W) chess_board.castle.w_l_can_castle = false;
+        if (src_piece.color == W) chess_board.castle.w_l_can_castle = false;
         else chess_board.castle.b_l_can_castle = false;
       }
     }
@@ -159,7 +159,7 @@ bool queen_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
   } else return false;
 }
 
-bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
+bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const ChessPiece src_piece)
 {
   float dx = fabsf(dest->rect.x - src->rect.x);
   float dy = fabsf(dest->rect.y - src->rect.y);
@@ -198,11 +198,11 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
       }
     }
     // Cannot castle anymore
-    if (chess_board.moving.src_piece.color == W) {
+    if (src_piece.color == W) {
       chess_board.castle.w_s_can_castle = false;
       chess_board.castle.w_l_can_castle = false;
     }
-    if (chess_board.moving.src_piece.color == B) {
+    if (src_piece.color == B) {
       chess_board.castle.b_s_can_castle = false;
       chess_board.castle.b_l_can_castle = false;
     }
@@ -212,15 +212,15 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
     // TODO: part of the most awful pieces of code. CHANGE
     if (x_step > 0) {
       if (!chess_board.board_flipped) {
-        if ((chess_board.moving.src_piece.color == W && chess_board.castle.w_s_can_castle) ||
-            (chess_board.moving.src_piece.color == B && chess_board.castle.b_s_can_castle)) {
+        if ((src_piece.color == W && chess_board.castle.w_s_can_castle) ||
+            (src_piece.color == B && chess_board.castle.b_s_can_castle)) {
           int x = xs;
           while (x != (NS - 1)) {
             if (chess_board.squares[yd][x].piece.type != NO_PIECE)
               return false;
             x += x_step;
           }
-          if (chess_board.moving.src_piece.color == W) {
+          if (src_piece.color == W) {
             if (chess_board.squares[7][7].piece.color != W) return false;
             if (chess_board.squares[7][7].piece.type != ROOK) return false;
             chess_board.squares[7][5].piece.type  = ROOK;
@@ -239,15 +239,15 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
           }
         } else return false;
       } else {
-        if ((chess_board.moving.src_piece.color == W && chess_board.castle.w_l_can_castle) ||
-            (chess_board.moving.src_piece.color == B && chess_board.castle.b_l_can_castle)) {
+        if ((src_piece.color == W && chess_board.castle.w_l_can_castle) ||
+            (src_piece.color == B && chess_board.castle.b_l_can_castle)) {
           int x = xs;
           while (x != (NS - 1)) {
             if (chess_board.squares[yd][x].piece.type != NO_PIECE)
               return false;
             x += x_step;
           }
-          if (chess_board.moving.src_piece.color == W) {
+          if (src_piece.color == W) {
             if (chess_board.squares[0][7].piece.color != W) return false;
             if (chess_board.squares[0][7].piece.type != ROOK) return false;
             chess_board.squares[0][4].piece.type  = ROOK;
@@ -268,15 +268,15 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
       }
     } else {
       if (!chess_board.board_flipped) {
-        if ((chess_board.moving.src_piece.color == W && chess_board.castle.w_l_can_castle) ||
-            (chess_board.moving.src_piece.color == B && chess_board.castle.b_l_can_castle)) {
+        if ((src_piece.color == W && chess_board.castle.w_l_can_castle) ||
+            (src_piece.color == B && chess_board.castle.b_l_can_castle)) {
           int x = xs;
           while (x != 1) {
             if (chess_board.squares[yd][x].piece.type != NO_PIECE)
               return false;
             x += x_step;
           }
-          if (chess_board.moving.src_piece.color == W) {
+          if (src_piece.color == W) {
             if (chess_board.squares[7][0].piece.color != W) return false;
             if (chess_board.squares[7][0].piece.type != ROOK) return false;
             chess_board.squares[7][3].piece.type  = ROOK;
@@ -295,15 +295,15 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
           }
         } else return false;
       } else {
-        if ((chess_board.moving.src_piece.color == W && chess_board.castle.w_s_can_castle) ||
-            (chess_board.moving.src_piece.color == B && chess_board.castle.b_s_can_castle)) {
+        if ((src_piece.color == W && chess_board.castle.w_s_can_castle) ||
+            (src_piece.color == B && chess_board.castle.b_s_can_castle)) {
           int x = xs;
           while (x != 1) {
             if (chess_board.squares[yd][x].piece.type != NO_PIECE)
               return false;
             x += x_step;
           }
-          if (chess_board.moving.src_piece.color == W) {
+          if (src_piece.color == W) {
             if (chess_board.squares[0][0].piece.color != W) return false;
             if (chess_board.squares[0][0].piece.type != ROOK) return false;
             chess_board.squares[0][2].piece.type  = ROOK;
@@ -376,7 +376,7 @@ void promote_pawn(const ChessSquare *src, ChessSquare *promotion_square)
   select_for_promotion(promotion_square);
 }
 
-bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest)
+bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPiece src_piece)
 {
   float dx = fabsf(dest->rect.x - src->rect.x);
   float dy = fabsf(dest->rect.y - src->rect.y);
@@ -396,11 +396,11 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest)
 
   // Allow it to only go forward
   if (!chess_board.board_flipped) {
-    if (chess_board.moving.src_piece.color == W && y_step > 0) return false;
-    if (chess_board.moving.src_piece.color == B && y_step < 0) return false;
+    if (src_piece.color == W && y_step > 0) return false;
+    if (src_piece.color == B && y_step < 0) return false;
   } else {
-    if (chess_board.moving.src_piece.color == W && y_step < 0) return false;
-    if (chess_board.moving.src_piece.color == B && y_step > 0) return false;
+    if (src_piece.color == W && y_step < 0) return false;
+    if (src_piece.color == B && y_step > 0) return false;
   }
 
   if (dx == 0) {
@@ -420,14 +420,14 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest)
 
       // En passant
       if (chess_board.squares[yd][xd - 1].piece.type == PAWN &&
-          chess_board.squares[yd][xd - 1].piece.color != chess_board.moving.src_piece.color) {
+          chess_board.squares[yd][xd - 1].piece.color != src_piece.color) {
         chess_board.enpassant.allowed = true;
         chess_board.enpassant.allowed_by_color = dest->piece.color;
         chess_board.enpassant.square = &chess_board.squares[yd - y_step][xd];
       }
 
       if (chess_board.squares[yd][xd + 1].piece.type == PAWN &&
-          chess_board.squares[yd][xd + 1].piece.color != chess_board.moving.src_piece.color) {
+          chess_board.squares[yd][xd + 1].piece.color != src_piece.color) {
         chess_board.enpassant.allowed = true;
         chess_board.enpassant.allowed_by_color = dest->piece.color;
         chess_board.enpassant.square = &chess_board.squares[yd - y_step][xd];
@@ -446,7 +446,9 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest)
       else return true;
     } else {
       if (dest == chess_board.enpassant.square) {
+        chess_board.moving.captured_piece = chess_board.squares[yd - y_step][xd].piece;
         reset_chess_square(&chess_board.squares[yd - y_step][xd]);
+        chess_board.enpassant.done = true;
         chess_board.enpassant.allowed = false;
         chess_board.enpassant.square = NULL;
         return true;

@@ -37,8 +37,10 @@ int main(void)
         ClearBackground(background_color);
         draw_chess_board(&font);
         if (chess_board.result == NONE) {
-          draw_moving_piece();
           if (chess_board.state.promote) promote_pawn(chess_board.moving.c_src, chess_board.moving.c_dest);
+          else {
+            draw_moving_piece();
+          }
         } else draw_result(&font);
 
         set_mouse_cursor();
@@ -46,10 +48,12 @@ int main(void)
       EndDrawing();
 
       // Reset
-      chess_board.state.placed_piece = false;
+      chess_board.state.piece_placed = false;
       chess_board.state.hovering_piece = false;
       chess_board.state.hovering_promotion = false;
       chess_board.state.captured = false;
+      chess_board.moving.captured_piece = (ChessPiece){0};
+      chess_board.moving.wrong_move = false;
     }
   }
 

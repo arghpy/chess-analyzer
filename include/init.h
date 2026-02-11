@@ -65,10 +65,9 @@ typedef struct {
 typedef struct {
   bool hovering_piece;
   bool dragging_piece;
-  bool placed_piece;
+  bool piece_placed;
   bool promote;
   bool hovering_promotion;
-  bool is_check;
   bool w_moved;
   bool b_moved;
   bool captured;
@@ -81,6 +80,7 @@ typedef enum {
 } Result;
 
 typedef struct {
+  bool done;
   bool allowed;
   ChessPieceColor allowed_by_color;
   ChessSquare *square;
@@ -94,6 +94,7 @@ typedef struct {
   ChessSquare *c_dest;
   ChessSquare *p_dest;
   ChessPiece captured_piece;
+  bool wrong_move;
 } MovingPieces;
 
 typedef struct {
