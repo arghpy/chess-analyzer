@@ -64,13 +64,13 @@ typedef struct {
 
 typedef struct {
   bool hovering_piece;
-  bool dragging_piece;
   bool piece_placed;
   bool promote;
   bool hovering_promotion;
   bool w_moved;
   bool b_moved;
   bool captured;
+  bool verify;
 } States;
 
 typedef enum {
@@ -117,6 +117,7 @@ typedef struct {
   Result result;
   ChessPieceColor won;
   ChessPieceColor lost;
+  ChessSquare *promotion_square;
 } ChessBoard;
 
 extern ChessBoard chess_board;

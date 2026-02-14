@@ -1,15 +1,20 @@
 #include "fen.h"
 #include "raylib.h"
+#include "keyboard.h"
 #include "init.h"
 #include "render.h"
-#include "core.h"
 #include "rules/pieces.h"
 #include <stdbool.h>
+#include <stdio.h>
+
+#define WINDOW_FACTOR 70
+#define WINDOW_WIDTH  (WINDOW_FACTOR * 16)
+#define WINDOW_HEIGHT (WINDOW_FACTOR * 9)
 
 int main(void)
 {
   SetTraceLogLevel(LOG_ERROR);
-  InitWindow(800, 600, "Chess analyzer");
+  InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Chess analyzer");
   SetTargetFPS(60);
   SetWindowState(FLAG_WINDOW_RESIZABLE);
 
@@ -27,22 +32,19 @@ int main(void)
 
   if (init) {
     while(!WindowShouldClose()) {
-      if (IsKeyPressed(KEY_SPACE)) {
-        chess_board.board_flipped = !chess_board.board_flipped;
-        flip_board();
-      }
-      if(IsKeyPressed(KEY_P)) iterate_fen_positions();
+      process_keyboard_events();
+      fflush(stdout);
       BeginDrawing();
       {
         ClearBackground(background_color);
         draw_chess_board(&font);
-        if (chess_board.result == NONE) {
-          if (chess_board.state.promote) promote_pawn(chess_board.moving.c_src, chess_board.moving.c_dest);
+        if (chess_board.result != NONE) draw_result(&font);
+        else {
+          if (chess_board.state.promote) promote_pawn(chess_board.promotion_square);
           else {
             draw_moving_piece();
           }
-        } else draw_result(&font);
-
+        }
         set_mouse_cursor();
       }
       EndDrawing();

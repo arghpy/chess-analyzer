@@ -10,6 +10,6 @@ bool rook_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
 bool queen_is_legal_move(const ChessSquare *src, const ChessSquare *dest);
 bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const ChessPiece src_piece);
 bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPiece src_piece);
-void promote_pawn(const ChessSquare *src, ChessSquare *promotion_square);
+void promote_pawn(ChessSquare *promotion_square);
 
 #endif

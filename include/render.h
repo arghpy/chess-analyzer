@@ -8,6 +8,8 @@
 
 extern float SQUARE_SIZE;
 
+void set_mouse_cursor(void);
+void draw_moving_piece(void);
 void draw_result(const Font *font);
 Color color_occupied_square(const ChessSquare *s);
 void draw_piece(const ChessSquare *square);

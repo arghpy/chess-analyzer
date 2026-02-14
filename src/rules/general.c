@@ -34,6 +34,7 @@ bool in_check(ChessPieceColor verify_color)
 
 void verify_if_any_legal_move(ChessPieceColor verify_color)
 {
+  chess_board.state.verify = true;
   bool no_legal_move = true;
 
   // Iterate over all enemy pieces:
@@ -58,6 +59,7 @@ void verify_if_any_legal_move(ChessPieceColor verify_color)
               square->piece = enemy_copy;
               reset_chess_square(enemy);
 
+              // Reset initial state before resetting
               if (in_check(square->piece.color)) {
                 square->piece = square_copy;
                 enemy->piece = enemy_copy;
@@ -80,6 +82,7 @@ void verify_if_any_legal_move(ChessPieceColor verify_color)
     if (in_check(verify_color)) chess_board.result = CHECKMATE;
     else                        chess_board.result = DRAW;
   }
+  chess_board.state.verify = false;
 }
 
 bool valid_move(ChessSquare *src, ChessSquare *dest, const ChessPiece src_piece)
