@@ -49,7 +49,7 @@ void draw_piece_on_mouse(void)
 
 void generate_san(void)
 {
-  // Write PGN
+  // Write SAN
   char *row    = "abcdefgh";
   char *column = "12345678";
 
@@ -77,10 +77,17 @@ void generate_san(void)
   switch (chess_board.moving.src_piece.type) {
     case NO_PIECE:
     case PAWN:
-      if (!chess_board.state.captured)
-        snprintf(move, sizeof(pgn), " %c%c", row[xd], column[yd]);
-      else
-        snprintf(move, sizeof(pgn), " %cx%c%c", row[xs], row[xd], column[yd]);
+      if (!chess_board.state.captured) {
+        if (!chess_board.state.promote && chess_board.state.promotion_done) {
+          if (chess_board.promotion_square != NULL) {
+          }
+        } else
+          snprintf(move, sizeof(pgn), " %c%c", row[xd], column[yd]);
+      } else {
+        if (!chess_board.state.promote && chess_board.state.promotion_done) {
+        } else
+          snprintf(move, sizeof(pgn), " %cx%c%c", row[xs], row[xd], column[yd]);
+      }
     case BISHOP:
     case KING:
     case KNIGHT:

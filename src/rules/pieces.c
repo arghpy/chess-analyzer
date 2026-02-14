@@ -363,6 +363,7 @@ void select_for_promotion(ChessSquare *promotion_square)
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           chess_board.state.hovering_piece = false;
           chess_board.state.promote = false;
+          chess_board.state.promotion_done = true;
           promotion_square->piece = piece_promotions[i].piece;
           break;
         }

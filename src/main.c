@@ -56,6 +56,7 @@ int main(void)
       chess_board.state.captured = false;
       chess_board.moving.captured_piece = (ChessPiece){0};
       chess_board.moving.wrong_move = false;
+      chess_board.state.promotion_done = false;
     }
   }
 
