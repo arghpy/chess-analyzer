@@ -1,5 +1,5 @@
 #include "keyboard.h"
-#include "fen.h"
+#include "protocols/fen.h"
 #include "raylib.h"
 #include "init.h"
 #include "render.h"

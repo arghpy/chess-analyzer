@@ -1,5 +1,5 @@
 #include "init.h"
-#include "fen.h"
+#include "protocols/fen.h"
 #include <stdio.h>
 
 ChessBoard chess_board = {0};

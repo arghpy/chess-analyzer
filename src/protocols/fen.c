@@ -1,4 +1,4 @@
-#include "fen.h"
+#include "protocols/fen.h"
 #include "core.h"
 #include "init.h"
 #include <assert.h>

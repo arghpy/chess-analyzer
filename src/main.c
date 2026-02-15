@@ -1,4 +1,4 @@
-#include "fen.h"
+#include "protocols/fen.h"
 #include "raylib.h"
 #include "keyboard.h"
 #include "init.h"

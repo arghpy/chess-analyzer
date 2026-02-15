@@ -1,5 +1,5 @@
 #include "render.h"
-#include "fen.h"
+#include "protocols/fen.h"
 #include "raylib.h"
 #include "core.h"
 #include "rules/general.h"
