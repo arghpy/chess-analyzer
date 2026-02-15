@@ -67,7 +67,6 @@ typedef struct {
   bool piece_placed;
   bool promote;
   bool promotion_done;
-  bool hovering_promotion;
   bool w_moved;
   bool b_moved;
   bool captured;

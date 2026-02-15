@@ -1,8 +1,10 @@
 #include "render.h"
 #include "protocols/fen.h"
+#include "protocols/san.h"
 #include "raylib.h"
 #include "core.h"
 #include "rules/general.h"
+#include "rules/pieces.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -47,60 +49,6 @@ void draw_piece_on_mouse(void)
   draw_piece(&moving_piece);
 }
 
-void generate_san(void)
-{
-  // Write SAN
-  char *row    = "abcdefgh";
-  char *column = "12345678";
-
-  ptrdiff_t s_index = chess_board.moving.c_src - &chess_board.squares[0][0];
-  int ys = s_index / NS;
-  int xs = s_index % NS;
-
-  ptrdiff_t d_index = chess_board.moving.c_dest - &chess_board.squares[0][0];
-  int yd = d_index / NS;
-  int xd = d_index % NS;
-
-  if (!chess_board.board_flipped) {
-    ys = NS - ys - 1;
-    yd = NS - yd - 1;
-  } else {
-    xs = NS - xs - 1;
-    xd = NS - xd - 1;
-  }
-  char pgn[10] = {0};
-  char move[10] = {0};
-
-  if (chess_board.state.w_moved && !chess_board.state.b_moved)
-    snprintf(pgn, sizeof(pgn), "\n%d.", chess_board.fullmoves);
-
-  switch (chess_board.moving.src_piece.type) {
-    case NO_PIECE:
-    case PAWN:
-      if (!chess_board.state.captured) {
-        if (!chess_board.state.promote && chess_board.state.promotion_done) {
-          if (chess_board.promotion_square != NULL) {
-          }
-        } else
-          snprintf(move, sizeof(pgn), " %c%c", row[xd], column[yd]);
-      } else {
-        if (!chess_board.state.promote && chess_board.state.promotion_done) {
-        } else
-          snprintf(move, sizeof(pgn), " %cx%c%c", row[xs], row[xd], column[yd]);
-      }
-    case BISHOP:
-    case KING:
-    case KNIGHT:
-    case QUEEN:
-    case ROOK:
-    case PIECE_COUNT:
-      break;
-  }
-  strcat(pgn, move);
-  printf("%s", pgn);
-  fflush(stdout);
-}
-
 void draw_drag_and_place(void)
 {
   dragging = dragging ? dragging : is_dragging();
@@ -112,33 +60,49 @@ void draw_drag_and_place(void)
       dragging = false;
       place_piece();
       if (chess_board.state.piece_placed) {
-        if (chess_board.enpassant.done) chess_board.enpassant.done = false;
+        chess_board.state.piece_placed = false;
 
-        // Record which color piece moved
-        if      (chess_board.moving.src_piece.color == W) chess_board.state.w_moved = true;
-        else if (chess_board.moving.src_piece.color == B) chess_board.state.b_moved = true;
+        // Check promotion
+        if (chess_board.moving.c_dest->piece.type == PAWN) {
+          ptrdiff_t d_index = chess_board.moving.c_dest - &chess_board.squares[0][0];
+          int yd = d_index / NS;
 
-        // Full moves
-        if (chess_board.state.w_moved && chess_board.state.b_moved) {
-          chess_board.fullmoves += 1;
-          chess_board.state.w_moved = false;
-          chess_board.state.b_moved = false;
+          if (yd == 0 || yd == (NS - 1)) {
+            chess_board.state.promote = true;
+            chess_board.promotion_square = chess_board.moving.c_dest;
+            draw_promotion_pieces(chess_board.promotion_square);
+            select_for_promotion(chess_board.promotion_square);
+          }
         }
+        if (!chess_board.state.promote) {
+          if (chess_board.enpassant.done) chess_board.enpassant.done = false;
 
-        // Half moves
-        if (chess_board.moving.src_piece.type == PAWN || chess_board.state.captured)
-          chess_board.halfmoves = 0;
-        else chess_board.halfmoves += 1;
+          // Record which color piece moved
+          if      (chess_board.moving.src_piece.color == W) chess_board.state.w_moved = true;
+          else if (chess_board.moving.src_piece.color == B) chess_board.state.b_moved = true;
 
-        if (chess_board.halfmoves == 50) chess_board.result = DRAW;
+          // Full moves
+          if (chess_board.state.w_moved && chess_board.state.b_moved) {
+            chess_board.fullmoves += 1;
+            chess_board.state.w_moved = false;
+            chess_board.state.b_moved = false;
+          }
 
-        generate_fen_position();
-        verify_if_any_legal_move(chess_board.color_turn);
-        generate_san();
+          // Half moves
+          if (chess_board.moving.src_piece.type == PAWN || chess_board.state.captured)
+            chess_board.halfmoves = 0;
+          else chess_board.halfmoves += 1;
+
+          if (chess_board.halfmoves == 50) chess_board.result = DRAW;
+
+          generate_fen_position();
+          verify_if_any_legal_move(chess_board.color_turn);
+          generate_san();
+        }
+        // Reset
+        chess_board.moving.c_src = NULL;
+        chess_board.moving.c_dest = NULL;
       }
-      // Reset
-      chess_board.moving.c_src = NULL;
-      chess_board.moving.c_dest = NULL;
     }
   }
 }
@@ -161,11 +125,11 @@ void check_pieces_hovering(void)
 void set_mouse_cursor(void)
 {
   SetMouseCursor(
-      chess_board.state.hovering_promotion || // TODO: make them local
       chess_board.state.hovering_piece ||
       dragging ?
       MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT
       );
+  chess_board.state.hovering_piece = false;
 }
 
 void draw_moving_piece(void)

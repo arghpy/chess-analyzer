@@ -1,4 +1,5 @@
 #include "protocols/fen.h"
+#include "protocols/common.h"
 #include "core.h"
 #include "init.h"
 #include <assert.h>
@@ -16,6 +17,7 @@ void iterate_fen_positions()
       printf("%d: %s\n", positions.items[i].c, positions.items[i].fen_p);
     }
   printf("--------------------------------------------------\n");
+  fflush(stdout);
 }
 
 void add_fen_position(const char* fen)
@@ -270,37 +272,8 @@ void generate_fen_position()
     char rank[20] = {0};
     for (; !chess_board.board_flipped ? i < NS : i >= 0; !chess_board.board_flipped ? i++ : i--) {
       ChessSquare *s = &chess_board.squares[j][i];
-      switch(s->piece.type) {
-        case NO_PIECE:
-          strcat(rank, "0");
-          break;
-        case PAWN:
-          if (s->piece.color == W) strcat(rank, "P");
-          else strcat(rank, "p");
-          break;
-        case BISHOP:
-          if (s->piece.color == W) strcat(rank, "B");
-          else strcat(rank, "b");
-          break;
-        case KING:
-          if (s->piece.color == W) strcat(rank, "K");
-          else strcat(rank, "k");
-          break;
-        case KNIGHT:
-          if (s->piece.color == W) strcat(rank, "N");
-          else strcat(rank, "n");
-          break;
-        case QUEEN:
-          if (s->piece.color == W) strcat(rank, "Q");
-          else strcat(rank, "q");
-          break;
-        case ROOK:
-          if (s->piece.color == W) strcat(rank, "R");
-          else strcat(rank, "r");
-          break;
-        case PIECE_COUNT:
-          break;
-      }
+      char *piece_notation = get_piece_notation(s->piece);
+      if (piece_notation != NULL) strcat(rank, piece_notation);
     }
     // Transform '0's in numbers for empty spaces
     char rank_tmp[50] = {0};

@@ -5,7 +5,6 @@
 #include "render.h"
 #include "rules/pieces.h"
 #include <stdbool.h>
-#include <stdio.h>
 
 #define WINDOW_FACTOR 70
 #define WINDOW_WIDTH  (WINDOW_FACTOR * 16)
@@ -33,26 +32,23 @@ int main(void)
   if (init) {
     while(!WindowShouldClose()) {
       process_keyboard_events();
-      fflush(stdout);
       BeginDrawing();
       {
         ClearBackground(background_color);
         draw_chess_board(&font);
         if (chess_board.result != NONE) draw_result(&font);
         else {
-          if (chess_board.state.promote) promote_pawn(chess_board.promotion_square);
-          else {
-            draw_moving_piece();
+          if (chess_board.state.promote) {
+            draw_promotion_pieces(chess_board.promotion_square);
+            select_for_promotion(chess_board.promotion_square);
           }
+          else draw_moving_piece();
         }
         set_mouse_cursor();
       }
       EndDrawing();
 
       // Reset
-      chess_board.state.piece_placed = false;
-      chess_board.state.hovering_piece = false;
-      chess_board.state.hovering_promotion = false;
       chess_board.state.captured = false;
       chess_board.moving.captured_piece = (ChessPiece){0};
       chess_board.moving.wrong_move = false;

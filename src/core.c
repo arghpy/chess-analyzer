@@ -40,7 +40,10 @@ void place_piece(void)
       if (CheckCollisionPointCircle(GetMousePosition(),
                                     square->center_proximity.center,
                                     square->center_proximity.r)) {
-        if (valid_move(chess_board.moving.c_src, square, chess_board.moving.src_piece)) {
+        if (!valid_move(chess_board.moving.c_src, square, chess_board.moving.src_piece)) {
+          chess_board.moving.wrong_move = true;
+          break;
+        } else {
           square->piece = chess_board.moving.src_piece;
           if (in_check(chess_board.moving.src_piece.color)) {
             square->piece = square_p;
@@ -59,23 +62,12 @@ void place_piece(void)
           chess_board.moving.p_src->board_color  = color_occupied_square(chess_board.moving.p_src);
           chess_board.moving.p_dest->board_color = color_occupied_square(chess_board.moving.p_dest);
 
-          // Check promotion
-          if (square->piece.type == PAWN) {
-            ptrdiff_t d_index = square - &chess_board.squares[0][0];
-            int yd = d_index / NS;
-
-            if (yd == 0 || yd == (NS - 1)) {
-              chess_board.state.promote = true;
-              chess_board.promotion_square = &chess_board.squares[y][x];
-              promote_pawn(square);
-            }
-          }
-
           change_chess_board_turn();
           chess_board.moving.c_dest = &chess_board.squares[y][x];
           chess_board.state.piece_placed = true;
           break;
         }
+        if (chess_board.moving.wrong_move) break;
       }
     }
     if (chess_board.state.piece_placed) break;

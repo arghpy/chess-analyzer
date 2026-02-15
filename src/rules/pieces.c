@@ -359,9 +359,8 @@ void select_for_promotion(ChessSquare *promotion_square)
       if (CheckCollisionPointRec(GetMousePosition(), square.rect) &&
           (square.piece.type != NO_PIECE)) {
 
-        chess_board.state.hovering_promotion = true;
+        chess_board.state.hovering_piece = true;
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
-          chess_board.state.hovering_piece = false;
           chess_board.state.promote = false;
           chess_board.state.promotion_done = true;
           promotion_square->piece = piece_promotions[i].piece;
@@ -371,7 +370,7 @@ void select_for_promotion(ChessSquare *promotion_square)
   }
 }
 
-void promote_pawn(ChessSquare *promotion_square)
+void draw_promotion_pieces(ChessSquare *promotion_square)
 {
   ptrdiff_t d_index = promotion_square - &chess_board.squares[0][0];
   int yd = d_index / NS;
@@ -398,7 +397,6 @@ void promote_pawn(ChessSquare *promotion_square)
     DrawRectangleLinesEx(piece_promotions[i].rect, 2.0f, GRAY);
     draw_piece(&piece_promotions[i]);
   }
-  select_for_promotion(promotion_square);
 }
 
 bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPiece src_piece)
@@ -473,6 +471,7 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPi
     } else {
       if (dest == chess_board.enpassant.square) {
         if (!chess_board.state.verify) {
+          chess_board.state.captured = true;
           chess_board.moving.captured_piece = chess_board.squares[yd - y_step][xd].piece;
           reset_chess_square(&chess_board.squares[yd - y_step][xd]);
           chess_board.enpassant.done = true;
