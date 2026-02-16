@@ -70,8 +70,12 @@ void generate_san(void)
 
             if (!in_check(chess_board.color_turn))
               snprintf(move, sizeof(move), " %cx%c%c=%c", row[xs], row[xd], column[yd], upper_piece_notation);
-            else
-              snprintf(move, sizeof(move), " %cx%c%c=%c+", row[xs], row[xd], column[yd], upper_piece_notation);
+            else {
+              if (chess_board.result == CHECKMATE)
+                snprintf(move, sizeof(move), " %cx%c%c=%c#", row[xs], row[xd], column[yd], upper_piece_notation);
+              else
+                snprintf(move, sizeof(move), " %cx%c%c=%c+", row[xs], row[xd], column[yd], upper_piece_notation);
+            }
           }
         } else { // Normal move
           if (!in_check(chess_board.color_turn))
