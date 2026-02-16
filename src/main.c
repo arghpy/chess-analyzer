@@ -1,8 +1,10 @@
 #include "protocols/fen.h"
+#include "protocols/san.h"
 #include "raylib.h"
 #include "keyboard.h"
 #include "init.h"
 #include "render.h"
+#include "rules/general.h"
 #include "rules/pieces.h"
 #include <stdbool.h>
 
@@ -41,18 +43,49 @@ int main(void)
           if (chess_board.state.promote) {
             draw_promotion_pieces(chess_board.promotion_square);
             select_for_promotion(chess_board.promotion_square);
+          } else {
+            if (!chess_board.state.promotion_done) {
+              draw_moving_piece();
+            } else {
+              if (chess_board.enpassant.done) chess_board.enpassant.done = false;
+
+              // Record which color piece moved
+              if      (chess_board.moving.src_piece.color == W) chess_board.state.w_moved = true;
+              else if (chess_board.moving.src_piece.color == B) chess_board.state.b_moved = true;
+
+              // Full moves
+              if (chess_board.state.w_moved && chess_board.state.b_moved) {
+                chess_board.fullmoves += 1;
+                chess_board.state.w_moved = false;
+                chess_board.state.b_moved = false;
+              }
+
+              // Half moves
+              if (chess_board.moving.src_piece.type == PAWN || chess_board.state.captured)
+                chess_board.halfmoves = 0;
+              else chess_board.halfmoves += 1;
+
+              if (chess_board.halfmoves == 50) chess_board.result = DRAW;
+
+              generate_fen_position();
+              verify_if_any_legal_move(chess_board.color_turn);
+              generate_san();
+
+              // Reset
+              chess_board.state.promotion_done = false;
+              chess_board.moving.c_src = NULL;
+              chess_board.moving.c_dest = NULL;
+
+              if (chess_board.state.captured) {
+                chess_board.state.captured = false;
+                chess_board.moving.captured_piece = (ChessPiece){0};
+              }
+            }
           }
-          else draw_moving_piece();
         }
         set_mouse_cursor();
       }
       EndDrawing();
-
-      // Reset
-      chess_board.state.captured = false;
-      chess_board.moving.captured_piece = (ChessPiece){0};
-      chess_board.moving.wrong_move = false;
-      chess_board.state.promotion_done = false;
     }
   }
 

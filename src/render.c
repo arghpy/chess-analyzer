@@ -59,6 +59,7 @@ void draw_drag_and_place(void)
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
       dragging = false;
       place_piece();
+      chess_board.moving.wrong_move = false;
       if (chess_board.state.piece_placed) {
         chess_board.state.piece_placed = false;
 
@@ -98,10 +99,16 @@ void draw_drag_and_place(void)
           generate_fen_position();
           verify_if_any_legal_move(chess_board.color_turn);
           generate_san();
+
+          // Reset
+          chess_board.moving.c_src = NULL;
+          chess_board.moving.c_dest = NULL;
+
+          if (chess_board.state.captured) {
+            chess_board.state.captured = false;
+            chess_board.moving.captured_piece = (ChessPiece){0};
+          }
         }
-        // Reset
-        chess_board.moving.c_src = NULL;
-        chess_board.moving.c_dest = NULL;
       }
     }
   }
