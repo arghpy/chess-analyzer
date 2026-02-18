@@ -34,68 +34,39 @@ void generate_san(void)
   if (chess_board.state.w_moved && !chess_board.state.b_moved)
     snprintf(pgn, sizeof(pgn), "\n%d.", chess_board.fullmoves);
 
-  switch (chess_board.moving.src_piece.type) {
-    case NO_PIECE:
-    case PAWN:
-      if (!chess_board.state.captured) {
-        if (!chess_board.state.promote && chess_board.state.promotion_done) {
-          if (chess_board.promotion_square != NULL) {
-            char* piece_notation = get_piece_notation(chess_board.promotion_square->piece);
-            char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
-
-            if (!in_check(chess_board.color_turn))
-              snprintf(move, sizeof(move), " %c%c=%c", row[xd], column[yd], upper_piece_notation);
-            else {
-              if (chess_board.result == CHECKMATE)
-                snprintf(move, sizeof(move), " %c%c=%c#", row[xd], column[yd], upper_piece_notation);
-              else
-                snprintf(move, sizeof(move), " %c%c=%c+", row[xd], column[yd], upper_piece_notation);
-            }
-          }
-        } else { // Normal move
-          if (!in_check(chess_board.color_turn))
-            snprintf(move, sizeof(move), " %c%c", row[xd], column[yd]);
-          else {
-            if (chess_board.result == CHECKMATE)
-              snprintf(move, sizeof(move), " %c%c#", row[xd], column[yd]);
-            else
-              snprintf(move, sizeof(move), " %c%c+", row[xd], column[yd]);
-          }
-        }
-      } else { // chess_board.state.captured
-        if (!chess_board.state.promote && chess_board.state.promotion_done) {
-          if (chess_board.promotion_square != NULL) {
-            char* piece_notation = get_piece_notation(chess_board.promotion_square->piece);
-            char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
-
-            if (!in_check(chess_board.color_turn))
-              snprintf(move, sizeof(move), " %cx%c%c=%c", row[xs], row[xd], column[yd], upper_piece_notation);
-            else {
-              if (chess_board.result == CHECKMATE)
-                snprintf(move, sizeof(move), " %cx%c%c=%c#", row[xs], row[xd], column[yd], upper_piece_notation);
-              else
-                snprintf(move, sizeof(move), " %cx%c%c=%c+", row[xs], row[xd], column[yd], upper_piece_notation);
-            }
-          }
-        } else { // Normal move
-          if (!in_check(chess_board.color_turn))
-            snprintf(move, sizeof(move), " %cx%c%c", row[xs], row[xd], column[yd]);
-          else {
-            if (chess_board.result == CHECKMATE)
-              snprintf(move, sizeof(move), " %cx%c%c#", row[xs], row[xd], column[yd]);
-            else
-              snprintf(move, sizeof(move), " %cx%c%c+", row[xs], row[xd], column[yd]);
-          }
-        }
-      }
-    case BISHOP:
-    case KING:
-    case KNIGHT:
-    case QUEEN:
-    case ROOK:
-    case PIECE_COUNT:
-      break;
+  strcat(move, " ");
+  if (chess_board.moving.src_piece.type != PAWN) {
+    char* piece_notation = get_piece_notation(chess_board.moving.src_piece);
+    char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
+    size_t len = strlen(move);
+    move[len] = upper_piece_notation;
+    move[len+1] = '\0';
   }
+  if (!chess_board.state.captured) {
+    strncat(move, &row[xd], 1);
+    strncat(move, &column[yd], 1);
+  } else {
+    if (chess_board.moving.src_piece.type == PAWN) strncat(move, &row[xs], 1);
+    strcat(move, "x");
+    strncat(move, &row[xd], 1);
+    strncat(move, &column[yd], 1);
+  }
+
+  if (chess_board.moving.src_piece.type == PAWN &&
+      !chess_board.state.promote && chess_board.state.promotion_done && chess_board.promotion_square != NULL) {
+
+    char* piece_notation = get_piece_notation(chess_board.promotion_square->piece);
+    char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
+    strcat(move, "=");
+    size_t len = strlen(move);
+    move[len] = upper_piece_notation;
+    move[len+1] = '\0';
+  }
+  if (in_check(chess_board.color_turn)) {
+    if (chess_board.result == CHECKMATE) strcat(move, "#");
+    else strcat(move, "+");
+  }
+
   strcat(pgn, move);
   printf("%s", pgn);
   fflush(stdout);
