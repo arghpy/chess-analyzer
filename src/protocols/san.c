@@ -35,36 +35,41 @@ void generate_san(void)
     snprintf(pgn, sizeof(pgn), "\n%d.", chess_board.fullmoves);
 
   strcat(move, " ");
-  if (chess_board.moving.src_piece.type != PAWN) {
-    char* piece_notation = get_piece_notation(chess_board.moving.src_piece);
-    char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
-    size_t len = strlen(move);
-    move[len] = upper_piece_notation;
-    move[len+1] = '\0';
-  }
-  if (!chess_board.state.captured) {
-    strncat(move, &row[xd], 1);
-    strncat(move, &column[yd], 1);
+  if (chess_board.castle.castled != NO) {
+    if      (chess_board.castle.castled == SHORT) strcat(move, "O-O");
+    else if (chess_board.castle.castled == LONG)  strcat(move, "O-O-O");
   } else {
-    if (chess_board.moving.src_piece.type == PAWN) strncat(move, &row[xs], 1);
-    strcat(move, "x");
-    strncat(move, &row[xd], 1);
-    strncat(move, &column[yd], 1);
-  }
+    if (chess_board.moving.src_piece.type != PAWN) {
+      char* piece_notation = get_piece_notation(chess_board.moving.src_piece);
+      char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
+      size_t len = strlen(move);
+      move[len] = upper_piece_notation;
+      move[len+1] = '\0';
+    }
+    if (!chess_board.state.captured) {
+      strncat(move, &row[xd], 1);
+      strncat(move, &column[yd], 1);
+    } else {
+      if (chess_board.moving.src_piece.type == PAWN) strncat(move, &row[xs], 1);
+      strcat(move, "x");
+      strncat(move, &row[xd], 1);
+      strncat(move, &column[yd], 1);
+    }
 
-  if (chess_board.moving.src_piece.type == PAWN &&
-      !chess_board.state.promote && chess_board.state.promotion_done && chess_board.promotion_square != NULL) {
+    if (chess_board.moving.src_piece.type == PAWN &&
+        !chess_board.state.promote && chess_board.state.promotion_done && chess_board.promotion_square != NULL) {
 
-    char* piece_notation = get_piece_notation(chess_board.promotion_square->piece);
-    char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
-    strcat(move, "=");
-    size_t len = strlen(move);
-    move[len] = upper_piece_notation;
-    move[len+1] = '\0';
-  }
-  if (in_check(chess_board.color_turn)) {
-    if (chess_board.result == CHECKMATE) strcat(move, "#");
-    else strcat(move, "+");
+      char* piece_notation = get_piece_notation(chess_board.promotion_square->piece);
+      char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
+      strcat(move, "=");
+      size_t len = strlen(move);
+      move[len] = upper_piece_notation;
+      move[len+1] = '\0';
+    }
+    if (in_check(chess_board.color_turn)) {
+      if (chess_board.result == CHECKMATE) strcat(move, "#");
+      else strcat(move, "+");
+    }
   }
 
   strcat(pgn, move);

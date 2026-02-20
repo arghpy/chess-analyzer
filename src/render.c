@@ -103,6 +103,7 @@ void draw_drag_and_place(void)
           // Reset
           chess_board.moving.c_src = NULL;
           chess_board.moving.c_dest = NULL;
+          chess_board.castle.castled = NO;
 
           if (chess_board.state.captured) {
             chess_board.state.captured = false;

@@ -97,11 +97,18 @@ typedef struct {
   bool wrong_move;
 } MovingPieces;
 
+typedef enum {
+  NO,
+  SHORT,
+  LONG,
+} Castled;
+
 typedef struct {
   bool w_s_can_castle;
   bool w_l_can_castle;
   bool b_s_can_castle;
   bool b_l_can_castle;
+  Castled castled;
 } Castle;
 
 typedef struct {

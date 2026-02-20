@@ -233,6 +233,7 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
             if (chess_board.squares[7][7].piece.color != W) return false;
             if (chess_board.squares[7][7].piece.type != ROOK) return false;
             if (!chess_board.state.verify) {
+              chess_board.castle.castled = SHORT;
               chess_board.squares[7][5].piece.type  = ROOK;
               chess_board.squares[7][5].piece.color = W;
               reset_chess_square(&chess_board.squares[7][7]);
@@ -243,6 +244,7 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
             if (chess_board.squares[0][7].piece.color != B) return false;
             if (chess_board.squares[0][7].piece.type != ROOK) return false;
             if (!chess_board.state.verify) {
+              chess_board.castle.castled = SHORT;
               chess_board.squares[0][5].piece.type  = ROOK;
               chess_board.squares[0][5].piece.color = B;
               reset_chess_square(&chess_board.squares[0][7]);
@@ -270,6 +272,7 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
             if (chess_board.squares[0][7].piece.color != W) return false;
             if (chess_board.squares[0][7].piece.type != ROOK) return false;
             if (!chess_board.state.verify) {
+              chess_board.castle.castled = LONG;
               chess_board.squares[0][4].piece.type  = ROOK;
               chess_board.squares[0][4].piece.color = W;
               reset_chess_square(&chess_board.squares[0][7]);
@@ -280,6 +283,7 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
             if (chess_board.squares[7][7].piece.color != B) return false;
             if (chess_board.squares[7][7].piece.type != ROOK) return false;
             if (!chess_board.state.verify) {
+              chess_board.castle.castled = LONG;
               chess_board.squares[7][4].piece.type  = ROOK;
               chess_board.squares[7][4].piece.color = B;
               reset_chess_square(&chess_board.squares[7][7]);
@@ -309,6 +313,7 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
             if (chess_board.squares[7][0].piece.color != W) return false;
             if (chess_board.squares[7][0].piece.type != ROOK) return false;
             if (!chess_board.state.verify) {
+              chess_board.castle.castled = LONG;
               chess_board.squares[7][3].piece.type  = ROOK;
               chess_board.squares[7][3].piece.color = W;
               reset_chess_square(&chess_board.squares[7][0]);
@@ -319,6 +324,7 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
             if (chess_board.squares[0][0].piece.color != B) return false;
             if (chess_board.squares[0][0].piece.type != ROOK) return false;
             if (!chess_board.state.verify) {
+              chess_board.castle.castled = LONG;
               chess_board.squares[0][3].piece.type  = ROOK;
               chess_board.squares[0][3].piece.color = B;
               reset_chess_square(&chess_board.squares[0][0]);
@@ -346,6 +352,7 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
             if (chess_board.squares[0][0].piece.color != W) return false;
             if (chess_board.squares[0][0].piece.type != ROOK) return false;
             if (!chess_board.state.verify) {
+              chess_board.castle.castled = SHORT;
               chess_board.squares[0][2].piece.type  = ROOK;
               chess_board.squares[0][2].piece.color = W;
               reset_chess_square(&chess_board.squares[0][0]);
@@ -356,6 +363,7 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
             if (chess_board.squares[7][0].piece.color != B) return false;
             if (chess_board.squares[7][0].piece.type != ROOK) return false;
             if (!chess_board.state.verify) {
+              chess_board.castle.castled = SHORT;
               chess_board.squares[7][2].piece.type  = ROOK;
               chess_board.squares[7][2].piece.color = B;
               reset_chess_square(&chess_board.squares[7][0]);
