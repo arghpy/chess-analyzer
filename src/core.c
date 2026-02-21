@@ -1,10 +1,32 @@
 #include "core.h"
 #include "render.h"
 #include "raylib.h"
-#include "rules/pieces.h"
 #include "rules/general.h"
 #include <stddef.h>
 #include <stdio.h>
+
+void increment_game_states(void)
+{
+  if (chess_board.enpassant.done) chess_board.enpassant.done = false;
+
+  // Record which color piece moved
+  if      (chess_board.moving.src_piece.color == W) chess_board.state.w_moved = true;
+  else if (chess_board.moving.src_piece.color == B) chess_board.state.b_moved = true;
+
+  // Full moves
+  if (chess_board.state.w_moved && chess_board.state.b_moved) {
+    chess_board.fullmoves += 1;
+    chess_board.state.w_moved = false;
+    chess_board.state.b_moved = false;
+  }
+
+  // Half moves
+  if (chess_board.moving.src_piece.type == PAWN || chess_board.state.captured)
+    chess_board.halfmoves = 0;
+  else chess_board.halfmoves += 1;
+
+  if (chess_board.halfmoves == 50) chess_board.result = DRAW;
+}
 
 void change_chess_board_turn(void)
 {
