@@ -7,7 +7,9 @@
 #include "render.h"
 #include "rules/general.h"
 #include "rules/pieces.h"
+#include "sound.h"
 #include <stdbool.h>
+#include <stdio.h>
 
 #define WINDOW_FACTOR 70
 #define WINDOW_WIDTH  (WINDOW_FACTOR * 16)
@@ -26,10 +28,17 @@ int main(void)
 
   bool init = true;
 
+  InitAudioDevice(); // Initialize audio device and context
+  if (!IsAudioDeviceReady()) {// Check if audio device has been initialized successfully
+    fprintf(stderr, "Failed to initialize audio device.\n");
+    init = false;
+  }
+
   { // Initializing
-    if (!load_starting_position()) init = false;
-    if (!load_chess_pieces())      init = false;
-    load_pawn_promotions();
+    if (init && !load_starting_position()) init = false;
+    if (init && !load_chess_pieces())      init = false;
+    if (init && !load_sounds())            init = false;
+    if (init) load_pawn_promotions();
   }
 
   if (init) {
@@ -39,8 +48,9 @@ int main(void)
       {
         ClearBackground(background_color);
         draw_chess_board(&font);
-        if (chess_board.result != NONE) draw_result(&font);
-        else {
+        if (chess_board.result != NONE) {
+          draw_result(&font);
+        } else {
           if (chess_board.state.promote) {
             draw_promotion_pieces(chess_board.promotion_square);
             select_for_promotion(chess_board.promotion_square);
@@ -67,12 +77,16 @@ int main(void)
           }
         }
         set_mouse_cursor();
+        if (chess_board.action_sound != NOTHING) PlaySound(game_sounds[chess_board.action_sound]);
+        chess_board.action_sound = NOTHING;
       }
       EndDrawing();
     }
   }
 
   { // Closing everything
+    if (IsAudioDeviceReady()) CloseAudioDevice(); // Close the audio device and context
+    unload_sounds();
     ut_da_free(&positions);
     unload_chess_pieces();
     UnloadFont(font);

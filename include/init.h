@@ -2,6 +2,7 @@
 #define INIT_H
 
 #include "raylib.h"
+#include "sound.h"
 
 #define NS 8
 
@@ -125,12 +126,13 @@ typedef struct {
   ChessPieceColor won;
   ChessPieceColor lost;
   ChessSquare *promotion_square;
+  GameSound action_sound;
 } ChessBoard;
 
 extern ChessBoard chess_board;
 extern Texture2D chess_pieces_texture[];
 extern const Color square_color[];
-extern ChessSquare piece_promotions[];
+extern ChessSquare piece_promotions[4];
 
 bool load_starting_position(void);
 void load_pawn_promotions(void);

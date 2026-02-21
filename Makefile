@@ -33,7 +33,8 @@ $(BUILD)/%.o: $(SRC)/%.c
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-debug: CFLAGS += -ggdb
+debug: CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer -fsanitize-undefined-trap-on-error -ggdb
+debug: LIBS   += -fsanitize=address,undefined
 debug: clean $(TARGET)
 	gf2 $(TARGET)
 
@@ -41,6 +42,11 @@ perf: CFLAGS += -O3 -march=native
 perf: clean $(TARGET)
 
 run: $(TARGET)
+	./$(TARGET)
+
+run_debug: CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer -ggdb
+run_debug: LIBS   += -fsanitize=address,undefined
+run_debug: clean $(TARGET)
 	./$(TARGET)
 
 bear:

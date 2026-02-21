@@ -5,6 +5,7 @@
 #include <math.h>
 #include <stddef.h>
 #include <stdlib.h>
+#include "utils.h"
 
 bool knight_is_legal_move(const ChessSquare *src, const ChessSquare *dest)
 {
@@ -380,13 +381,14 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
 
 void select_for_promotion(ChessSquare *promotion_square)
 {
-  for (int i = 0; i < NS; i++) {
+  for (size_t i = 0; i < ARRAY_LEN(piece_promotions); i++) {
       ChessSquare square = piece_promotions[i];
       if (CheckCollisionPointRec(GetMousePosition(), square.rect) &&
           (square.piece.type != NO_PIECE)) {
 
         chess_board.state.hovering_piece = true;
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
+          chess_board.action_sound = PROMOTE;
           chess_board.state.promote = false;
           chess_board.state.promotion_done = true;
           promotion_square->piece = piece_promotions[i].piece;
@@ -500,6 +502,7 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPi
           chess_board.state.captured = true;
           chess_board.moving.captured_piece = chess_board.squares[yd - y_step][xd].piece;
           reset_chess_square(&chess_board.squares[yd - y_step][xd]);
+          chess_board.action_sound = CAPTURE;
           chess_board.enpassant.done = true;
           chess_board.enpassant.allowed = false;
           chess_board.enpassant.square = NULL;

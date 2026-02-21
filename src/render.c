@@ -61,6 +61,7 @@ void draw_drag_and_place(void)
       place_piece();
       chess_board.moving.wrong_move = false;
       if (chess_board.state.piece_placed) {
+        if (in_check(chess_board.color_turn)) chess_board.action_sound = MOVE_CHECK;
         chess_board.state.piece_placed = false;
 
         // Check promotion

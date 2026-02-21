@@ -63,11 +63,15 @@ void place_piece(void)
                                     square->center_proximity.center,
                                     square->center_proximity.r)) {
         if (!valid_move(chess_board.moving.c_src, square, chess_board.moving.src_piece)) {
+          if (still_on_src_square(chess_board.moving.c_src, square)) chess_board.action_sound = NOTHING;
+          else chess_board.action_sound = ILLEGAL;
+
           chess_board.moving.wrong_move = true;
           break;
         } else {
           square->piece = chess_board.moving.src_piece;
           if (in_check(chess_board.moving.src_piece.color)) {
+            chess_board.action_sound = ILLEGAL;
             square->piece = square_p;
             chess_board.moving.wrong_move = true;
             break;
@@ -76,6 +80,9 @@ void place_piece(void)
             chess_board.state.captured = true;
             chess_board.moving.captured_piece = square_p;
           }
+
+          if (chess_board.state.captured) chess_board.action_sound = CAPTURE;
+          else chess_board.action_sound = MOVE;
 
           // Reset original colors and set colors for new valid moves
           reset_color_previously_moved_pieces();

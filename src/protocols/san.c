@@ -63,7 +63,7 @@ void generate_san(void)
           ChessSquare *s = &chess_board.squares[y][x];
           ChessSquare s_copy = chess_board.squares[y][x];
 
-          if (s == chess_board.moving.c_src) continue;
+          if (s == chess_board.moving.c_dest) continue;
           if (s->piece.color == chess_board.moving.src_piece.color &&
               s->piece.type == chess_board.moving.src_piece.type &&
               is_legal_move(s, chess_board.moving.c_dest, s->piece)) {
