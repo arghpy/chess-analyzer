@@ -82,7 +82,10 @@ void place_piece(void)
           }
 
           if (chess_board.state.captured) chess_board.action_sound = CAPTURE;
-          else chess_board.action_sound = MOVE;
+          else {
+            if (chess_board.castle.castled) chess_board.action_sound = CASTLE;
+            else chess_board.action_sound = MOVE;
+          }
 
           // Reset original colors and set colors for new valid moves
           reset_color_previously_moved_pieces();
