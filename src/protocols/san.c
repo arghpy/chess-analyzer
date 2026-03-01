@@ -9,10 +9,23 @@
 #include <stdio.h>
 #include <string.h>
 
+size_t SAN_MOVES_CAP = 10;
+
 typedef ut_da_declare(ChessSquare*) PossibleMoves;
+
+SanMove empty = {0};
+SanMoves san_moves = {0};
 
 void generate_san(void)
 {
+  static SanMove *current_san_move = &empty;
+
+  // Already populated, means it is part of the san_moves
+  if (memcmp(current_san_move, &(SanMove){0}, sizeof(*current_san_move)) != 0) {
+    current_san_move = &san_moves.items[san_moves.count - 1];
+    empty = (SanMove){0};
+  }
+
   // Write SAN
   char *row    = "abcdefgh";
   char *column = "12345678";
@@ -32,13 +45,11 @@ void generate_san(void)
     xs = NS - xs - 1;
     xd = NS - xd - 1;
   }
-  char pgn[20] = {0};
   char move[20] = {0};
 
-  if (chess_board.state.w_moved && !chess_board.state.b_moved)
-    snprintf(pgn, sizeof(pgn), "\n%d.", chess_board.fullmoves);
+  if (memcmp(current_san_move, &(SanMove){0}, sizeof(*current_san_move)) == 0)
+    current_san_move->move_nr = chess_board.fullmoves;
 
-  strcat(move, " ");
   if (chess_board.castle.castled != NO) {
     if      (chess_board.castle.castled == SHORT) strcat(move, "O-O");
     else if (chess_board.castle.castled == LONG)  strcat(move, "O-O-O");
@@ -126,7 +137,9 @@ void generate_san(void)
     }
 
     if (chess_board.moving.src_piece.type == PAWN &&
-        !chess_board.state.promote && chess_board.state.promotion_done && chess_board.promotion_square != NULL) {
+        !chess_board.state.promote &&
+        chess_board.state.promotion_done &&
+        chess_board.promotion_square != NULL) {
 
       char* piece_notation = get_piece_notation(chess_board.promotion_square->piece);
       char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
@@ -141,7 +154,16 @@ void generate_san(void)
     }
   }
 
-  strcat(pgn, move);
-  printf("%s", pgn);
-  fflush(stdout);
+  if (chess_board.state.w_moved && chess_board.color_turn == B) strcpy(current_san_move->san_w, move);
+  if (chess_board.state.b_moved && chess_board.color_turn == W) strcpy(current_san_move->san_b, move);
+
+  if (current_san_move != &san_moves.items[san_moves.count - 1])
+    ut_da_push(&san_moves, *current_san_move);
+
+  if (current_san_move->move_nr != 0 &&
+      strcmp(current_san_move->san_w, "") > 0 &&
+      strcmp(current_san_move->san_b, "") > 0) {
+    empty = (SanMove){0};
+    current_san_move = &empty;
+  }
 }

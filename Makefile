@@ -33,8 +33,7 @@ $(BUILD)/%.o: $(SRC)/%.c
 	mkdir -p $(dir $@)
 	$(CC) $(CFLAGS) $(INCLUDES) -c $< -o $@
 
-debug: CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer -fsanitize-undefined-trap-on-error -ggdb
-debug: LIBS   += -fsanitize=address,undefined
+debug: CFLAGS += -ggdb
 debug: clean $(TARGET)
 	gf2 $(TARGET)
 

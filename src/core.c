@@ -14,11 +14,8 @@ void increment_game_states(void)
   else if (chess_board.moving.src_piece.color == B) chess_board.state.b_moved = true;
 
   // Full moves
-  if (chess_board.state.w_moved && chess_board.state.b_moved) {
+  if (chess_board.state.w_moved && chess_board.state.b_moved)
     chess_board.fullmoves += 1;
-    chess_board.state.w_moved = false;
-    chess_board.state.b_moved = false;
-  }
 
   // Half moves
   if (chess_board.moving.src_piece.type == PAWN || chess_board.state.captured)

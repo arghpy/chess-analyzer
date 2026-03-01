@@ -471,18 +471,22 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPi
       }
 
       // En passant
-      if (chess_board.squares[yd][xd - 1].piece.type == PAWN &&
-          chess_board.squares[yd][xd - 1].piece.color != src_piece.color) {
-        chess_board.enpassant.allowed = true;
-        chess_board.enpassant.allowed_by_color = src_piece.color;
-        chess_board.enpassant.square = &chess_board.squares[yd - y_step][xd];
+      if (xd > 0) {
+        if (chess_board.squares[yd][xd - 1].piece.type == PAWN &&
+            chess_board.squares[yd][xd - 1].piece.color != src_piece.color) {
+          chess_board.enpassant.allowed = true;
+          chess_board.enpassant.allowed_by_color = src_piece.color;
+          chess_board.enpassant.square = &chess_board.squares[yd - y_step][xd];
+        }
       }
 
-      if (chess_board.squares[yd][xd + 1].piece.type == PAWN &&
-          chess_board.squares[yd][xd + 1].piece.color != src_piece.color) {
-        chess_board.enpassant.allowed = true;
-        chess_board.enpassant.allowed_by_color = src_piece.color;
-        chess_board.enpassant.square = &chess_board.squares[yd - y_step][xd];
+      if (xd < NS) {
+        if (chess_board.squares[yd][xd + 1].piece.type == PAWN &&
+            chess_board.squares[yd][xd + 1].piece.color != src_piece.color) {
+          chess_board.enpassant.allowed = true;
+          chess_board.enpassant.allowed_by_color = src_piece.color;
+          chess_board.enpassant.square = &chess_board.squares[yd - y_step][xd];
+        }
       }
 
       return true;

@@ -20,7 +20,6 @@ int main(void)
   SetTraceLogLevel(LOG_ERROR);
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Chess analyzer");
   SetTargetFPS(60);
-  SetWindowState(FLAG_WINDOW_RESIZABLE);
 
   char *font_path = "./assets/fonts/JetBrainsMono-Bold.ttf";
   Font font = LoadFont(font_path);
@@ -48,6 +47,7 @@ int main(void)
       {
         ClearBackground(background_color);
         draw_chess_board(&font);
+        draw_san(&font);
         if (chess_board.result != NONE) {
           draw_result(&font);
         } else {
@@ -81,6 +81,10 @@ int main(void)
         chess_board.action_sound = NOTHING;
       }
       EndDrawing();
+      if (chess_board.state.w_moved && chess_board.state.b_moved) {
+        chess_board.state.w_moved = false;
+        chess_board.state.b_moved = false;
+      }
     }
   }
 

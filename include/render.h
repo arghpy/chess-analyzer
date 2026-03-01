@@ -8,6 +8,7 @@
 
 extern float SQUARE_SIZE;
 
+void draw_san(const Font *font);
 void set_mouse_cursor(void);
 void draw_moving_piece(void);
 void draw_result(const Font *font);

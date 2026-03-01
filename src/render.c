@@ -13,6 +13,57 @@ bool dragging = false;
 
 float SQUARE_SIZE = 0.0f;
 
+void draw_san(const Font *font)
+{
+  float san_r_thickness = 1.0f;
+  Rectangle san_r = {
+    .x = SQUARE_SIZE * NS,
+    .y = 0,
+    .width = GetScreenWidth() - SQUARE_SIZE * NS,
+    .height = GetScreenHeight(),
+  };
+  int spacing = 5;
+  float font_size = roundf(SQUARE_SIZE);
+  float font_height = MeasureTextEx(*font, "1", font_size, 0).y;
+
+  DrawRectangleLinesEx(san_r, san_r_thickness, WHITE);
+
+  static size_t start_san_count = 0;
+  if (font_height * (san_moves.count - start_san_count) > GetScreenHeight()) start_san_count++;
+
+  for (size_t i = 0; i < san_moves.count; i++) {
+    char notation[64] = {0};
+    char tmp[64] = {0};
+
+    if (san_moves.items[i].move_nr != 0) {
+      char tmp2[64] = {0};
+      snprintf(tmp2, sizeof(tmp2), "%d.", san_moves.items[i].move_nr);
+      snprintf(tmp, sizeof(tmp), "%-10s", tmp2);
+      strcat(notation, tmp);
+      memset(tmp, 0, sizeof(tmp));
+    }
+
+    if (strcmp(san_moves.items[i].san_w, "") > 0) {
+      snprintf(tmp, sizeof(tmp), "%-15s", san_moves.items[i].san_w);
+      strcat(notation, tmp);
+      memset(tmp, 0, sizeof(tmp));
+    }
+
+    if (strcmp(san_moves.items[i].san_b, "") > 0) {
+      snprintf(tmp, sizeof(tmp), "%s\n", san_moves.items[i].san_b);
+      strcat(notation, tmp);
+      memset(tmp, 0, sizeof(tmp));
+    }
+
+    Vector2 text_pos = {
+      .x = san_r.x + spacing,
+      .y = san_r.y + font_height * (i - start_san_count) + spacing
+    };
+    if (strcmp(notation, "") > 0)
+      DrawTextEx(*font, notation, text_pos, font_size, 0, WHITE);
+  }
+}
+
 bool is_dragging(void)
 {
   bool dragging = false;
