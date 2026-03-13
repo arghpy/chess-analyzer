@@ -5,13 +5,12 @@
 #include "core.h"
 #include "rules/general.h"
 #include "rules/pieces.h"
-#include <math.h>
 #include <stddef.h>
 #include <stdio.h>
 
 bool dragging = false;
 
-float SQUARE_SIZE = 0.0f;
+// float SQUARE_SIZE = 0.0f;
 
 void draw_san(const Font *font)
 {
@@ -23,8 +22,7 @@ void draw_san(const Font *font)
     .height = GetScreenHeight(),
   };
   int spacing = 5;
-  float font_size = roundf(SQUARE_SIZE);
-  float font_height = MeasureTextEx(*font, "1", font_size, 0).y;
+  float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
 
   DrawRectangleLinesEx(san_r, san_r_thickness, WHITE);
 
@@ -60,7 +58,7 @@ void draw_san(const Font *font)
       .y = san_r.y + font_height * (i - start_san_count) + spacing
     };
     if (strcmp(notation, "") > 0)
-      DrawTextEx(*font, notation, text_pos, font_size, 0, WHITE);
+      DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);
   }
 }
 
@@ -91,8 +89,8 @@ void draw_piece_on_mouse(void)
 {
   Vector2 mouse_pos = GetMousePosition();
   Rectangle square = chess_board.moving.c_src->rect;
-  square.x      = mouse_pos.x - SQUARE_SIZE / 2;
-  square.y      = mouse_pos.y - SQUARE_SIZE / 2;
+  square.x      = mouse_pos.x - SQUARE_SIZE / 2.0f;
+  square.y      = mouse_pos.y - SQUARE_SIZE / 2.0f;
 
   ChessSquare moving_piece = {0};
   moving_piece.piece = chess_board.moving.src_piece;
@@ -183,7 +181,6 @@ void draw_result(const Font *font)
 {
   bool draw = false;
   char text[10];
-  float font_size = roundf(SQUARE_SIZE * 0.8f);
 
   switch(chess_board.result) {
     case NONE: break;
@@ -201,7 +198,7 @@ void draw_result(const Font *font)
                     }
   }
   if (draw) {
-    float rsize = NS * SQUARE_SIZE / 2;
+    float rsize = NS * SQUARE_SIZE / 2.0f;
     Rectangle r = {
       .x      = rsize - rsize / 2,
       .y      = rsize - rsize / 2,
@@ -211,12 +208,12 @@ void draw_result(const Font *font)
     DrawRectangleRounded(r, 0.20f, 90, background_color);
     DrawRectangleRoundedLinesEx(r, 0.20f, 90, 2.0f, WHITE);
 
-    Vector2 text_size = MeasureTextEx(*font, text, font_size, 0);
+    Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
     Vector2 pos = {
       .x = r.x + rsize / 2 - text_size.x / 2,
       .y = r.y + rsize / 5
     };
-    DrawTextEx(*font, text, pos, font_size, 0, WHITE);
+    DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
   }
 }
 
@@ -262,11 +259,11 @@ void flip_board(void)
 
 void scale_chess_board(void)
 {
-  SQUARE_SIZE = roundf(
-      GetScreenWidth() < GetScreenHeight()
-      ? GetScreenWidth() / NS
-      : GetScreenHeight() / NS
-  );
+  // SQUARE_SIZE = roundf(
+  //     GetScreenWidth() < GetScreenHeight()
+  //     ? GetScreenWidth() / NS
+  //     : GetScreenHeight() / NS
+  // );
 
   for (int y = 0; y < NS; y++)
     for (int x = 0; x < NS; x++) {
@@ -278,8 +275,8 @@ void scale_chess_board(void)
       };
       chess_board.squares[y][x].center_proximity = (Circle) {
         .center = (Vector2) {
-          .x = x * SQUARE_SIZE + SQUARE_SIZE / 2,
-          .y = y * SQUARE_SIZE + SQUARE_SIZE / 2
+          .x = x * SQUARE_SIZE + SQUARE_SIZE / 2.0f,
+          .y = y * SQUARE_SIZE + SQUARE_SIZE / 2.0f
         },
         .r = SQUARE_SIZE / 2.5f,
       };
@@ -297,7 +294,6 @@ void draw_board_coordinates(const Font *font)
 {
   char text[10];
   int square_spacing = 5;
-  float font_size = roundf(SQUARE_SIZE * 0.3f);
 
   // Numbers
   for (int y = 0; y < NS; y++) {
@@ -307,20 +303,20 @@ void draw_board_coordinates(const Font *font)
       .x = chess_board.squares[y][0].rect.x + square_spacing,
       .y = chess_board.squares[y][0].rect.y + square_spacing
     };
-    DrawTextEx(*font, text, pos, font_size, 0, square_color[(y + 1) % 2]);
+    DrawTextEx(*font, text, pos, font->baseSize, 0, square_color[(y + 1) % 2]);
   }
 
   // Letters
   for (int x = 0; x < NS; x++) {
     snprintf(text, sizeof(text), "%c", chess_board.board_flipped ? 'h' - x : 'a' + x);
 
-    Vector2 text_size = MeasureTextEx(*font, text, font_size, 0);
+    Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
 
     Vector2 pos = {
       .x = chess_board.squares[NS - 1][x].rect.x + (SQUARE_SIZE - text_size.x - square_spacing),
       .y = chess_board.squares[NS - 1][x].rect.y + (SQUARE_SIZE - text_size.y - square_spacing)
     };
-    DrawTextEx(*font, text, pos, font_size, 0, square_color[x % 2]);
+    DrawTextEx(*font, text, pos, font->baseSize, 0, square_color[x % 2]);
   }
 }
 
@@ -338,8 +334,8 @@ void draw_piece(const ChessSquare *square)
   };
 
   Rectangle dest = {
-    rect.x + (SQUARE_SIZE / 2 - piece_size / 2),
-    rect.y + (SQUARE_SIZE / 2 - piece_size / 2),
+    rect.x + (SQUARE_SIZE / 2.0f - piece_size / 2),
+    rect.y + (SQUARE_SIZE / 2.0f - piece_size / 2),
     piece_size,
     piece_size
   };

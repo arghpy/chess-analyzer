@@ -4,7 +4,13 @@
 #include "raylib.h"
 #include "sound.h"
 
+
+#define WINDOW_FACTOR 70
+#define WINDOW_WIDTH  (WINDOW_FACTOR * 16)
+#define WINDOW_HEIGHT (WINDOW_FACTOR * 9)
+
 #define NS 8
+#define SQUARE_SIZE (((WINDOW_WIDTH) < (WINDOW_HEIGHT)) ? ((WINDOW_WIDTH) / (NS)) : ((WINDOW_HEIGHT) / (NS)))
 
 typedef enum {
   LIGHT_TILE,

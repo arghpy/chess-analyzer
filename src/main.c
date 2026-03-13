@@ -11,9 +11,6 @@
 #include <stdbool.h>
 #include <stdio.h>
 
-#define WINDOW_FACTOR 70
-#define WINDOW_WIDTH  (WINDOW_FACTOR * 16)
-#define WINDOW_HEIGHT (WINDOW_FACTOR * 9)
 
 int main(void)
 {
@@ -22,8 +19,8 @@ int main(void)
   SetTargetFPS(60);
 
   char *font_path = "./assets/fonts/JetBrainsMono-Bold.ttf";
-  Font font = LoadFont(font_path);
-  SetTextureFilter(font.texture, TEXTURE_FILTER_BILINEAR);
+  Font general_font = LoadFontEx(font_path, SQUARE_SIZE * 0.3f, NULL, 0);
+  Font big_font = LoadFontEx(font_path, SQUARE_SIZE * 0.8f, NULL, 0);
 
   bool init = true;
 
@@ -46,10 +43,10 @@ int main(void)
       BeginDrawing();
       {
         ClearBackground(background_color);
-        draw_chess_board(&font);
-        draw_san(&font);
+        draw_chess_board(&general_font);
+        draw_san(&general_font);
         if (chess_board.result != NONE) {
-          draw_result(&font);
+          draw_result(&big_font);
         } else {
           if (chess_board.state.promote) {
             draw_promotion_pieces(chess_board.promotion_square);
@@ -93,7 +90,8 @@ int main(void)
     unload_sounds();
     ut_da_free(&positions);
     unload_chess_pieces();
-    UnloadFont(font);
+    UnloadFont(general_font);
+    UnloadFont(big_font);
     CloseWindow();
   }
   return 0;

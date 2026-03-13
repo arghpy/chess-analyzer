@@ -6,12 +6,12 @@
 
 #define background_color ((Color){0x18, 0x18, 0x18, 0xFF})
 
-extern float SQUARE_SIZE;
+// extern float SQUARE_SIZE;
 
-void draw_san(const Font *font);
+void draw_san(const Font *general_font);
 void set_mouse_cursor(void);
 void draw_moving_piece(void);
-void draw_result(const Font *font);
+void draw_result(const Font *big_font);
 Color color_occupied_square(const ChessSquare *s);
 void draw_piece(const ChessSquare *square);
 void draw_chess_board(const Font *font);
