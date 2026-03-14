@@ -1,4 +1,5 @@
 #include "render.h"
+#include "init.h"
 #include "protocols/fen.h"
 #include "protocols/san.h"
 #include "raylib.h"
@@ -16,9 +17,9 @@ void draw_san(const Font *font)
 {
   float san_r_thickness = 1.0f;
   Rectangle san_r = {
-    .x = SQUARE_SIZE * NS,
-    .y = 0,
-    .width = GetScreenWidth() - SQUARE_SIZE * NS,
+    .x      = SQUARE_SIZE * NS,
+    .y      = 0,
+    .width  = GetScreenWidth() - SQUARE_SIZE * NS,
     .height = GetScreenHeight(),
   };
   int spacing = 5;
@@ -26,8 +27,43 @@ void draw_san(const Font *font)
 
   DrawRectangleLinesEx(san_r, san_r_thickness, WHITE);
 
-  static size_t start_san_count = 0;
+  static int start_san_count = 0;
+
+  // Initializing
+  static Rectangle scroll_bar = {0};
+  if (memcmp(&scroll_bar, &(Rectangle){0}, sizeof(scroll_bar)) == 0) {
+    scroll_bar.x     = GetScreenWidth() - SQUARE_SIZE / 5.0f;
+    scroll_bar.width = SQUARE_SIZE / 5.0f;
+    scroll_bar.height  =  GetScreenHeight() - font_height * start_san_count - 2;
+  }
+
+  // TODO: you may hit a point where you cannot scroll anymore to see the moves
+  // This happens because there is no more space to scroll to
+  // maybe chatgpt was right about making it about a ration between what's visible and what's not
+  float scroll_speed = 8.0f;
+  static float total_scroll_offset_delta_y = 0.0f;
+  float scroll_offset_delta_y = 0.0f;
+
   if (font_height * (san_moves.count - start_san_count) > GetScreenHeight()) start_san_count++;
+  if (start_san_count > 0) {
+    float wheel = 0.0f;
+    if (CheckCollisionPointRec(GetMousePosition(), san_r))
+      wheel = GetMouseWheelMove();
+
+    if ( (scroll_bar.y - wheel * scroll_speed                       > 0) &&
+        ((scroll_bar.y - wheel * scroll_speed + scroll_bar.height)  < GetScreenHeight()))
+      scroll_offset_delta_y = wheel * scroll_speed;
+
+    total_scroll_offset_delta_y += scroll_offset_delta_y;
+
+    if (scroll_bar.height > font_height * 3) {
+      scroll_bar.height  =  GetScreenHeight() - font_height * start_san_count - 2;
+      scroll_bar.y       =  font_height * start_san_count + 2 - total_scroll_offset_delta_y;
+    } else scroll_bar.y -= scroll_offset_delta_y;
+
+    DrawRectangleLines(scroll_bar.x, 0, scroll_bar.width, GetScreenHeight(), WHITE);
+    DrawRectangleRounded(scroll_bar, 0.85f, 32, WHITE);
+  }
 
   for (size_t i = 0; i < san_moves.count; i++) {
     char notation[64] = {0};
@@ -55,8 +91,9 @@ void draw_san(const Font *font)
 
     Vector2 text_pos = {
       .x = san_r.x + spacing,
-      .y = san_r.y + font_height * (i - start_san_count) + spacing
+      .y = san_r.y + font_height * ((int)i - start_san_count) + spacing + total_scroll_offset_delta_y
     };
+
     if (strcmp(notation, "") > 0)
       DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);
   }
