@@ -6,6 +6,7 @@
 #include "core.h"
 #include "rules/general.h"
 #include "rules/pieces.h"
+#include <math.h>
 #include <stddef.h>
 #include <stdio.h>
 
@@ -13,6 +14,7 @@ bool dragging = false;
 
 // float SQUARE_SIZE = 0.0f;
 
+// Made with the help of claude from previous commit
 void draw_san(const Font *font)
 {
   float san_r_thickness = 1.0f;
@@ -22,57 +24,78 @@ void draw_san(const Font *font)
     .width  = GetScreenWidth() - SQUARE_SIZE * NS,
     .height = GetScreenHeight(),
   };
-  int spacing = 5;
+  int   spacing     = 5;
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
 
   DrawRectangleLinesEx(san_r, san_r_thickness, WHITE);
 
-  static int start_san_count = 0;
+  float content_height   = font_height * san_moves.count;
+  float window_height    = (float)GetScreenHeight();
+  bool  needs_scroll     = content_height > window_height;
 
-  // Initializing
-  static Rectangle scroll_bar = {0};
-  if (memcmp(&scroll_bar, &(Rectangle){0}, sizeof(scroll_bar)) == 0) {
-    scroll_bar.x     = GetScreenWidth() - SQUARE_SIZE / 5.0f;
-    scroll_bar.width = SQUARE_SIZE / 5.0f;
-    scroll_bar.height  =  GetScreenHeight() - font_height * start_san_count - 2;
+  // Minimum bar height
+  float min_bar_height   = font_height * 3.0f;
+  float natural_bar_h    = needs_scroll
+                           ? window_height * (window_height / content_height)
+                           : window_height;
+  float scroll_bar_height = fmaxf(natural_bar_h, min_bar_height);
+
+  // How far bar and content can each travel
+  float scrollable_bar     = window_height - scroll_bar_height;
+  float scrollable_content = content_height - window_height;
+
+  static float bar_y = 0.0f;
+  float scroll_one_distance = 8.0f;
+
+  static bool initialized = false;
+  static float bar_x = 0.0f, bar_w = 0.0f;
+  if (!initialized) {
+    bar_x       = GetScreenWidth() - SQUARE_SIZE / 5.0f;
+    bar_w       = SQUARE_SIZE / 5.0f;
+    initialized = true;
   }
 
-  // TODO: you may hit a point where you cannot scroll anymore to see the moves
-  // This happens because there is no more space to scroll to
-  // maybe chatgpt was right about making it about a ration between what's visible and what's not
-  float scroll_speed = 8.0f;
-  static float total_scroll_offset_delta_y = 0.0f;
-  float scroll_offset_delta_y = 0.0f;
+  // // Auto-advance bar when new moves push content down
+  static size_t last_move_count = 0;
 
-  if (font_height * (san_moves.count - start_san_count) > GetScreenHeight()) start_san_count++;
-  if (start_san_count > 0) {
+  if (san_moves.count != last_move_count) {
+      // A new move was just added — snap bar to bottom
+      bar_y = scrollable_bar;
+      last_move_count = san_moves.count;
+  }
+
+  if (needs_scroll) {
     float wheel = 0.0f;
-    if (CheckCollisionPointRec(GetMousePosition(), san_r))
-      wheel = GetMouseWheelMove();
+    Rectangle san_hover_r = san_r;
+    if (CheckCollisionPointRec(GetMousePosition(), san_hover_r))
+      wheel = GetMouseWheelMove(); // + UP, - DOWN
 
-    if ( (scroll_bar.y - wheel * scroll_speed                       > 0) &&
-        ((scroll_bar.y - wheel * scroll_speed + scroll_bar.height)  < GetScreenHeight()))
-      scroll_offset_delta_y = wheel * scroll_speed;
+    bar_y -= wheel * scroll_one_distance;
+    if      (bar_y < 0.0f)           bar_y = 0.0f;
+    else if (bar_y > scrollable_bar) bar_y = scrollable_bar;
 
-    total_scroll_offset_delta_y += scroll_offset_delta_y;
-
-    if (scroll_bar.height > font_height * 3) {
-      scroll_bar.height  =  GetScreenHeight() - font_height * start_san_count - 2;
-      scroll_bar.y       =  font_height * start_san_count + 2 - total_scroll_offset_delta_y;
-    } else scroll_bar.y -= scroll_offset_delta_y;
-
-    DrawRectangleLines(scroll_bar.x, 0, scroll_bar.width, GetScreenHeight(), WHITE);
-    DrawRectangleRounded(scroll_bar, 0.85f, 32, WHITE);
+    // Draw scroll track + bar
+    Rectangle bar = {
+      .x      = bar_x,
+      .y      = bar_y,
+      .width  = bar_w,
+      .height = scroll_bar_height,
+    };
+    DrawRectangleRounded(bar, 0.85f, 32, WHITE);
   }
+
+  // Map bar position → content offset
+  float t              = (scrollable_bar > 0.0f) ? bar_y / scrollable_bar : 0.0f;
+  float content_scroll = t * scrollable_content;
 
   for (size_t i = 0; i < san_moves.count; i++) {
     char notation[64] = {0};
-    char tmp[64] = {0};
+    char tmp[64]      = {0};
 
     if (san_moves.items[i].move_nr != 0) {
       char tmp2[64] = {0};
       snprintf(tmp2, sizeof(tmp2), "%d.", san_moves.items[i].move_nr);
-      snprintf(tmp, sizeof(tmp), "%-10s", tmp2);
+      snprintf(tmp,  sizeof(tmp),  "%-10s", tmp2);
       strcat(notation, tmp);
       memset(tmp, 0, sizeof(tmp));
     }
@@ -91,8 +114,12 @@ void draw_san(const Font *font)
 
     Vector2 text_pos = {
       .x = san_r.x + spacing,
-      .y = san_r.y + font_height * ((int)i - start_san_count) + spacing + total_scroll_offset_delta_y
+      .y = san_r.y + font_height * (float)i + spacing - content_scroll - 5,
     };
+
+    // Cull lines fully outside the visible area
+    if (text_pos.y + font_height < 0 || text_pos.y > window_height)
+      continue;
 
     if (strcmp(notation, "") > 0)
       DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);

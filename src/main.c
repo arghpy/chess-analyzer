@@ -20,7 +20,7 @@ int main(void)
 
   char *font_path = "./assets/fonts/JetBrainsMono-Bold.ttf";
   Font general_font = LoadFontEx(font_path, SQUARE_SIZE * 0.3f, NULL, 0);
-  Font big_font = LoadFontEx(font_path, SQUARE_SIZE * 2.0f, NULL, 0);
+  Font big_font = LoadFontEx(font_path, SQUARE_SIZE * 0.8f, NULL, 0);
 
   bool init = true;
 
@@ -44,7 +44,7 @@ int main(void)
       {
         ClearBackground(background_color);
         draw_chess_board(&general_font);
-        draw_san(&big_font);
+        draw_san(&general_font);
         if (chess_board.result != NONE) {
           draw_result(&big_font);
         } else {
