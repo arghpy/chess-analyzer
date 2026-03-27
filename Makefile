@@ -40,7 +40,7 @@ debug: clean $(TARGET)
 perf: CFLAGS += -O3 -march=native
 perf: clean $(TARGET)
 
-run: $(TARGET)
+run: clean $(TARGET)
 	./$(TARGET)
 
 run_debug: CFLAGS += -fsanitize=address,undefined -fno-omit-frame-pointer -ggdb
