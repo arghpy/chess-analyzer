@@ -497,10 +497,7 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPi
 
     return true;
   } else if ((dx == dy) && (abs(xs - xd) == 1 || abs(ys - yd) == 1)) {
-    if (!chess_board.enpassant.allowed) {
-      if (chess_board.squares[yd][xd].piece.type == NO_PIECE) return false;
-      else return true;
-    } else {
+    if (chess_board.enpassant.allowed) {
       if (dest == chess_board.enpassant.square) {
         if (!chess_board.state.verify) {
           chess_board.state.captured = true;
@@ -512,7 +509,9 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPi
           chess_board.enpassant.square = NULL;
         }
         return true;
-      } else return false;
+      }
     }
+    if (chess_board.squares[yd][xd].piece.type == NO_PIECE) return false;
+    else return true;
   } else return false;
 }

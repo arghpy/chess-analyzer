@@ -174,6 +174,10 @@ void draw_drag_and_place(void)
       place_piece();
       chess_board.moving.wrong_move = false;
       if (chess_board.state.piece_placed) {
+        if (chess_board.enpassant.allowed)
+          if (chess_board.enpassant.allowed_by_color != chess_board.moving.c_dest->piece.color)
+            chess_board.enpassant.allowed = false;
+
         if (in_check(chess_board.color_turn)) chess_board.action_sound = MOVE_CHECK;
         chess_board.state.piece_placed = false;
 
