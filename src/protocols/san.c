@@ -157,7 +157,8 @@ void generate_san(void)
   if (chess_board.state.w_moved && chess_board.color_turn == B) strcpy(current_san_move->san_w, move);
   if (chess_board.state.b_moved && chess_board.color_turn == W) strcpy(current_san_move->san_b, move);
 
-  if (current_san_move != &san_moves.items[san_moves.count - 1])
+  if (san_moves.count == 0) ut_da_push(&san_moves, *current_san_move);
+  else if (current_san_move != &san_moves.items[san_moves.count - 1])
     ut_da_push(&san_moves, *current_san_move);
 
   if (current_san_move->move_nr != 0 &&
