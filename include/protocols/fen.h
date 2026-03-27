@@ -4,8 +4,6 @@
 #include <stdbool.h>
 #include "utils.h"
 
-#define FEN_START_POS "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-
 typedef struct {
   char fen_p[256];
   int c;
@@ -13,6 +11,7 @@ typedef struct {
 
 typedef ut_da_declare(Position) Positions;
 extern Positions positions;
+extern char current_fen[512];
 
 void iterate_fen_positions();
 bool load_fen_position(const char* fen);

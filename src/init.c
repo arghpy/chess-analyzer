@@ -19,7 +19,7 @@ bool load_starting_position(void)
     for (int x = 0; x < NS; x++)
       chess_board.squares[y][x].board_color = square_color[(x + y) % 2];
 
-  return load_fen_position(FEN_START_POS);
+  return load_fen_position(current_fen);
 }
 
 void load_pawn_promotions(void)

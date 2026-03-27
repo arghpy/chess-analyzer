@@ -10,6 +10,8 @@
 
 Positions positions = {0};
 
+char current_fen[512] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+
 void iterate_fen_positions()
 {
   printf("\n\n--------------------------------------------------\n");
@@ -291,9 +293,8 @@ void generate_fen_position()
         i += empty_c - 1;
       }
     }
-    strcpy(rank, rank_tmp);
-    if (j != (NS - 1) || j != 0) strcat(rank, "/");
-    strcat(fen, rank);
+    strcat(fen, rank_tmp);
+    if (j < NS - 1 && j >= 0) strcat(fen, "/");
   }
 
   // Active color
@@ -336,4 +337,6 @@ void generate_fen_position()
 
   strcat(fen, halfmoves);
   strcat(fen, fullmoves);
+
+  strcpy(current_fen, fen);
 }
