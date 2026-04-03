@@ -21,7 +21,7 @@ OBJS := $(SRCS:$(SRC)/%.c=$(BUILD)/%.o)
 
 TARGET := $(BUILD)/main
 
-.PHONY: all debug perf run bear clean
+.PHONY: all debug coverage perf run bear clean
 
 # default action. Builds target
 all: $(TARGET)
@@ -36,6 +36,16 @@ $(BUILD)/%.o: $(SRC)/%.c
 debug: CFLAGS += -ggdb
 debug: clean $(TARGET)
 	gf2 $(TARGET)
+
+coverage: CFLAGS += -fprofile-arcs -ftest-coverage
+coverage: LIBS   += -fprofile-arcs -ftest-coverage
+coverage: clean $(TARGET)
+	./$(TARGET)
+	gcovr -r . \
+	      --exclude 'thirdparty' \
+	      --html --html-details \
+	      -o coverage.html
+	@echo "Open coverage.html in your browser"
 
 perf: CFLAGS += -O3 -march=native
 perf: clean $(TARGET)
