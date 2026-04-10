@@ -1,12 +1,9 @@
 #include "core.h"
 #include "protocols/fen.h"
-#include "protocols/san.h"
 #include "raylib.h"
 #include "keyboard.h"
 #include "init.h"
 #include "render.h"
-#include "rules/general.h"
-#include "rules/pieces.h"
 #include "sound.h"
 #include <stdbool.h>
 #include <stdio.h>
@@ -44,44 +41,15 @@ int main(void)
       {
         ClearBackground(background_color);
         draw_chess_board(&general_font);
-        draw_san(&general_font);
-        if (chess_board.result != NONE) {
-          draw_result(&big_font);
-        } else {
-          if (chess_board.state.promote) {
-            draw_promotion_pieces(chess_board.promotion_square);
-            select_for_promotion(chess_board.promotion_square);
-          } else {
-            if (!chess_board.state.promotion_done) {
-              draw_moving_piece();
-            } else {
-              increment_game_states();
-              generate_fen_position();
-              verify_if_any_legal_move(chess_board.color_turn);
-              generate_san();
+        draw_san_window(&general_font);
 
-              // Reset
-              chess_board.state.promotion_done = false;
-              chess_board.moving.c_src = NULL;
-              chess_board.moving.c_dest = NULL;
-              chess_board.castle.castled = NO;
+        process_game_states(&big_font);
 
-              if (chess_board.state.captured) {
-                chess_board.state.captured = false;
-                chess_board.moving.captured_piece = (ChessPiece){0};
-              }
-            }
-          }
-        }
         set_mouse_cursor();
         if (chess_board.action_sound != NOTHING) PlaySound(game_sounds[chess_board.action_sound]);
         chess_board.action_sound = NOTHING;
       }
       EndDrawing();
-      if (chess_board.state.w_moved && chess_board.state.b_moved) {
-        chess_board.state.w_moved = false;
-        chess_board.state.b_moved = false;
-      }
     }
   }
 

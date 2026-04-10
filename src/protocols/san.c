@@ -30,11 +30,11 @@ void generate_san(void)
   char *row    = "abcdefgh";
   char *column = "12345678";
 
-  ptrdiff_t s_index = chess_board.moving.c_src - &chess_board.squares[0][0];
+  ptrdiff_t s_index = chess_board.moving.current_src - &chess_board.squares[0][0];
   int ys = s_index / NS;
   int xs = s_index % NS;
 
-  ptrdiff_t d_index = chess_board.moving.c_dest - &chess_board.squares[0][0];
+  ptrdiff_t d_index = chess_board.moving.current_dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
 
@@ -54,7 +54,7 @@ void generate_san(void)
     if      (chess_board.castle.castled == SHORT) strcat(move, "O-O");
     else if (chess_board.castle.castled == LONG)  strcat(move, "O-O-O");
     if (in_check(chess_board.color_turn)) {
-      if (chess_board.result == CHECKMATE) strcat(move, "#");
+      if (game_state == CHECKMATE) strcat(move, "#");
       else strcat(move, "+");
     }
   } else {
@@ -74,11 +74,11 @@ void generate_san(void)
           ChessSquare *s = &chess_board.squares[y][x];
           ChessSquare s_copy = chess_board.squares[y][x];
 
-          if (s == chess_board.moving.c_dest) continue;
+          if (s == chess_board.moving.current_dest) continue;
           if (s->piece.color == chess_board.moving.src_piece.color &&
               s->piece.type == chess_board.moving.src_piece.type &&
-              is_legal_move(s, chess_board.moving.c_dest, s->piece)) {
-            chess_board.moving.c_dest->piece = s->piece;
+              is_legal_move(s, chess_board.moving.current_dest, s->piece)) {
+            chess_board.moving.current_dest->piece = s->piece;
             reset_chess_square(s);
             if (!in_check(chess_board.moving.src_piece.color)) {
               s->piece = s_copy.piece;
@@ -137,8 +137,7 @@ void generate_san(void)
     }
 
     if (chess_board.moving.src_piece.type == PAWN &&
-        !chess_board.state.promote &&
-        chess_board.state.promotion_done &&
+        (game_state != PROMOTING) &&
         chess_board.promotion_square != NULL) {
 
       char* piece_notation = get_piece_notation(chess_board.promotion_square->piece);
@@ -149,7 +148,7 @@ void generate_san(void)
       move[len+1] = '\0';
     }
     if (in_check(chess_board.color_turn)) {
-      if (chess_board.result == CHECKMATE) strcat(move, "#");
+      if (game_state == CHECKMATE) strcat(move, "#");
       else strcat(move, "+");
     }
   }

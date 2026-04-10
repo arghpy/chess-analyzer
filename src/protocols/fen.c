@@ -35,8 +35,8 @@ void add_fen_position(const char* fen)
       if (strcmp(p.fen_p, positions.items[i].fen_p) == 0) {
         found = true;
         positions.items[i].c++;
-        if (positions.items[i].c == 3) chess_board.result = DRAW;
-        if (found || (chess_board.result == DRAW)) break;
+        if (positions.items[i].c == 3) game_state = DRAW;
+        if (found || (game_state == DRAW)) break;
       }
     }
     if (!found) ut_da_push(&positions, p);

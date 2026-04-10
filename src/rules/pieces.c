@@ -389,8 +389,7 @@ void select_for_promotion(ChessSquare *promotion_square)
         chess_board.state.hovering_piece = true;
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           chess_board.action_sound = PROMOTE;
-          chess_board.state.promote = false;
-          chess_board.state.promotion_done = true;
+          game_state = PLAYING;
           promotion_square->piece = piece_promotions[i].piece;
           break;
         }
@@ -415,8 +414,8 @@ void draw_promotion_pieces(ChessSquare *promotion_square)
     };
     piece_promotions[i].center_proximity = (Circle) {
       .center = (Vector2) {
-        .x = xd * SQUARE_SIZE + SQUARE_SIZE / 2,
-        .y = (yd - y_step * i) * SQUARE_SIZE + SQUARE_SIZE / 2
+        .x = xd * SQUARE_SIZE + SQUARE_SIZE / 2.0f,
+        .y = (yd - y_step * i) * SQUARE_SIZE + SQUARE_SIZE / 2.0f
       },
         .r = SQUARE_SIZE / 2.5f,
     };

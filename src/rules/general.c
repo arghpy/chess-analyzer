@@ -81,10 +81,10 @@ void verify_if_any_legal_move(ChessPieceColor verify_color)
   if (no_legal_move) {
     if (in_check(verify_color)) {
       chess_board.action_sound = MOVE_CHECK;
-      chess_board.result = CHECKMATE;
+      game_state = CHECKMATE;
     } else {
       chess_board.action_sound = GAME_END;
-      chess_board.result = DRAW;
+      game_state = DRAW;
     }
   }
   chess_board.state.verify = false;

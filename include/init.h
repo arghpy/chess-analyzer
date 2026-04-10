@@ -80,12 +80,6 @@ typedef struct {
   bool verify;
 } States;
 
-typedef enum {
-  NONE,
-  CHECKMATE,
-  DRAW,
-} Result;
-
 typedef struct {
   bool done;
   bool allowed;
@@ -94,14 +88,13 @@ typedef struct {
 } EnPassant;
 
 typedef struct {
-  ChessSquare *c_src;
-  ChessSquare *p_src;
+  ChessSquare *current_src;
+  ChessSquare *prev_src;
   ChessPiece src_piece;
   ChessPiece dest_piece;
-  ChessSquare *c_dest;
-  ChessSquare *p_dest;
+  ChessSquare *current_dest;
+  ChessSquare *prev_dest;
   ChessPiece captured_piece;
-  bool wrong_move;
 } MovingPieces;
 
 typedef enum {
@@ -128,7 +121,6 @@ typedef struct {
   int fullmoves;
   MovingPieces moving;
   EnPassant enpassant;
-  Result result;
   ChessPieceColor won;
   ChessPieceColor lost;
   ChessSquare *promotion_square;
