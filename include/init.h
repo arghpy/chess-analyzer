@@ -5,7 +5,7 @@
 #include "sound.h"
 
 
-#define WINDOW_FACTOR 70
+#define WINDOW_FACTOR 67.5
 #define WINDOW_WIDTH  (WINDOW_FACTOR * 16)
 #define WINDOW_HEIGHT (WINDOW_FACTOR * 9)
 
