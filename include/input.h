@@ -1,5 +1,5 @@
-#ifndef KEYBOARD_H
-#define KEYBOARD_H
+#ifndef INPUT_H
+#define INPUT_H
 
 void process_keyboard_events(void);
 
