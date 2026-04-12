@@ -1,5 +1,7 @@
 #include "input.h"
+#include "core.h"
 #include "protocols/fen.h"
+#include "protocols/san.h"
 #include "raylib.h"
 #include "init.h"
 #include "render.h"
@@ -33,5 +35,4 @@ void process_keyboard_events(void)
       printf("%d. %s %s\n", full_move->move_nr, full_move->san_w, full_move->san_b);
     }
   }
->>>>>>> ebcaa9c (fixup fen)
 }
