@@ -10,8 +10,44 @@
 #include <stdio.h>
 
 bool dragging = false;
+Rectangle fen_button_r = {0};
+bool copying_fen = false;
 
 // float SQUARE_SIZE = 0.0f;
+
+void draw_copy_fen_button(const Font* font)
+{
+  float fen_button_r_thickness = 1.0f;
+  fen_button_r = (Rectangle) {
+    .x      = SQUARE_SIZE * NS,
+    .y      = GetScreenHeight() - SQUARE_SIZE / 2.0f,
+    .width  = (GetScreenWidth() - SQUARE_SIZE * NS) / 2.0f,
+    .height = SQUARE_SIZE / 2.0f,
+  };
+
+  if (CheckCollisionPointRec(GetMousePosition(), fen_button_r)) fen_button_r_thickness *= 3;
+
+  DrawRectangleRec(fen_button_r, BROWN);
+  DrawRectangleLinesEx(fen_button_r, fen_button_r_thickness, WHITE);
+
+  if (CheckCollisionPointRec(GetMousePosition(), fen_button_r)) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+      SetClipboardText(current_fen);
+      copying_fen = true;
+    }
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) copying_fen = false;
+  }
+
+  if (copying_fen) DrawRectangleRec(fen_button_r, Fade(GRAY, 0.3f));
+
+  char *text = "Copy FEN";
+  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  Vector2 pos = {
+    .x = fen_button_r.x + fen_button_r.width  / 2 - text_size.x / 2,
+    .y = fen_button_r.y + fen_button_r.height / 2 - text_size.y / 2
+  };
+  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+}
 
 // Made with the help of claude from previous commit
 void draw_san_window(const Font *font)
@@ -29,7 +65,7 @@ void draw_san_window(const Font *font)
   DrawRectangleLinesEx(san_r, san_r_thickness, WHITE);
 
   float content_height   = font_height * san_moves.count;
-  float window_height    = (float)GetScreenHeight();
+  float window_height    = (float)GetScreenHeight() - fen_button_r.height;
   bool  needs_scroll     = content_height > window_height;
 
   // Minimum bar height
@@ -229,7 +265,8 @@ void set_mouse_cursor(void)
 {
   SetMouseCursor(
       chess_board.state.hovering_piece ||
-      dragging ?
+      dragging ||
+      CheckCollisionPointRec(GetMousePosition(), fen_button_r) ?
       MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT
       );
   chess_board.state.hovering_piece = false;

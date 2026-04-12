@@ -1,7 +1,7 @@
 #include "core.h"
 #include "protocols/fen.h"
 #include "raylib.h"
-#include "keyboard.h"
+#include "input.h"
 #include "init.h"
 #include "render.h"
 #include "sound.h"
@@ -42,6 +42,7 @@ int main(void)
         ClearBackground(background_color);
         draw_chess_board(&general_font);
         draw_san_window(&general_font);
+        draw_copy_fen_button(&general_font);
 
         process_game_states(&big_font);
 
