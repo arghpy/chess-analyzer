@@ -10,10 +10,85 @@
 #include <stdio.h>
 
 bool dragging = false;
+
 Rectangle fen_button_r = {0};
 bool copying_fen = false;
 
+Rectangle pgn_button_r = {0};
+bool copying_pgn = false;
+
 // float SQUARE_SIZE = 0.0f;
+
+char *generate_pgn(void)
+{
+  size_t pgn_capacity = 100;
+  char* pgn = calloc(pgn_capacity, sizeof(char));
+
+  switch (game_state) {
+    case PLAYING:
+      sprintf(pgn, "\n[Result \"*\"]\n\n");
+      break;
+    case PROMOTING:
+      break;
+    case DRAW:
+      sprintf(pgn, "\n[Result \"1/2-1/2\"]\n\n");
+      break;
+    case CHECKMATE: {
+                      int white_result = chess_board.color_turn == W ? 0 : 1;
+                      int black_result = chess_board.color_turn == W ? 1 : 0;
+                      sprintf(pgn, "\n[Result \"%d-%d\"]\n\n", white_result, black_result);
+                      break;
+                    }
+  }
+  for (size_t i = 0; i < san_moves.count; i++) {
+    SanMove *full_move = &san_moves.items[i];
+    char move[50] = {0};
+    sprintf(move, "%d. %s %s\n", full_move->move_nr, full_move->san_w, full_move->san_b);
+    if (strlen(pgn) + strlen(move) + 2 > pgn_capacity) {
+      pgn_capacity *= 2;
+      pgn = realloc(pgn, pgn_capacity);
+      if(!pgn) fprintf(stderr, "Not enough memory.\n");
+    }
+    strcat(pgn, move);
+  }
+  return pgn;
+}
+
+void draw_copy_pgn_button(const Font* font)
+{
+  float pgn_button_r_thickness = 1.0f;
+  pgn_button_r = (Rectangle) {
+    .x      = fen_button_r.x + fen_button_r.width,
+    .y      = GetScreenHeight() - SQUARE_SIZE / 2.0f,
+    .width  = (GetScreenWidth() - SQUARE_SIZE * NS) / 2.0f,
+    .height = SQUARE_SIZE / 2.0f,
+  };
+
+  if (CheckCollisionPointRec(GetMousePosition(), pgn_button_r)) pgn_button_r_thickness *= 3;
+
+  DrawRectangleRec(pgn_button_r, BROWN);
+  DrawRectangleLinesEx(pgn_button_r, pgn_button_r_thickness, WHITE);
+
+  if (CheckCollisionPointRec(GetMousePosition(), pgn_button_r)) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+      char *current_pgn = generate_pgn();
+      SetClipboardText(current_pgn);
+      free(current_pgn);
+      copying_pgn = true;
+    }
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) copying_pgn = false;
+  }
+
+  if (copying_pgn) DrawRectangleRec(pgn_button_r, Fade(GRAY, 0.3f));
+
+  char *text = "Copy PGN";
+  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  Vector2 pos = {
+    .x = pgn_button_r.x + pgn_button_r.width  / 2 - text_size.x / 2,
+    .y = pgn_button_r.y + pgn_button_r.height / 2 - text_size.y / 2
+  };
+  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+}
 
 void draw_copy_fen_button(const Font* font)
 {

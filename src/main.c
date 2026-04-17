@@ -43,6 +43,7 @@ int main(void)
         draw_chess_board(&general_font);
         draw_san_window(&general_font);
         draw_copy_fen_button(&general_font);
+        draw_copy_pgn_button(&general_font);
 
         process_game_states(&big_font);
 

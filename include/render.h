@@ -8,6 +8,7 @@
 
 // extern float SQUARE_SIZE;
 
+void draw_copy_pgn_button(const Font* font);
 void draw_copy_fen_button(const Font* font);
 void draw_san_window(const Font *general_font);
 void set_mouse_cursor(void);
