@@ -5,6 +5,7 @@
 #include "init.h"
 
 #define background_color ((Color){0x18, 0x18, 0x18, 0xFF})
+#define RED_SQUARE       CLITERAL(Color){226, 105, 85, 255}
 
 // extern float SQUARE_SIZE;
 

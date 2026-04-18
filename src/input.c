@@ -13,4 +13,22 @@ void process_keyboard_events(void)
     chess_board.board_flipped = !chess_board.board_flipped;
     flip_board();
   }
+
+  // Color square red on right mouse click
+  if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
+    for (int y = 0; y < NS; y++) {
+      for (int x = 0; x < NS; x++) {
+        ChessSquare *s = &chess_board.squares[y][x];
+        if (CheckCollisionPointRec(GetMousePosition(), s->rect)) {
+          if (!ColorIsEqual(s->board_color, RED_SQUARE))
+            s->board_color = RED_SQUARE;
+          else {
+            s->board_color = square_color[(x + y) % 2];
+            if (s == chess_board.moving.prev_src || s == chess_board.moving.prev_dest)
+              s->board_color  = color_occupied_square(s);
+          }
+        }
+      }
+    }
+  }
 }
