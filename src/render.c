@@ -1,4 +1,5 @@
 #include "render.h"
+#include "utils.h"
 #include "init.h"
 #include "protocols/fen.h"
 #include "protocols/san.h"
@@ -107,7 +108,8 @@ void draw_copy_fen_button(const Font* font)
 
   if (CheckCollisionPointRec(GetMousePosition(), fen_button_r)) {
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-      SetClipboardText(current_fen);
+      if (ll_chess_move_current == NULL) SetClipboardText(STARTING_POSITION);
+      else SetClipboardText(ll_chess_move_current->value.fen);
       copying_fen = true;
     }
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) copying_fen = false;
@@ -246,8 +248,8 @@ bool is_dragging_piece(void)
           (square->piece.type != NO_PIECE)) {
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           dragging = true;
-          chess_board.moving.src_piece   = chess_board.squares[y][x].piece;
-          chess_board.moving.current_src = &chess_board.squares[y][x];
+          moving_piece.piece = chess_board.squares[y][x].piece;
+          moving_piece.src   = &chess_board.squares[y][x];
           reset_chess_square(square);
           break;
         }
@@ -261,14 +263,14 @@ bool is_dragging_piece(void)
 void draw_piece_on_mouse(void)
 {
   Vector2 mouse_pos = GetMousePosition();
-  Rectangle square = chess_board.moving.current_src->rect;
+  Rectangle square = moving_piece.src->rect;
   square.x      = mouse_pos.x - SQUARE_SIZE / 2.0f;
   square.y      = mouse_pos.y - SQUARE_SIZE / 2.0f;
 
-  ChessSquare moving_piece = {0};
-  moving_piece.piece = chess_board.moving.src_piece;
-  moving_piece.rect = square;
-  draw_piece(&moving_piece);
+  ChessSquare s = {0};
+  s.piece = moving_piece.piece;
+  s.rect = square;
+  draw_piece(&s);
 }
 
 void draw_drag_and_place(void)
@@ -286,34 +288,18 @@ void draw_drag_and_place(void)
         if (in_check(chess_board.color_turn)) chess_board.action_sound = MOVE_CHECK;
 
         if (chess_board.enpassant.allowed)
-          if (chess_board.enpassant.allowed_by_color != chess_board.moving.current_dest->piece.color)
+          if (chess_board.enpassant.allowed_by_color != moving_piece.dest->piece.color)
             chess_board.enpassant.allowed = false;
 
         // Check promotion
-        if (chess_board.moving.current_dest->piece.type == PAWN) {
-          ptrdiff_t d_index = chess_board.moving.current_dest - &chess_board.squares[0][0];
+        if (moving_piece.dest->piece.type == PAWN) {
+          ptrdiff_t d_index = moving_piece.dest - &chess_board.squares[0][0];
           int yd = d_index / NS;
 
           if (yd == 0 || yd == (NS - 1)) {
             game_state = PROMOTING;
             chess_board.action_sound = NOTHING;
-            chess_board.promotion_square = chess_board.moving.current_dest;
-          }
-        }
-        if (game_state != PROMOTING) {
-          advance_game_parameters();
-          generate_fen_position();
-          verify_if_any_legal_move(chess_board.color_turn);
-          generate_san();
-
-          // Reset
-          chess_board.moving.current_src = NULL;
-          chess_board.moving.current_dest = NULL;
-          chess_board.castle.castled = NO;
-
-          if (chess_board.state.captured) {
-            chess_board.state.captured = false;
-            chess_board.moving.captured_piece = (ChessPiece){0};
+            chess_board.promotion_square = moving_piece.dest;
           }
         }
       }
@@ -388,20 +374,28 @@ void flip_board(void)
       chess_board.squares[NS - 1 - y][NS - 1 - x] = tmp;
     }
   }
-  if (chess_board.moving.prev_src != NULL) {
-    ptrdiff_t p_s_index = chess_board.moving.prev_src - &chess_board.squares[0][0];
-    int ys = p_s_index / NS;
-    int xs = p_s_index % NS;
+  // TODO: You really need to check this
+  if (ll_chess_move_head != NULL) {
+    ChessMoveNode *tmp = ll_chess_move_head;
+    while (tmp != NULL) {
+      if (tmp->value.src != NULL) {
+        ptrdiff_t p_s_index = tmp->value.src - &chess_board.squares[0][0];
+        int ys = p_s_index / NS;
+        int xs = p_s_index % NS;
 
-    chess_board.moving.prev_src = &chess_board.squares[NS - 1 - ys][NS - 1 - xs];
-  }
+        tmp->value.src = &chess_board.squares[NS - 1 - ys][NS - 1 - xs];
+      }
 
-  if (chess_board.moving.prev_dest != NULL) {
-    ptrdiff_t p_d_index = chess_board.moving.prev_dest - &chess_board.squares[0][0];
-    int yd = p_d_index / NS;
-    int xd = p_d_index % NS;
+      if (tmp->value.dest != NULL) {
+        ptrdiff_t p_d_index = tmp->value.dest - &chess_board.squares[0][0];
+        int yd = p_d_index / NS;
+        int xd = p_d_index % NS;
 
-    chess_board.moving.prev_dest = &chess_board.squares[NS - 1 - yd][NS - 1 - xd];
+        tmp->value.dest = &chess_board.squares[NS - 1 - yd][NS - 1 - xd];
+      }
+
+      tmp = tmp->next;
+    }
   }
 
   if (chess_board.enpassant.square != NULL) {

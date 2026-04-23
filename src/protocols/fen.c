@@ -8,9 +8,10 @@
 #include <stdio.h>
 #include <string.h>
 
-Positions positions = {0};
+#define UT_IMPLEMENTATION
+#include "utils.h"
 
-char current_fen[512] = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+Positions positions = {0};
 
 void iterate_fen_positions()
 {
@@ -45,7 +46,7 @@ void add_fen_position(const char* fen)
 
 bool load_fen_position(const char* fen_pos)
 {
-  char fen[256];
+  char fen[86];
   strcpy(fen, fen_pos);
 
   // Get the sections
@@ -67,7 +68,9 @@ bool load_fen_position(const char* fen_pos)
   char *rank;
   int rank_c = 0;
   int column_c = 0;
+  if (chess_board.board_flipped) ut_strrev(board);
   rank = strtok(board, "/");
+
   assert(rank != NULL);
   while (rank != NULL) {
     for (size_t i = 0; i < strlen(rank); i++) {
@@ -243,18 +246,17 @@ bool load_fen_position(const char* fen_pos)
 
     chess_board.enpassant.allowed = true;
     chess_board.enpassant.square = &chess_board.squares[NS - 1 - y][x];
-    chess_board.enpassant.square->board_color = RED;
     chess_board.enpassant.allowed_by_color = chess_board.color_turn == W ? B : W;
   }
 
   // Process halfmoves and fullmoves
-  if (strlen(halfmoves) > 1 || !isdigit(halfmoves[0])) {
+  if (!isdigit(halfmoves[0])) {
     fprintf(stderr, "Wrong halfmoves notation: %s.\n", halfmoves);
     return false;
   }
   chess_board.halfmoves = halfmoves[0] - '0';
 
-  if (strlen(fullmoves) > 1 || !isdigit(fullmoves[0])) {
+  if (!isdigit(fullmoves[0])) {
     fprintf(stderr, "Wrong fullmoves notation: %s.\n", fullmoves);
     return false;
   }
@@ -262,24 +264,25 @@ bool load_fen_position(const char* fen_pos)
   return true;
 }
 
-void generate_fen_position()
+void generate_fen_position(char* dest)
 {
-  char fen[256] = {0};
+  char fen[86] = {0};
 
-  int j = !chess_board.board_flipped ? 0 : NS - 1;
   // Process each rank
+  int j = !chess_board.board_flipped ? 0 : NS - 1;
   for (; !chess_board.board_flipped ? j < NS : j >= 0; !chess_board.board_flipped ? j++ : j--) {
-    int i = !chess_board.board_flipped ? 0 : NS - 1;
-
     char rank[20] = {0};
+
+    // Process each row
+    int i = !chess_board.board_flipped ? 0 : NS - 1;
     for (; !chess_board.board_flipped ? i < NS : i >= 0; !chess_board.board_flipped ? i++ : i--) {
       ChessSquare *s = &chess_board.squares[j][i];
       char *piece_notation = get_piece_notation(s->piece);
       if (piece_notation != NULL) strcat(rank, piece_notation);
     }
+
     // Transform '0's in numbers for empty spaces
     char rank_tmp[50] = {0};
-
     for (size_t i = 0; i < strlen(rank); i++) {
       if (rank[i] != '0') strncat(rank_tmp, &rank[i], 1);
       else {
@@ -294,7 +297,11 @@ void generate_fen_position()
       }
     }
     strcat(fen, rank_tmp);
-    if (j < NS - 1 && j >= 0) strcat(fen, "/");
+    if (!chess_board.board_flipped) {
+      if (j < NS - 1) strcat(fen, "/");
+    } else {
+      if (j > 0) strcat(fen, "/");
+    }
   }
 
   // Active color
@@ -338,5 +345,5 @@ void generate_fen_position()
   strcat(fen, halfmoves);
   strcat(fen, fullmoves);
 
-  strcpy(current_fen, fen);
+  strcpy(dest, fen);
 }

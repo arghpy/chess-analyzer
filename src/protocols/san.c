@@ -1,4 +1,5 @@
 #include "protocols/san.h"
+#include "render.h"
 #include "core.h"
 #include "protocols/common.h"
 #include "init.h"
@@ -30,11 +31,11 @@ void generate_san(void)
   char *row    = "abcdefgh";
   char *column = "12345678";
 
-  ptrdiff_t s_index = chess_board.moving.current_src - &chess_board.squares[0][0];
+  ptrdiff_t s_index = moving_piece.src - &chess_board.squares[0][0];
   int ys = s_index / NS;
   int xs = s_index % NS;
 
-  ptrdiff_t d_index = chess_board.moving.current_dest - &chess_board.squares[0][0];
+  ptrdiff_t d_index = moving_piece.dest - &chess_board.squares[0][0];
   int yd = d_index / NS;
   int xd = d_index % NS;
 
@@ -58,8 +59,8 @@ void generate_san(void)
       else strcat(move, "+");
     }
   } else {
-    if (chess_board.moving.src_piece.type != PAWN) {
-      char* piece_notation = get_piece_notation(chess_board.moving.src_piece);
+    if (moving_piece.piece.type != PAWN) {
+      char* piece_notation = get_piece_notation(moving_piece.piece);
       char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
       size_t len = strlen(move);
       move[len] = upper_piece_notation;
@@ -74,13 +75,13 @@ void generate_san(void)
           ChessSquare *s = &chess_board.squares[y][x];
           ChessSquare s_copy = chess_board.squares[y][x];
 
-          if (s == chess_board.moving.current_dest) continue;
-          if (s->piece.color == chess_board.moving.src_piece.color &&
-              s->piece.type == chess_board.moving.src_piece.type &&
-              is_legal_move(s, chess_board.moving.current_dest, s->piece)) {
-            chess_board.moving.current_dest->piece = s->piece;
+          if (s == moving_piece.dest) continue;
+          if (s->piece.color == moving_piece.piece.color &&
+              s->piece.type == moving_piece.piece.type &&
+              is_legal_move(s, moving_piece.dest, s->piece)) {
+            moving_piece.dest->piece = s->piece;
             reset_chess_square(s);
-            if (!in_check(chess_board.moving.src_piece.color)) {
+            if (!in_check(moving_piece.piece.color)) {
               s->piece = s_copy.piece;
               ut_da_push(&ps, s);
             } else s->piece = s_copy.piece;
@@ -130,13 +131,13 @@ void generate_san(void)
       strncat(move, &row[xd], 1);
       strncat(move, &column[yd], 1);
     } else {
-      if (chess_board.moving.src_piece.type == PAWN) strncat(move, &row[xs], 1);
+      if (moving_piece.piece.type == PAWN) strncat(move, &row[xs], 1);
       strcat(move, "x");
       strncat(move, &row[xd], 1);
       strncat(move, &column[yd], 1);
     }
 
-    if (chess_board.moving.src_piece.type == PAWN &&
+    if (moving_piece.piece.type == PAWN &&
         (game_state != PROMOTING) &&
         chess_board.promotion_square != NULL) {
 

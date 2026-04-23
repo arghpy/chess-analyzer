@@ -3,6 +3,7 @@
 
 #include "raylib.h"
 #include "sound.h"
+#include "utils.h"
 
 
 #define WINDOW_FACTOR 67.5
@@ -87,16 +88,6 @@ typedef struct {
   ChessSquare *square;
 } EnPassant;
 
-typedef struct {
-  ChessSquare *current_src;
-  ChessSquare *prev_src;
-  ChessPiece src_piece;
-  ChessPiece dest_piece;
-  ChessSquare *current_dest;
-  ChessSquare *prev_dest;
-  ChessPiece captured_piece;
-} MovingPieces;
-
 typedef enum {
   NO,
   SHORT,
@@ -119,7 +110,7 @@ typedef struct {
   bool board_flipped;
   int halfmoves;
   int fullmoves;
-  MovingPieces moving;
+  ChessPiece captured_piece;
   EnPassant enpassant;
   ChessPieceColor won;
   ChessPieceColor lost;
@@ -127,12 +118,28 @@ typedef struct {
   GameSound action_sound;
 } ChessBoard;
 
+typedef struct {
+  ChessSquare *src;
+  ChessSquare *dest;
+  ChessPiece piece;
+  GameSound sound;
+  char fen[86];
+  ChessPieceColor color_turn;
+  int counter;
+} ChessMove;
+
+ut_ll_declare(ChessMoveNode, ChessMove);
+
+extern ChessMoveNode *ll_chess_move_head;
+extern ChessMove moving_piece;
+extern ChessMoveNode *ll_chess_move_tail;
+extern ChessMoveNode *ll_chess_move_current;
 extern ChessBoard chess_board;
 extern Texture2D chess_pieces_texture[];
 extern const Color square_color[];
 extern ChessSquare piece_promotions[4];
 
-bool load_starting_position(void);
+bool initialize_chess_board(void);
 void load_pawn_promotions(void);
 bool load_chess_pieces(void);
 void unload_chess_pieces(void);

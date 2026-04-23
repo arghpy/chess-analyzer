@@ -500,7 +500,7 @@ bool pawn_is_legal_move(const ChessSquare *src, ChessSquare *dest, const ChessPi
       if (dest == chess_board.enpassant.square) {
         if (!chess_board.state.verify) {
           chess_board.state.captured = true;
-          chess_board.moving.captured_piece = chess_board.squares[yd - y_step][xd].piece;
+          chess_board.captured_piece = chess_board.squares[yd - y_step][xd].piece;
           reset_chess_square(&chess_board.squares[yd - y_step][xd]);
           chess_board.action_sound = CAPTURE;
           chess_board.enpassant.done = true;

@@ -1,4 +1,6 @@
 #include "core.h"
+#include "protocols/fen.h"
+#include "protocols/san.h"
 #include "render.h"
 #include "raylib.h"
 #include "rules/general.h"
@@ -24,6 +26,29 @@ void process_game_states(const Font* font)
   switch (game_state) {
     case PLAYING:
       draw_moving_piece();
+      if (chess_board.state.piece_placed) {
+        advance_game_parameters();
+        verify_if_any_legal_move(chess_board.color_turn);
+        generate_san();
+
+        moving_piece.sound      = chess_board.action_sound;
+        moving_piece.color_turn = chess_board.color_turn;
+        moving_piece.counter    = chess_board.fullmoves;
+        generate_fen_position(moving_piece.fen);
+        ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
+
+        // Always follow the latest move
+        ll_chess_move_current = ll_chess_move_tail;
+
+        // Reset
+        chess_board.castle.castled = NO;
+
+        if (chess_board.state.captured) {
+          chess_board.state.captured = false;
+          chess_board.captured_piece = (ChessPiece){0};
+        }
+      }
+
       break;
     case PROMOTING:
       draw_promotion_pieces(chess_board.promotion_square);
@@ -43,15 +68,15 @@ void increment_chess_states(void)
   if (chess_board.enpassant.done) chess_board.enpassant.done = false;
 
   // Record which color piece moved
-  if      (chess_board.moving.src_piece.color == W) chess_board.state.w_moved = true;
-  else if (chess_board.moving.src_piece.color == B) chess_board.state.b_moved = true;
+  if      (moving_piece.piece.color == W) chess_board.state.w_moved = true;
+  else if (moving_piece.piece.color == B) chess_board.state.b_moved = true;
 
   // Full moves
   if (chess_board.state.w_moved && chess_board.state.b_moved)
     chess_board.fullmoves += 1;
 
   // Half moves
-  if (chess_board.moving.src_piece.type == PAWN || chess_board.state.captured)
+  if (moving_piece.piece.type == PAWN || chess_board.state.captured)
     chess_board.halfmoves = 0;
   else chess_board.halfmoves += 1;
 
@@ -64,22 +89,20 @@ void change_chess_board_turn(void)
   else chess_board.color_turn = W;
 }
 
-void reset_color_previously_moved_pieces(void)
+void reset_square_color_chess_move(ChessMoveNode *node)
 {
-  if (chess_board.moving.prev_src != NULL) {
-    ptrdiff_t p_s_index = chess_board.moving.prev_src - &chess_board.squares[0][0];
+  if (node != NULL && node->value.src != NULL && node->value.dest != NULL) {
+    ptrdiff_t p_s_index = node->value.src - &chess_board.squares[0][0];
     int ys = p_s_index / NS;
     int xs = p_s_index % NS;
 
-    chess_board.moving.prev_src->board_color = square_color[(xs + ys) % 2];
-  }
+    node->value.src->board_color = square_color[(xs + ys) % 2];
 
-  if (chess_board.moving.prev_dest != NULL) {
-    ptrdiff_t p_d_index = chess_board.moving.prev_dest - &chess_board.squares[0][0];
+    ptrdiff_t p_d_index = node->value.dest - &chess_board.squares[0][0];
     int yd = p_d_index / NS;
     int xd = p_d_index % NS;
 
-    chess_board.moving.prev_dest->board_color = square_color[(xd + yd) % 2];
+    node->value.dest->board_color = square_color[(xd + yd) % 2];
   }
 }
 
@@ -93,15 +116,15 @@ void place_piece(void)
                                     square_ptr->center_proximity.center,
                                     square_ptr->center_proximity.r)) {
         found_placement_square = true;
-        if (!valid_move(chess_board.moving.current_src, square_ptr, chess_board.moving.src_piece)) {
+        if (!valid_move(moving_piece.src, square_ptr, moving_piece.piece)) {
           // This additional check is only for setting the sound
-          if (still_on_src_square(chess_board.moving.current_src, square_ptr)) chess_board.action_sound = NOTHING;
+          if (still_on_src_square(moving_piece.src, square_ptr)) chess_board.action_sound = NOTHING;
           else chess_board.action_sound = ILLEGAL;
           break;
         } else {
           // Needed for verifying if current player is in check
-          square_ptr->piece = chess_board.moving.src_piece;
-          if (in_check(chess_board.moving.src_piece.color)) {
+          square_ptr->piece = moving_piece.piece;
+          if (in_check(moving_piece.piece.color)) {
             chess_board.action_sound = ILLEGAL;
             square_ptr->piece = square_piece_copy;
             break;
@@ -110,21 +133,20 @@ void place_piece(void)
           // Sounds:
           if (square_piece_copy.type != NO_PIECE || chess_board.enpassant.done) {
             chess_board.state.captured = true;
-            chess_board.moving.captured_piece = square_piece_copy;
+            chess_board.captured_piece = square_piece_copy;
             chess_board.action_sound = CAPTURE;
           } else if (chess_board.castle.castled) {
             chess_board.action_sound = CASTLE;
           } else chess_board.action_sound = MOVE;
 
           chess_board.state.piece_placed = true;
+          moving_piece.dest = square_ptr;
 
           // Reset original colors and set colors for new valid moves
-          reset_color_previously_moved_pieces();
-          chess_board.moving.prev_src               = chess_board.moving.current_src;
-          chess_board.moving.prev_dest              = square_ptr;
-          chess_board.moving.prev_src->board_color  = color_occupied_square(chess_board.moving.prev_src);
-          chess_board.moving.prev_dest->board_color = color_occupied_square(chess_board.moving.prev_dest);
-          chess_board.moving.current_dest           = square_ptr;
+          reset_square_color_chess_move(ll_chess_move_tail);
+          moving_piece.src->board_color  = color_occupied_square(moving_piece.src);
+          moving_piece.dest->board_color = color_occupied_square(moving_piece.dest);
+
           break;
         }
         break;
@@ -134,7 +156,7 @@ void place_piece(void)
   }
   found_placement_square = false;
   if (!chess_board.state.piece_placed)
-    chess_board.moving.current_src->piece = chess_board.moving.src_piece;
+    moving_piece.src->piece = moving_piece.piece;
 }
 
 void reset_chess_square(ChessSquare *square)

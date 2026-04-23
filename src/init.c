@@ -3,6 +3,10 @@
 #include <stdio.h>
 
 ChessBoard chess_board = {0};
+ChessMoveNode *ll_chess_move_head = NULL;
+ChessMove     moving_piece     = {0};
+ChessMoveNode *ll_chess_move_tail = NULL;
+ChessMoveNode *ll_chess_move_current = NULL;
 
 const Color square_color[] = {
   [LIGHT_TILE] = (Color) { 0xED, 0xD4, 0xAE, 0xFF },
@@ -13,13 +17,22 @@ Texture2D chess_pieces_texture[TEXTURE_COUNT] = {0};
 
 ChessSquare piece_promotions[4] = {0};
 
-bool load_starting_position(void)
+bool initialize_chess_board(void)
 {
   for (int y = 0; y < NS; y++)
     for (int x = 0; x < NS; x++)
       chess_board.squares[y][x].board_color = square_color[(x + y) % 2];
 
-  return load_fen_position(current_fen);
+  moving_piece.sound      = chess_board.action_sound;
+  moving_piece.color_turn = chess_board.color_turn;
+  moving_piece.counter    = chess_board.fullmoves;
+  strcpy(moving_piece.fen, STARTING_POSITION);
+  ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
+
+  // Always follow the latest move
+  ll_chess_move_current = ll_chess_move_tail;
+
+  return load_fen_position(STARTING_POSITION);
 }
 
 void load_pawn_promotions(void)

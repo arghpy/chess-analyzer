@@ -6,6 +6,7 @@
 #include "init.h"
 #include "render.h"
 #include <stdio.h>
+#include <stddef.h>
 
 void process_keyboard_events(void)
 {
@@ -14,17 +15,61 @@ void process_keyboard_events(void)
     flip_board();
   }
 
+  if (IsKeyPressed(KEY_F)) {
+    if (ll_chess_move_current != NULL) printf("|%s|\n", ll_chess_move_current->value.fen);
+  }
+
+  // Cycle through moves
+  if (IsKeyPressed(KEY_LEFT)) {
+    if (ll_chess_move_current != NULL) {
+      if (ll_chess_move_current->prev != NULL) {
+        // Reset current color
+        reset_square_color_chess_move(ll_chess_move_current);
+
+        // Assign new color
+        if (ll_chess_move_current->prev->value.src != NULL && ll_chess_move_current->prev->value.dest != NULL) {
+          ll_chess_move_current->prev->value.src->board_color  = color_occupied_square(ll_chess_move_current->prev->value.src);
+          ll_chess_move_current->prev->value.dest->board_color = color_occupied_square(ll_chess_move_current->prev->value.dest);
+        }
+
+        ll_chess_move_current = ll_chess_move_current->prev;
+        load_fen_position(ll_chess_move_current->value.fen);
+        chess_board.action_sound = ll_chess_move_current->value.sound;
+      }
+    }
+  }
+  if (IsKeyPressed(KEY_RIGHT)) {
+    if (ll_chess_move_current != NULL) {
+      if (ll_chess_move_current->next != NULL) {
+        // Reset current color
+        reset_square_color_chess_move(ll_chess_move_current);
+
+        // Assign new color
+        if (ll_chess_move_current->next->value.src != NULL && ll_chess_move_current->next->value.dest != NULL) {
+          ll_chess_move_current->next->value.src->board_color  = color_occupied_square(ll_chess_move_current->next->value.src);
+          ll_chess_move_current->next->value.dest->board_color = color_occupied_square(ll_chess_move_current->next->value.dest);
+        }
+
+        ll_chess_move_current = ll_chess_move_current->next;
+        load_fen_position(ll_chess_move_current->value.fen);
+        chess_board.action_sound = ll_chess_move_current->value.sound;
+      }
+    }
+  }
+}
+
+void process_mouse_events(void)
+{
   // Color square red on right mouse click
   if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
     for (int y = 0; y < NS; y++) {
       for (int x = 0; x < NS; x++) {
         ChessSquare *s = &chess_board.squares[y][x];
         if (CheckCollisionPointRec(GetMousePosition(), s->rect)) {
-          if (!ColorIsEqual(s->board_color, RED_SQUARE))
-            s->board_color = RED_SQUARE;
+          if (!ColorIsEqual(s->board_color, RED_SQUARE)) s->board_color = RED_SQUARE;
           else {
             s->board_color = square_color[(x + y) % 2];
-            if (s == chess_board.moving.prev_src || s == chess_board.moving.prev_dest)
+            if (s == ll_chess_move_tail->value.src || s == ll_chess_move_tail->value.dest)
               s->board_color  = color_occupied_square(s);
           }
         }

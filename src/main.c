@@ -28,7 +28,7 @@ int main(void)
   }
 
   { // Initializing
-    if (init && !load_starting_position()) init = false;
+    if (init && !initialize_chess_board()) init = false;
     if (init && !load_chess_pieces())      init = false;
     if (init && !load_sounds())            init = false;
     if (init) load_pawn_promotions();
@@ -37,6 +37,7 @@ int main(void)
   if (init) {
     while(!WindowShouldClose()) {
       process_keyboard_events();
+      process_mouse_events();
       BeginDrawing();
       {
         ClearBackground(background_color);
@@ -59,6 +60,7 @@ int main(void)
     if (IsAudioDeviceReady()) CloseAudioDevice(); // Close the audio device and context
     unload_sounds();
     ut_da_free(&positions);
+    ut_ll_free(ChessMoveNode, ll_chess_move_head);
     unload_chess_pieces();
     UnloadFont(general_font);
     UnloadFont(big_font);
