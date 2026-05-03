@@ -89,6 +89,15 @@ void change_chess_board_turn(void)
   else chess_board.color_turn = W;
 }
 
+void reset_square_color(ChessSquare *s)
+{
+  ptrdiff_t p_index = s - &chess_board.squares[0][0];
+  int y = p_index / NS;
+  int x = p_index % NS;
+
+  s->board_color = square_color[(x + y) % 2];
+}
+
 void reset_square_color_chess_move(ChessMoveNode *node)
 {
   if (node != NULL && node->value.src != NULL && node->value.dest != NULL) {
@@ -144,6 +153,9 @@ void place_piece(void)
 
           // Reset original colors and set colors for new valid moves
           reset_square_color_chess_move(ll_chess_move_tail);
+          reset_square_color(moving_piece.src);
+          reset_square_color(moving_piece.dest);
+
           moving_piece.src->board_color  = color_occupied_square(moving_piece.src);
           moving_piece.dest->board_color = color_occupied_square(moving_piece.dest);
 

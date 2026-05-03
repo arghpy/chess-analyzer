@@ -17,6 +17,7 @@ void reset_chess_square(ChessSquare *square);
 void place_piece(void);
 void process_game_states(const Font* font);
 void advance_game_parameters(void);
+void reset_square_color(ChessSquare *s);
 void reset_square_color_chess_move(ChessMoveNode *node);
 void change_chess_board_turn(void);
 

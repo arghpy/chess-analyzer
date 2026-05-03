@@ -1,4 +1,5 @@
 #include "init.h"
+#include "core.h"
 #include "protocols/fen.h"
 #include <stdio.h>
 
@@ -13,6 +14,11 @@ const Color square_color[] = {
   [DARK_TILE]  = (Color) { 0xB9, 0x89, 0x65, 0xFF }
 };
 
+const Color occupied_square_color[] = {
+  [LIGHT_OCCUPIED_TILE] = (Color) {0xF6, 0xEA, 0x72, 0xFF},
+  [DARK_OCCUPIED_TILE]  = (Color) {0xDD, 0xC3, 0x4C, 0xFF}
+};
+
 Texture2D chess_pieces_texture[TEXTURE_COUNT] = {0};
 
 ChessSquare piece_promotions[4] = {0};
@@ -21,7 +27,7 @@ bool initialize_chess_board(void)
 {
   for (int y = 0; y < NS; y++)
     for (int x = 0; x < NS; x++)
-      chess_board.squares[y][x].board_color = square_color[(x + y) % 2];
+      reset_square_color(&chess_board.squares[y][x]);
 
   moving_piece.sound      = chess_board.action_sound;
   moving_piece.color_turn = chess_board.color_turn;

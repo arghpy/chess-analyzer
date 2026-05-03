@@ -19,6 +19,11 @@ typedef enum {
 } BoardColor;
 
 typedef enum {
+  LIGHT_OCCUPIED_TILE,
+  DARK_OCCUPIED_TILE
+} BoardColorOccupied;
+
+typedef enum {
   PAWN_W,
   PAWN_B,
   BISHOP_W,
@@ -137,6 +142,7 @@ extern ChessMoveNode *ll_chess_move_current;
 extern ChessBoard chess_board;
 extern Texture2D chess_pieces_texture[];
 extern const Color square_color[];
+extern const Color occupied_square_color[];
 extern ChessSquare piece_promotions[4];
 
 bool initialize_chess_board(void);

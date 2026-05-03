@@ -362,7 +362,7 @@ void draw_result(const Font *font, const char* result)
 Color color_occupied_square(const ChessSquare *s)
 {
   return ColorIsEqual(s->board_color, square_color[LIGHT_TILE]) ?
-    (Color){0xF6, 0xEA, 0x72, 0xFF} : (Color){0xDD, 0xC3, 0x4C, 0xFF};
+    occupied_square_color[LIGHT_OCCUPIED_TILE] : occupied_square_color[DARK_OCCUPIED_TILE];
 }
 
 void flip_board(void)
