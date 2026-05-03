@@ -27,18 +27,18 @@ void process_game_states(const Font* font)
     case PLAYING:
       draw_moving_piece();
       if (chess_board.state.piece_placed) {
-        advance_game_parameters();
-        verify_if_any_legal_move(chess_board.color_turn);
-        generate_san();
-
         moving_piece.sound      = chess_board.action_sound;
         moving_piece.color_turn = chess_board.color_turn;
-        moving_piece.counter    = chess_board.fullmoves;
+        moving_piece.move_nr    = chess_board.fullmoves;
         generate_fen_position(moving_piece.fen);
+        generate_san(moving_piece.san);
         ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
 
         // Always follow the latest move
         ll_chess_move_current = ll_chess_move_tail;
+
+        advance_game_parameters();
+        verify_if_any_legal_move(chess_board.color_turn);
 
         // Reset
         chess_board.castle.castled = NO;

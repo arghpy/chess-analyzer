@@ -41,16 +41,24 @@ char *generate_pgn(void)
                       break;
                     }
   }
-  for (size_t i = 0; i < san_moves.count; i++) {
-    SanMove *full_move = &san_moves.items[i];
+  ChessMoveNode *ll_n = ll_chess_move_head->next;
+  while (ll_n != NULL) {
     char move[50] = {0};
-    sprintf(move, "%d. %s %s\n", full_move->move_nr, full_move->san_w, full_move->san_b);
+    char tmp[50] = {0};
+
+    if (ll_n->value.move_nr != ll_n->prev->value.move_nr) sprintf(move, "%d. ", ll_n->value.move_nr);
+    sprintf(tmp, "%s ", ll_n->value.san);
+    strcat(move, tmp);
+
+    // Allocate more memory for PGN
     if (strlen(pgn) + strlen(move) + 2 > pgn_capacity) {
       pgn_capacity *= 2;
       pgn = realloc(pgn, pgn_capacity);
       if(!pgn) fprintf(stderr, "Not enough memory.\n");
     }
     strcat(pgn, move);
+
+    ll_n = ll_n->next;
   }
   return pgn;
 }
@@ -141,7 +149,7 @@ void draw_san_window(const Font *font)
 
   DrawRectangleLinesEx(san_r, san_r_thickness, WHITE);
 
-  float content_height   = font_height * san_moves.count;
+  float content_height   = font_height * ll_chess_move_tail->value.move_nr;
   float window_height    = (float)GetScreenHeight() - fen_button_r.height;
   bool  needs_scroll     = content_height > window_height;
 
@@ -167,13 +175,13 @@ void draw_san_window(const Font *font)
     initialized = true;
   }
 
-  // // Auto-advance bar when new moves push content down
-  static size_t last_move_count = 0;
+  // Auto-advance bar when new moves push content down
+  static int last_move_count = 0;
 
-  if (san_moves.count != last_move_count) {
+  if (ll_chess_move_tail->value.move_nr != last_move_count) {
       // A new move was just added — snap bar to bottom
       bar_y = scrollable_bar;
-      last_move_count = san_moves.count;
+      last_move_count = ll_chess_move_tail->value.move_nr;
   }
 
   if (needs_scroll) {
@@ -200,34 +208,29 @@ void draw_san_window(const Font *font)
   float t              = (scrollable_bar > 0.0f) ? bar_y / scrollable_bar : 0.0f;
   float content_scroll = t * scrollable_content;
 
-  for (size_t i = 0; i < san_moves.count; i++) {
-    char notation[64] = {0};
-    char tmp[64]      = {0};
+  ChessMoveNode *ll_n = ll_chess_move_head->next;
+  char notation[64] = {0};
+  while (ll_n != NULL) {
+    char buf[64] = {0};
 
-    if (san_moves.items[i].move_nr != 0) {
-      char tmp2[64] = {0};
-      snprintf(tmp2, sizeof(tmp2), "%d.", san_moves.items[i].move_nr);
-      snprintf(tmp,  sizeof(tmp),  "%-10s", tmp2);
-      strcat(notation, tmp);
-      memset(tmp, 0, sizeof(tmp));
+    if (ll_n->value.move_nr != ll_n->prev->value.move_nr) {
+      sprintf(buf, "%d.", ll_n->value.move_nr);
+      sprintf(notation, "%-5s", buf);
     }
 
-    if (strcmp(san_moves.items[i].san_w, "") > 0) {
-      snprintf(tmp, sizeof(tmp), "%-15s", san_moves.items[i].san_w);
-      strcat(notation, tmp);
-      memset(tmp, 0, sizeof(tmp));
+    if (strcmp(ll_n->value.san, "") > 0) {
+      sprintf(buf, "%10s", ll_n->value.san);
+      strcat(notation, buf);
     }
 
-    if (strcmp(san_moves.items[i].san_b, "") > 0) {
-      snprintf(tmp, sizeof(tmp), "%s\n", san_moves.items[i].san_b);
-      strcat(notation, tmp);
-      memset(tmp, 0, sizeof(tmp));
-    }
+    if (ll_n->value.move_nr == ll_n->prev->value.move_nr) strcat(notation, "\n");
 
     Vector2 text_pos = {
       .x = san_r.x + spacing,
-      .y = san_r.y + font_height * (float)i + spacing - content_scroll - 5,
+      .y = san_r.y + font_height * (ll_n->value.move_nr - 1) + spacing - content_scroll - 5,
     };
+
+    ll_n = ll_n->next;
 
     // Cull lines fully outside the visible area
     if (text_pos.y + font_height < 0 || text_pos.y > window_height)

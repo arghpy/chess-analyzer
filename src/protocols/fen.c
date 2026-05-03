@@ -13,16 +13,6 @@
 
 Positions positions = {0};
 
-void iterate_fen_positions()
-{
-  printf("\n\n--------------------------------------------------\n");
-    for (size_t i = 0; i < positions.count; i++) {
-      printf("%d: %s\n", positions.items[i].c, positions.items[i].fen_p);
-    }
-  printf("--------------------------------------------------\n");
-  fflush(stdout);
-}
-
 void add_fen_position(const char* fen)
 {
   Position p = {0};

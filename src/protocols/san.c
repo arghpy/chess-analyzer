@@ -10,23 +10,10 @@
 #include <stdio.h>
 #include <string.h>
 
-size_t SAN_MOVES_CAP = 10;
-
 typedef ut_da_declare(ChessSquare*) PossibleMoves;
 
-SanMove empty = {0};
-SanMoves san_moves = {0};
-
-void generate_san(void)
+void generate_san(char* dest)
 {
-  static SanMove *current_san_move = &empty;
-
-  // Already populated, means it is part of the san_moves
-  if (memcmp(current_san_move, &(SanMove){0}, sizeof(*current_san_move)) != 0) {
-    current_san_move = &san_moves.items[san_moves.count - 1];
-    empty = (SanMove){0};
-  }
-
   // Write SAN
   char *row    = "abcdefgh";
   char *column = "12345678";
@@ -47,9 +34,6 @@ void generate_san(void)
     xd = NS - xd - 1;
   }
   char move[20] = {0};
-
-  if (memcmp(current_san_move, &(SanMove){0}, sizeof(*current_san_move)) == 0)
-    current_san_move->move_nr = chess_board.fullmoves;
 
   if (chess_board.castle.castled != NO) {
     if      (chess_board.castle.castled == SHORT) strcat(move, "O-O");
@@ -154,17 +138,5 @@ void generate_san(void)
     }
   }
 
-  if (chess_board.state.w_moved && chess_board.color_turn == B) strcpy(current_san_move->san_w, move);
-  if (chess_board.state.b_moved && chess_board.color_turn == W) strcpy(current_san_move->san_b, move);
-
-  if (san_moves.count == 0) ut_da_push(&san_moves, *current_san_move);
-  else if (current_san_move != &san_moves.items[san_moves.count - 1])
-    ut_da_push(&san_moves, *current_san_move);
-
-  if (current_san_move->move_nr != 0 &&
-      strcmp(current_san_move->san_w, "") > 0 &&
-      strcmp(current_san_move->san_b, "") > 0) {
-    empty = (SanMove){0};
-    current_san_move = &empty;
-  }
+  strcpy(dest, move);
 }

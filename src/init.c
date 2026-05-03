@@ -31,7 +31,7 @@ bool initialize_chess_board(void)
 
   moving_piece.sound      = chess_board.action_sound;
   moving_piece.color_turn = chess_board.color_turn;
-  moving_piece.counter    = chess_board.fullmoves;
+  moving_piece.move_nr    = chess_board.fullmoves;
   strcpy(moving_piece.fen, STARTING_POSITION);
   ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
 

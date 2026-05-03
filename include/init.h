@@ -126,11 +126,12 @@ typedef struct {
 typedef struct {
   ChessSquare *src;
   ChessSquare *dest;
+  char san[8];
   ChessPiece piece;
   GameSound sound;
   char fen[86];
   ChessPieceColor color_turn;
-  int counter;
+  int move_nr;
 } ChessMove;
 
 ut_ll_declare(ChessMoveNode, ChessMove);
