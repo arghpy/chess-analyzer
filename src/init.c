@@ -25,20 +25,23 @@ ChessSquare piece_promotions[4] = {0};
 
 bool initialize_chess_board(void)
 {
+  bool ret = false;
   for (int y = 0; y < NS; y++)
     for (int x = 0; x < NS; x++)
       reset_square_color(&chess_board.squares[y][x]);
 
-  moving_piece.sound      = chess_board.action_sound;
-  moving_piece.color_turn = chess_board.color_turn;
-  moving_piece.move_nr    = chess_board.fullmoves;
-  strcpy(moving_piece.fen, STARTING_POSITION);
-  ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
+  ret = load_fen_position(STARTING_POSITION);
+  if (ret) {
+    moving_piece.sound      = chess_board.action_sound;
+    moving_piece.move_nr    = -1;
+    strcpy(moving_piece.fen, STARTING_POSITION);
+    ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
 
-  // Always follow the latest move
-  ll_chess_move_current = ll_chess_move_tail;
+    // Always follow the latest move
+    ll_chess_move_current = ll_chess_move_tail;
+  }
 
-  return load_fen_position(STARTING_POSITION);
+  return ret;
 }
 
 void load_pawn_promotions(void)

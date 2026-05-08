@@ -63,7 +63,7 @@ void generate_san(char* dest)
           if (s->piece.color == moving_piece.piece.color &&
               s->piece.type == moving_piece.piece.type &&
               is_legal_move(s, moving_piece.dest, s->piece)) {
-            moving_piece.dest->piece = s->piece;
+            moving_piece.piece = s->piece;
             reset_chess_square(s);
             if (!in_check(moving_piece.piece.color)) {
               s->piece = s_copy.piece;
@@ -121,11 +121,9 @@ void generate_san(char* dest)
       strncat(move, &column[yd], 1);
     }
 
-    if (moving_piece.piece.type == PAWN &&
-        (game_state != PROMOTING) &&
-        chess_board.promotion_square != NULL) {
-
-      char* piece_notation = get_piece_notation(chess_board.promotion_square->piece);
+    // Checking promoting
+    if (moving_piece.piece.type == PAWN && moving_piece.dest->piece.type != moving_piece.piece.type) {
+      char* piece_notation = get_piece_notation(moving_piece.dest->piece);
       char upper_piece_notation = toupper((unsigned char) piece_notation[0]);
       strcat(move, "=");
       size_t len = strlen(move);

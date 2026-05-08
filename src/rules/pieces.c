@@ -379,9 +379,11 @@ bool king_is_legal_move(const ChessSquare *src, const ChessSquare *dest, const C
   } else return false;
 }
 
-void select_for_promotion(ChessSquare *promotion_square)
+ChessPiece select_for_promotion(void)
 {
-  for (size_t i = 0; i < ARRAY_LEN(piece_promotions); i++) {
+  ChessPiece promotion_piece = {0};
+  if (moving_piece.dest != NULL) {
+    for (size_t i = 0; i < ARRAY_LEN(piece_promotions); i++) {
       ChessSquare square = piece_promotions[i];
       if (CheckCollisionPointRec(GetMousePosition(), square.rect) &&
           (square.piece.type != NO_PIECE)) {
@@ -389,40 +391,43 @@ void select_for_promotion(ChessSquare *promotion_square)
         chess_board.state.hovering_piece = true;
         if (IsMouseButtonPressed(MOUSE_BUTTON_LEFT)) {
           chess_board.action_sound = PROMOTE;
-          game_state = PLAYING;
-          promotion_square->piece = piece_promotions[i].piece;
+          promotion_piece = piece_promotions[i].piece;
           break;
         }
       }
+    }
   }
+  return promotion_piece;
 }
 
-void draw_promotion_pieces(ChessSquare *promotion_square)
+void draw_promotion_pieces(void)
 {
-  ptrdiff_t d_index = promotion_square - &chess_board.squares[0][0];
-  int yd = d_index / NS;
-  int xd = d_index % NS;
+  if (moving_piece.dest != NULL) {
+    ptrdiff_t d_index = moving_piece.dest - &chess_board.squares[0][0];
+    int yd = d_index / NS;
+    int xd = d_index % NS;
 
-  int y_step = (yd == (NS-1)) ? 1 : -1;
+    int y_step = (yd == (NS-1)) ? 1 : -1;
 
-  for (int i = 0; i < 4; i++) {
-    piece_promotions[i].rect = (Rectangle) {
-      .x      = xd * SQUARE_SIZE,
-      .y      = (yd - y_step * i) * SQUARE_SIZE,
-      .width  = SQUARE_SIZE,
-      .height = SQUARE_SIZE,
-    };
-    piece_promotions[i].center_proximity = (Circle) {
-      .center = (Vector2) {
-        .x = xd * SQUARE_SIZE + SQUARE_SIZE / 2.0f,
-        .y = (yd - y_step * i) * SQUARE_SIZE + SQUARE_SIZE / 2.0f
-      },
+    for (int i = 0; i < 4; i++) {
+      piece_promotions[i].rect = (Rectangle) {
+        .x      = xd * SQUARE_SIZE,
+        .y      = (yd - y_step * i) * SQUARE_SIZE,
+        .width  = SQUARE_SIZE,
+        .height = SQUARE_SIZE,
+      };
+      piece_promotions[i].center_proximity = (Circle) {
+        .center = (Vector2) {
+          .x = xd * SQUARE_SIZE + SQUARE_SIZE / 2.0f,
+          .y = (yd - y_step * i) * SQUARE_SIZE + SQUARE_SIZE / 2.0f
+        },
         .r = SQUARE_SIZE / 2.5f,
-    };
-    piece_promotions[i].piece.color = promotion_square->piece.color == W ? W : B;
-    DrawRectangleRec(piece_promotions[i].rect, RAYWHITE);
-    DrawRectangleLinesEx(piece_promotions[i].rect, 2.0f, GRAY);
-    draw_piece(&piece_promotions[i]);
+      };
+      piece_promotions[i].piece.color = moving_piece.piece.color == W ? W : B;
+      DrawRectangleRec(piece_promotions[i].rect, RAYWHITE);
+      DrawRectangleLinesEx(piece_promotions[i].rect, 2.0f, GRAY);
+      draw_piece(&piece_promotions[i]);
+    }
   }
 }
 

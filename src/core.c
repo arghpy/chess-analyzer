@@ -14,45 +14,73 @@ bool found_placement_square = false;
 void advance_game_parameters(void)
 {
   chess_board.state.piece_placed = false;
-  if (chess_board.state.w_moved && chess_board.state.b_moved) {
-    chess_board.state.w_moved = false;
-    chess_board.state.b_moved = false;
+
+  if (chess_board.enpassant.done) chess_board.enpassant.done = false;
+
+  // Half moves
+  if (moving_piece.piece.type == PAWN || chess_board.state.captured)
+    chess_board.halfmoves = 0;
+  else chess_board.halfmoves += 1;
+
+  if (chess_board.halfmoves == 50) game_state = DRAW;
+
+  // Castling
+  chess_board.castle.castled = NO;
+
+  // Captured piece
+  if (chess_board.state.captured) {
+    chess_board.state.captured = false;
+    chess_board.captured_piece = (ChessPiece){0};
   }
-  increment_chess_states();
+  if (game_state != DRAW && game_state != CHECKMATE) game_state = PLAYING;
 }
 
 void process_game_states(const Font* font)
 {
+  // Allow moves to continue only from the end
+  if (game_state == REWINDING && ll_chess_move_current == ll_chess_move_tail)
+    game_state = PLAYING;
+
   switch (game_state) {
+    case REWINDING: break;
     case PLAYING:
       draw_moving_piece();
-      if (chess_board.state.piece_placed) {
-        moving_piece.sound      = chess_board.action_sound;
-        moving_piece.color_turn = chess_board.color_turn;
-        moving_piece.move_nr    = chess_board.fullmoves;
+      if (chess_board.state.piece_placed && game_state != PROMOTING) {
+        verify_if_any_legal_move(chess_board.color_turn);
+
+        // Full moves
+        if (ll_chess_move_current->prev != NULL && moving_piece.piece.color == W)
+          chess_board.fullmoves += 1;
+
+        moving_piece.sound   = chess_board.action_sound;
+        moving_piece.move_nr = chess_board.fullmoves;
         generate_fen_position(moving_piece.fen);
         generate_san(moving_piece.san);
         ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
+        ll_chess_move_current = ll_chess_move_tail;
+        advance_game_parameters();
+      }
+      break;
+    case PROMOTING:
+      draw_promotion_pieces();
+      ChessPiece promotion_piece = select_for_promotion();
+      if (promotion_piece.type != NO_PIECE) {
+        moving_piece.dest->piece = promotion_piece;
+        verify_if_any_legal_move(chess_board.color_turn);
 
-        // Always follow the latest move
+        // Full moves
+        if (ll_chess_move_current->prev != NULL && moving_piece.dest->piece.color == W)
+          chess_board.fullmoves += 1;
+
+        moving_piece.sound   = chess_board.action_sound;
+        moving_piece.move_nr = chess_board.fullmoves;
+        generate_fen_position(moving_piece.fen);
+        generate_san(moving_piece.san);
+        ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
         ll_chess_move_current = ll_chess_move_tail;
 
         advance_game_parameters();
-        verify_if_any_legal_move(chess_board.color_turn);
-
-        // Reset
-        chess_board.castle.castled = NO;
-
-        if (chess_board.state.captured) {
-          chess_board.state.captured = false;
-          chess_board.captured_piece = (ChessPiece){0};
-        }
       }
-
-      break;
-    case PROMOTING:
-      draw_promotion_pieces(chess_board.promotion_square);
-      select_for_promotion(chess_board.promotion_square);
       break;
     case DRAW:
       draw_result(font, "DRAW");
@@ -61,26 +89,6 @@ void process_game_states(const Font* font)
       draw_result(font, chess_board.color_turn == W ? "BLACK WON" : "WHITE WON");
       break;
   }
-}
-
-void increment_chess_states(void)
-{
-  if (chess_board.enpassant.done) chess_board.enpassant.done = false;
-
-  // Record which color piece moved
-  if      (moving_piece.piece.color == W) chess_board.state.w_moved = true;
-  else if (moving_piece.piece.color == B) chess_board.state.b_moved = true;
-
-  // Full moves
-  if (chess_board.state.w_moved && chess_board.state.b_moved)
-    chess_board.fullmoves += 1;
-
-  // Half moves
-  if (moving_piece.piece.type == PAWN || chess_board.state.captured)
-    chess_board.halfmoves = 0;
-  else chess_board.halfmoves += 1;
-
-  if (chess_board.halfmoves == 50) game_state = DRAW;
 }
 
 void change_chess_board_turn(void)

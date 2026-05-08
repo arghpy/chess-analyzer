@@ -7,12 +7,12 @@
 typedef enum {
   PLAYING,
   PROMOTING,
+  REWINDING,
   DRAW,
   CHECKMATE,
 } GameState;
 
 extern GameState game_state;
-void increment_chess_states(void);
 void reset_chess_square(ChessSquare *square);
 void place_piece(void);
 void process_game_states(const Font* font);

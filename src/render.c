@@ -26,6 +26,7 @@ char *generate_pgn(void)
   char* pgn = calloc(pgn_capacity, sizeof(char));
 
   switch (game_state) {
+    case REWINDING:
     case PLAYING:
       sprintf(pgn, "\n[Result \"*\"]\n\n");
       break;
@@ -291,18 +292,17 @@ void draw_drag_and_place(void)
         if (in_check(chess_board.color_turn)) chess_board.action_sound = MOVE_CHECK;
 
         if (chess_board.enpassant.allowed)
-          if (chess_board.enpassant.allowed_by_color != moving_piece.dest->piece.color)
+          if (chess_board.enpassant.allowed_by_color != moving_piece.piece.color)
             chess_board.enpassant.allowed = false;
 
         // Check promotion
-        if (moving_piece.dest->piece.type == PAWN) {
+        if (moving_piece.piece.type == PAWN) {
           ptrdiff_t d_index = moving_piece.dest - &chess_board.squares[0][0];
           int yd = d_index / NS;
 
           if (yd == 0 || yd == (NS - 1)) {
             game_state = PROMOTING;
             chess_board.action_sound = NOTHING;
-            chess_board.promotion_square = moving_piece.dest;
           }
         }
       }

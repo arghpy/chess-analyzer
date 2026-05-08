@@ -23,6 +23,8 @@ void process_keyboard_events(void)
   if (IsKeyPressed(KEY_LEFT)) {
     if (ll_chess_move_current != NULL) {
       if (ll_chess_move_current->prev != NULL) {
+        game_state = REWINDING;
+
         // Reset current color
         reset_square_color_chess_move(ll_chess_move_current);
 
@@ -41,6 +43,8 @@ void process_keyboard_events(void)
   if (IsKeyPressed(KEY_RIGHT)) {
     if (ll_chess_move_current != NULL) {
       if (ll_chess_move_current->next != NULL) {
+        game_state = REWINDING;
+
         // Reset current color
         reset_square_color_chess_move(ll_chess_move_current);
 
@@ -86,7 +90,7 @@ void process_mouse_events(void)
       for (int x = 0; x < NS; x++) {
         ChessSquare *s = &chess_board.squares[y][x];
         if (CheckCollisionPointRec(GetMousePosition(), s->rect) && s->piece.type != NO_PIECE) {
-          if (!ColorIsEqual(s->board_color, occupied_square_color[LIGHT_OCCUPIED_TILE]) ||
+          if (!ColorIsEqual(s->board_color, occupied_square_color[LIGHT_OCCUPIED_TILE]) &&
               !ColorIsEqual(s->board_color, occupied_square_color[DARK_OCCUPIED_TILE]))
           {
             for (int y = 0; y < NS; y++)

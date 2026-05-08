@@ -80,8 +80,6 @@ typedef struct {
   bool piece_placed;
   bool promote;
   bool promotion_done;
-  bool w_moved;
-  bool b_moved;
   bool captured;
   bool verify;
 } States;
@@ -117,9 +115,6 @@ typedef struct {
   int fullmoves;
   ChessPiece captured_piece;
   EnPassant enpassant;
-  ChessPieceColor won;
-  ChessPieceColor lost;
-  ChessSquare *promotion_square;
   GameSound action_sound;
 } ChessBoard;
 
@@ -130,7 +125,6 @@ typedef struct {
   ChessPiece piece;
   GameSound sound;
   char fen[86];
-  ChessPieceColor color_turn;
   int move_nr;
 } ChessMove;
 
