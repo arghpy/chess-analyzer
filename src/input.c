@@ -65,6 +65,7 @@ void process_keyboard_events(void)
 void process_mouse_events(void)
 {
   bool found = false;
+
   // Color square red on right mouse click
   if (IsMouseButtonPressed(MOUSE_RIGHT_BUTTON)) {
     for (int y = 0; y < NS; y++) {
@@ -89,22 +90,18 @@ void process_mouse_events(void)
     for (int y = 0; y < NS; y++) {
       for (int x = 0; x < NS; x++) {
         ChessSquare *s = &chess_board.squares[y][x];
-        if (CheckCollisionPointRec(GetMousePosition(), s->rect) && s->piece.type != NO_PIECE) {
-          if (!ColorIsEqual(s->board_color, occupied_square_color[LIGHT_OCCUPIED_TILE]) &&
-              !ColorIsEqual(s->board_color, occupied_square_color[DARK_OCCUPIED_TILE]))
-          {
-            for (int y = 0; y < NS; y++)
-              for (int x = 0; x < NS; x++)
-                reset_square_color(&chess_board.squares[y][x]);
-
-            if (ll_chess_move_current->value.src != NULL && ll_chess_move_current->value.dest != NULL) {
-              ll_chess_move_current->value.src->board_color  = color_occupied_square(ll_chess_move_current->value.src);
-              ll_chess_move_current->value.dest->board_color = color_occupied_square(ll_chess_move_current->value.dest);
+        if (CheckCollisionPointRec(GetMousePosition(), s->rect)) {
+          if (s->piece.type == NO_PIECE) reset_colors_for_current_move();
+          else {
+            if (!ColorIsEqual(s->board_color, occupied_square_color[LIGHT_OCCUPIED_TILE]) &&
+                !ColorIsEqual(s->board_color, occupied_square_color[DARK_OCCUPIED_TILE]))
+            {
+              reset_colors_for_current_move();
+              s->board_color = color_occupied_square(s);
             }
-            s->board_color = color_occupied_square(s);
+            found = true;
+            break;
           }
-          found = true;
-          break;
         }
       }
       if (found) break;

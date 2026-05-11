@@ -20,6 +20,21 @@ bool copying_pgn = false;
 
 // float SQUARE_SIZE = 0.0f;
 
+void reset_colors_for_current_move(void)
+{
+  for (int y = 0; y < NS; y++)
+    for (int x = 0; x < NS; x++)
+      if (!ColorIsEqual(chess_board.squares[y][x].board_color, RED_SQUARE))
+        reset_square_color(&chess_board.squares[y][x]);
+
+  if (ll_chess_move_current->value.src != NULL &&
+      ll_chess_move_current->value.dest != NULL)
+  {
+    ll_chess_move_current->value.src->board_color  = color_occupied_square(ll_chess_move_current->value.src);
+    ll_chess_move_current->value.dest->board_color = color_occupied_square(ll_chess_move_current->value.dest);
+  }
+}
+
 char *generate_pgn(void)
 {
   size_t pgn_capacity = 100;
