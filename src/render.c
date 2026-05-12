@@ -1,4 +1,5 @@
 #include "render.h"
+#include "raymath.h"
 #include "utils.h"
 #include "init.h"
 #include "protocols/fen.h"
@@ -221,8 +222,11 @@ void draw_san_window(const Font *font)
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
 
   float san_text_height = font_height * ll_chess_move_tail->value.move_nr;
-  static float offset = 0.0f;
 
+  static float offset = 0.0f;
+  static float scrollbar_target = 0.0f;
+
+  // The mother of all scroll bars
   if (san_text_height > san_r.height) {
     float scrollable_san = san_text_height - san_r.height;
 
@@ -234,40 +238,38 @@ void draw_san_window(const Font *font)
     bar_r.width  = SQUARE_SIZE / 5.0f;
     bar_r.x      = GetScreenWidth() - bar_r.width;
 
-    float scrollable_bar = san_r.height - bar_r.height;
-
-    // How far bar and san_text can each travel
-    float scroll_unit = 10.0f;
-
     // Auto-advance bar when new moves push san_text down
+    // no smoothing
     static ChessMoveNode *last_move = NULL;
     if (ll_chess_move_tail != last_move) {
       offset = scrollable_san;
-      bar_r.y = san_r.y + san_r.height - bar_r.height;
+      scrollbar_target = san_r.y + san_r.height - bar_r.height;
       last_move = ll_chess_move_tail;
+    } else {
+      float wheel = 0.0f;
+      if (CheckCollisionPointRec(GetMousePosition(), san_r))
+        wheel = GetMouseWheelMove(); // + UP, - DOWN
+
+      float scroll_unit = 15.0f;
+      float delta = wheel * scroll_unit;
+      float next = scrollbar_target - delta;
+      scrollbar_target = Clamp(next, san_r.y, san_r.y + san_r.height - bar_r.height);
+
+      // This is ChatGPT. I'm not smart enough
+      float smoothing = 20.0f;
+      float alpha = 1.0f - expf(-smoothing * GetFrameTime());
+      bar_r.y = Lerp(bar_r.y, scrollbar_target, alpha);
+
+      // Map bar position to san_text offset
+      float scrollable_san = san_text_height - san_r.height;
+      float scrollable_bar = san_r.height - bar_r.height;
+      assert(scrollable_bar > 0);
+
+      float t = (bar_r.y - san_r.y) / scrollable_bar;
+      offset  = t * scrollable_san;
     }
-
-    float wheel = 0.0f;
-    if (CheckCollisionPointRec(GetMousePosition(), san_r))
-      wheel = GetMouseWheelMove(); // + UP, - DOWN
-
-    float delta = wheel * scroll_unit;
-    bar_r.y -= delta;
-    if (bar_r.y < san_r.y) {
-      bar_r.y = san_r.y;
-      delta = 0.0f;
-    } else if ((bar_r.y + bar_r.height) > fen_button_r.y) {
-      bar_r.y = fen_button_r.y - bar_r.height;
-      delta = 0.0f;
-    }
-
     DrawRectangleRounded(bar_r, 0.85f, 32, WHITE);
-
-    // Map bar position to san_text offset
-    float t = (bar_r.y - san_r.y) / scrollable_bar;
-    offset  = t * scrollable_san;
   }
-
   draw_san_text_moves(font, offset);
 }
 
