@@ -18,7 +18,31 @@ bool copying_fen = false;
 Rectangle pgn_button_r = {0};
 bool copying_pgn = false;
 
+Rectangle title_r = {0};
+Rectangle san_r = {0};
+Rectangle bar_r = {0};
+
 // float SQUARE_SIZE = 0.0f;
+
+void draw_menu(const Font* font)
+{
+  float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
+  title_r = (Rectangle) {
+    .x      = SQUARE_SIZE * NS,
+    .y      = 0,
+    .width  = GetScreenWidth() - SQUARE_SIZE * NS,
+    .height = font_height * 2,
+  };
+  DrawRectangleRec(title_r, GRAY);
+
+  char *text = "Analysis";
+  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  Vector2 pos = {
+    .x = title_r.x + title_r.width  / 2 - text_size.x / 2,
+    .y = title_r.y + title_r.height / 2 - text_size.y / 2
+  };
+  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+}
 
 void reset_colors_for_current_move(void)
 {
@@ -150,79 +174,10 @@ void draw_copy_fen_button(const Font* font)
   DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
 }
 
-// Made with the help of claude from previous commit
-void draw_san_window(const Font *font)
+void draw_san_text_moves(const Font* font, float offset)
 {
-  float san_r_thickness = 1.0f;
-  Rectangle san_r = {
-    .x      = SQUARE_SIZE * NS,
-    .y      = 0,
-    .width  = GetScreenWidth() - SQUARE_SIZE * NS,
-    .height = GetScreenHeight(),
-  };
-  int   spacing     = 5;
+  int spacing = 5;
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
-
-  DrawRectangleLinesEx(san_r, san_r_thickness, WHITE);
-
-  float content_height   = font_height * ll_chess_move_tail->value.move_nr;
-  float window_height    = (float)GetScreenHeight() - fen_button_r.height;
-  bool  needs_scroll     = content_height > window_height;
-
-  // Minimum bar height
-  float min_bar_height   = font_height * 3.0f;
-  float natural_bar_h    = needs_scroll
-                           ? window_height * (window_height / content_height)
-                           : window_height;
-  float scroll_bar_height = fmaxf(natural_bar_h, min_bar_height);
-
-  // How far bar and content can each travel
-  float scrollable_bar     = window_height - scroll_bar_height;
-  float scrollable_content = content_height - window_height;
-
-  static float bar_y = 0.0f;
-  float scroll_one_distance = 8.0f;
-
-  static bool initialized = false;
-  static float bar_x = 0.0f, bar_w = 0.0f;
-  if (!initialized) {
-    bar_x       = GetScreenWidth() - SQUARE_SIZE / 5.0f;
-    bar_w       = SQUARE_SIZE / 5.0f;
-    initialized = true;
-  }
-
-  // Auto-advance bar when new moves push content down
-  static int last_move_count = 0;
-
-  if (ll_chess_move_tail->value.move_nr != last_move_count) {
-      // A new move was just added — snap bar to bottom
-      bar_y = scrollable_bar;
-      last_move_count = ll_chess_move_tail->value.move_nr;
-  }
-
-  if (needs_scroll) {
-    float wheel = 0.0f;
-    Rectangle san_hover_r = san_r;
-    if (CheckCollisionPointRec(GetMousePosition(), san_hover_r))
-      wheel = GetMouseWheelMove(); // + UP, - DOWN
-
-    bar_y -= wheel * scroll_one_distance;
-    if      (bar_y < 0.0f)           bar_y = 0.0f;
-    else if (bar_y > scrollable_bar) bar_y = scrollable_bar;
-
-    // Draw scroll track + bar
-    Rectangle bar = {
-      .x      = bar_x,
-      .y      = bar_y,
-      .width  = bar_w,
-      .height = scroll_bar_height,
-    };
-    DrawRectangleRounded(bar, 0.85f, 32, WHITE);
-  }
-
-  // Map bar position → content offset
-  float t              = (scrollable_bar > 0.0f) ? bar_y / scrollable_bar : 0.0f;
-  float content_scroll = t * scrollable_content;
 
   ChessMoveNode *ll_n = ll_chess_move_head->next;
   char notation[64] = {0};
@@ -243,18 +198,77 @@ void draw_san_window(const Font *font)
 
     Vector2 text_pos = {
       .x = san_r.x + spacing,
-      .y = san_r.y + font_height * (ll_n->value.move_nr - 1) + spacing - content_scroll - 5,
+      .y = san_r.y + font_height * (ll_n->value.move_nr - 1) - offset,
     };
 
     ll_n = ll_n->next;
 
-    // Cull lines fully outside the visible area
-    if (text_pos.y + font_height < 0 || text_pos.y > window_height)
-      continue;
-
     if (strcmp(notation, "") > 0)
-      DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);
+      // Don't write if not visible
+      if ((text_pos.y + font_height) >= san_r.y && text_pos.y <= (san_r.y + san_r.height))
+        DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);
   }
+}
+
+void draw_san_window(const Font *font)
+{
+  san_r = (Rectangle) {
+    .x      = SQUARE_SIZE * NS,
+    .y      = title_r.y + title_r.height,
+    .width  = GetScreenWidth() - SQUARE_SIZE * NS,
+    .height = GetScreenHeight() - title_r.height - fen_button_r.height,
+  };
+  float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
+
+  float san_text_height = font_height * ll_chess_move_tail->value.move_nr;
+  static float offset = 0.0f;
+
+  if (san_text_height > san_r.height) {
+    float scrollable_san = san_text_height - san_r.height;
+
+    // Minimum bar height
+    float min_bar_h = font_height * 3.0f;
+    float nat_bar_h = san_r.height * (san_r.height / san_text_height);
+
+    bar_r.height = fmaxf(nat_bar_h, min_bar_h);
+    bar_r.width  = SQUARE_SIZE / 5.0f;
+    bar_r.x      = GetScreenWidth() - bar_r.width;
+
+    float scrollable_bar = san_r.height - bar_r.height;
+
+    // How far bar and san_text can each travel
+    float scroll_unit = 10.0f;
+
+    // Auto-advance bar when new moves push san_text down
+    static ChessMoveNode *last_move = NULL;
+    if (ll_chess_move_tail != last_move) {
+      offset = scrollable_san;
+      bar_r.y = san_r.y + san_r.height - bar_r.height;
+      last_move = ll_chess_move_tail;
+    }
+
+    float wheel = 0.0f;
+    if (CheckCollisionPointRec(GetMousePosition(), san_r))
+      wheel = GetMouseWheelMove(); // + UP, - DOWN
+
+    float delta = wheel * scroll_unit;
+    bar_r.y -= delta;
+    if (bar_r.y < san_r.y) {
+      bar_r.y = san_r.y;
+      delta = 0.0f;
+    } else if ((bar_r.y + bar_r.height) > fen_button_r.y) {
+      bar_r.y = fen_button_r.y - bar_r.height;
+      delta = 0.0f;
+    }
+
+    DrawRectangleRounded(bar_r, 0.85f, 32, WHITE);
+
+    // Map bar position to san_text offset
+    float t = (bar_r.y - san_r.y) / scrollable_bar;
+    offset  = t * scrollable_san;
+  }
+
+  draw_san_text_moves(font, offset);
 }
 
 bool is_dragging_piece(void)
