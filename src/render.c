@@ -24,7 +24,7 @@ void reset_colors_for_current_move(void)
 {
   for (int y = 0; y < NS; y++)
     for (int x = 0; x < NS; x++)
-      if (!ColorIsEqual(chess_board.squares[y][x].board_color, RED_SQUARE))
+      if (!ColorIsEqual(chess_board.squares[y][x].board_color, red_square_color[(x + y) % 2]))
         reset_square_color(&chess_board.squares[y][x]);
 
   if (ll_chess_move_current->value.src != NULL &&
@@ -380,7 +380,7 @@ void draw_result(const Font *font, const char* result)
 Color color_occupied_square(const ChessSquare *s)
 {
   return ColorIsEqual(s->board_color, square_color[LIGHT_TILE]) ?
-    occupied_square_color[LIGHT_OCCUPIED_TILE] : occupied_square_color[DARK_OCCUPIED_TILE];
+    occupied_square_color[LIGHT_TILE] : occupied_square_color[DARK_TILE];
 }
 
 void flip_board(void)

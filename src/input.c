@@ -72,7 +72,7 @@ void process_mouse_events(void)
       for (int x = 0; x < NS; x++) {
         ChessSquare *s = &chess_board.squares[y][x];
         if (CheckCollisionPointRec(GetMousePosition(), s->rect)) {
-          if (!ColorIsEqual(s->board_color, RED_SQUARE)) s->board_color = RED_SQUARE;
+          if (!ColorIsEqual(s->board_color, red_square_color[(x + y) % 2])) s->board_color = red_square_color[(x + y) % 2];
           else {
             reset_square_color(s);
             if (s == ll_chess_move_tail->value.src || s == ll_chess_move_tail->value.dest)
@@ -93,8 +93,8 @@ void process_mouse_events(void)
         if (CheckCollisionPointRec(GetMousePosition(), s->rect)) {
           if (s->piece.type == NO_PIECE) reset_colors_for_current_move();
           else {
-            if (!ColorIsEqual(s->board_color, occupied_square_color[LIGHT_OCCUPIED_TILE]) &&
-                !ColorIsEqual(s->board_color, occupied_square_color[DARK_OCCUPIED_TILE]))
+            if (!ColorIsEqual(s->board_color, occupied_square_color[LIGHT_TILE]) &&
+                !ColorIsEqual(s->board_color, occupied_square_color[DARK_TILE]))
             {
               reset_colors_for_current_move();
               s->board_color = color_occupied_square(s);

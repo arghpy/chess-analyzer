@@ -15,8 +15,13 @@ const Color square_color[] = {
 };
 
 const Color occupied_square_color[] = {
-  [LIGHT_OCCUPIED_TILE] = (Color) {0xF6, 0xEA, 0x72, 0xFF},
-  [DARK_OCCUPIED_TILE]  = (Color) {0xDD, 0xC3, 0x4C, 0xFF}
+  [LIGHT_TILE] = (Color) {0xF6, 0xEA, 0x72, 0xFF},
+  [DARK_TILE]  = (Color) {0xDD, 0xC3, 0x4C, 0xFF}
+};
+
+const Color red_square_color[] = {
+  [LIGHT_TILE] = (Color) {0xEB, 0x78, 0x63, 0xFF},
+  [DARK_TILE]  = (Color) {0xE1, 0x69, 0x54, 0xFF}
 };
 
 Texture2D chess_pieces_texture[TEXTURE_COUNT] = {0};
