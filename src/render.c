@@ -180,34 +180,37 @@ void draw_san_text_moves(const Font* font, float offset)
   int spacing = 5;
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
 
+  // Skip starting position and start with white's move
   ChessMoveNode *ll_n = ll_chess_move_head->next;
   char notation[64] = {0};
   while (ll_n != NULL) {
-    char buf[64] = {0};
+    char tmp[64] = {0};
 
-    if (ll_n->value.move_nr != ll_n->prev->value.move_nr) {
-      sprintf(buf, "%d.", ll_n->value.move_nr);
-      sprintf(notation, "%-5s", buf);
-    }
+    // Write move number
+    sprintf(notation, "%d.", ll_n->value.move_nr);
 
     if (strcmp(ll_n->value.san, "") > 0) {
-      sprintf(buf, "%10s", ll_n->value.san);
-      strcat(notation, buf);
+      sprintf(tmp, "%10s", ll_n->value.san);
+      strcat(notation, tmp);
     }
 
-    if (ll_n->value.move_nr == ll_n->prev->value.move_nr) strcat(notation, "\n");
+    if (ll_n->next != NULL && strcmp(ll_n->next->value.san, "") > 0) {
+      sprintf(tmp, "%10s", ll_n->next->value.san);
+      strcat(notation, tmp);
+    }
 
     Vector2 text_pos = {
       .x = san_r.x + spacing,
       .y = san_r.y + font_height * (ll_n->value.move_nr - 1) - offset,
     };
 
-    ll_n = ll_n->next;
-
     if (strcmp(notation, "") > 0)
       // Don't write if not visible
       if ((text_pos.y + font_height) >= san_r.y && text_pos.y <= (san_r.y + san_r.height))
         DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);
+
+    if (ll_n->next != NULL) ll_n = ll_n->next->next;
+    else ll_n = NULL;
   }
 }
 
