@@ -25,7 +25,7 @@ Rectangle bar_r = {0};
 
 // float SQUARE_SIZE = 0.0f;
 
-void draw_menu(const Font* font)
+void draw_title(const Font* font)
 {
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
   title_r = (Rectangle) {

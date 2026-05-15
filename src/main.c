@@ -45,7 +45,7 @@ int main(void)
         // Needs to be first such that writing can be displayed
         // even if it's only half displayed on screen
         draw_san_window(&general_font);
-        draw_menu(&general_font);
+        draw_title(&general_font);
         draw_copy_fen_button(&general_font);
         draw_copy_pgn_button(&general_font);
 
