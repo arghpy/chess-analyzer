@@ -188,14 +188,17 @@ void draw_san_text_moves(const Font* font, float offset)
 
     // Write move number
     sprintf(notation, "%d.", ll_n->value.move_nr);
+    size_t move_nr_len = strlen(notation);
+    int base_padding   = 15;
+    int padding        = base_padding - move_nr_len;
 
     if (strcmp(ll_n->value.san, "") > 0) {
-      sprintf(tmp, "%10s", ll_n->value.san);
+      sprintf(tmp, "%*s", padding, ll_n->value.san);
       strcat(notation, tmp);
     }
 
     if (ll_n->next != NULL && strcmp(ll_n->next->value.san, "") > 0) {
-      sprintf(tmp, "%10s", ll_n->next->value.san);
+      sprintf(tmp, "%*s", base_padding, ll_n->next->value.san);
       strcat(notation, tmp);
     }
 
