@@ -36,12 +36,12 @@ int main(void)
 
   if (init) {
     while(!WindowShouldClose()) {
-      process_keyboard_events();
-      process_mouse_events();
       BeginDrawing();
       {
         ClearBackground(background_color);
         draw_chess_board(&general_font);
+        process_keyboard_events();
+        process_mouse_events();
         // Needs to be first such that writing can be displayed
         // even if it's only half displayed on screen
         draw_san_window(&general_font);
@@ -62,6 +62,7 @@ int main(void)
   { // Closing everything
     if (IsAudioDeviceReady()) CloseAudioDevice(); // Close the audio device and context
     unload_sounds();
+    ut_da_free(&drawn_arrows);
     ut_da_free(&positions);
     ut_ll_free(ChessMoveNode, ll_chess_move_head);
     unload_chess_pieces();

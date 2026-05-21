@@ -71,6 +71,11 @@ typedef struct {
 } ChessSquare;
 
 typedef struct {
+  ChessSquare* src;
+  ChessSquare* dest;
+} SrcDestChessSquares;
+
+typedef struct {
   bool hovering_piece;
   bool piece_placed;
   bool promote;

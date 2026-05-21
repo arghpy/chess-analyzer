@@ -23,7 +23,78 @@ Rectangle title_r = {0};
 Rectangle san_r = {0};
 Rectangle bar_r = {0};
 
+Arrows drawn_arrows = {0};
+
 // float SQUARE_SIZE = 0.0f;
+
+// Vector v1 is dest, or head of arrow
+void draw_arrow(const Arrow* arrow)
+{
+  DrawTriangle(arrow->v1, arrow->v2, arrow->v3, arrow->color);
+
+  Vector2 s = arrow->src;
+  Vector2 d = {
+      arrow->v1.x - arrow->direction.x * SQUARE_SIZE/3.0f,
+      arrow->v1.y - arrow->direction.y * SQUARE_SIZE/3.0f
+  };
+
+  DrawLineEx(s, d, SQUARE_SIZE / 4.0f, arrow->color);
+}
+
+void add_arrow(const ChessSquare* src, const ChessSquare* dest)
+{
+  ptrdiff_t s_index = src - &chess_board.squares[0][0];
+  int ys = s_index / NS;
+  int xs = s_index % NS;
+
+  ptrdiff_t d_index = dest - &chess_board.squares[0][0];
+  int yd = d_index / NS;
+  int xd = d_index % NS;
+
+  int y = yd - ys;
+  int x = xd - xs;
+
+  // You need to learn math behind game programming
+  Vector2 direction     = Vector2Normalize((Vector2){ x, y});
+  Vector2 perpendicular = {-direction.y, direction.x};
+
+  float size = SQUARE_SIZE/3.0f;
+
+  Vector2 v1 = dest->center_proximity.center;
+  Vector2 v2 = {
+    .x = v1.x + (-direction.x - perpendicular.x) * size,
+    .y = v1.y + (-direction.y - perpendicular.y) * size,
+  };
+  Vector2 v3 = {
+    .x = v1.x + (-direction.x + perpendicular.x) * size,
+    .y = v1.y + (-direction.y + perpendicular.y) * size,
+  };
+
+  Arrow arrow = {
+    .direction = direction,
+    .src = src->center_proximity.center,
+    .v1 = v1,
+    .v2 = v2,
+    .v3 = v3,
+    .color = arrow_color,
+  };
+
+  bool exists = false;
+  for (size_t i = 0; i < drawn_arrows.count; i++) {
+    if (Vector2Equals(arrow.direction, drawn_arrows.items[i].direction) &&
+        Vector2Equals(arrow.src, drawn_arrows.items[i].src) &&
+        Vector2Equals(arrow.v1, drawn_arrows.items[i].v1) &&
+        Vector2Equals(arrow.v2, drawn_arrows.items[i].v2) &&
+        Vector2Equals(arrow.v3, drawn_arrows.items[i].v3) &&
+        ColorIsEqual(arrow.color, drawn_arrows.items[i].color)
+        ) {
+      ut_da_remove(&drawn_arrows, i);
+      exists = true;
+      break;
+    }
+  }
+  if (!exists) ut_da_push(&drawn_arrows, arrow);
+}
 
 void draw_title(const Font* font)
 {
