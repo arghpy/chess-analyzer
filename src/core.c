@@ -5,11 +5,40 @@
 #include "raylib.h"
 #include "rules/general.h"
 #include "rules/pieces.h"
+#include "input.h"
 #include <stddef.h>
 #include <stdio.h>
 
 GameState game_state = PLAYING;
+MenuState menu_state = MAIN;
 bool found_placement_square = false;
+
+void process_menu_states(const Font* general_font, const Font* big_font)
+{
+  ClearBackground(background_color);
+  draw_chess_board(general_font);
+  process_keyboard_events();
+  process_mouse_events();
+
+  switch (menu_state) {
+    case MAIN:
+      draw_title(general_font);
+      draw_paste_fen_window(general_font);
+      draw_paste_pgn_window(general_font);
+      draw_load_fen_pgn_button(general_font);
+      check_pieces_hovering();
+      break;
+    case ANALYSIS:
+      // Needs to be first such that writing can be displayed
+      // even if it's only half displayed on screen
+      draw_san_window(general_font);
+      draw_title(general_font);
+      draw_copy_fen_button(general_font);
+      draw_copy_pgn_button(general_font);
+      process_game_states(big_font);
+      break;
+  }
+}
 
 void advance_game_parameters(void)
 {

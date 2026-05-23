@@ -22,10 +22,96 @@ bool copying_pgn = false;
 Rectangle title_r = {0};
 Rectangle san_r = {0};
 Rectangle bar_r = {0};
+Rectangle paste_fen_r = {0};
+Rectangle paste_pgn_r = {0};
+Rectangle import_fen_pgn_r = {0};
+bool loading_fen_pgn = false;
 
 Arrows drawn_arrows = {0};
 
 // float SQUARE_SIZE = 0.0f;
+
+float px(float v)
+{
+  return floorf(v + 0.5f);
+}
+
+void draw_paste_fen_window(const Font* font)
+{
+  float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
+  paste_fen_r = (Rectangle) {
+    .x      = px(title_r.x + font_height/2.0f),
+    .y      = px(title_r.y + title_r.height + font_height),
+    .width  = px(GetScreenWidth() - SQUARE_SIZE * NS - font_height/2.0f * 2),
+    .height = px(font_height * 2),
+  };
+  DrawRectangleRounded(paste_fen_r, 0.12f, 8, paste_window_color);
+
+  char *text = "Paste FEN";
+  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  Vector2 pos = {
+    .x = paste_fen_r.x + paste_fen_r.width  / 2 - text_size.x / 2,
+    .y = paste_fen_r.y + paste_fen_r.height / 2 - text_size.y / 2
+  };
+  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+}
+
+void draw_paste_pgn_window(const Font* font)
+{
+  float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
+  paste_pgn_r = (Rectangle) {
+    .x      = px(paste_fen_r.x),
+    .y      = px(paste_fen_r.y + paste_fen_r.height + font_height/2.0f),
+    .width  = px(GetScreenWidth() - SQUARE_SIZE * NS - font_height/2.0f * 2),
+    .height = px(font_height * 10),
+  };
+  DrawRectangleRounded(paste_pgn_r, 0.08f, 8, paste_window_color);
+
+  char *text = "Paste PGN";
+  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  Vector2 pos = {
+    .x = paste_pgn_r.x + paste_pgn_r.width  / 2 - text_size.x / 2,
+    .y = paste_pgn_r.y + paste_pgn_r.height / 2 - text_size.y / 2
+  };
+  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+}
+
+void draw_load_fen_pgn_button(const Font* font)
+{
+  float import_fen_pgn_r_thickness = 1.0f;
+  float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
+  import_fen_pgn_r = (Rectangle) {
+    .x      = px(paste_pgn_r.x),
+    .y      = px(paste_pgn_r.y + paste_pgn_r.height + font_height/2.0f),
+    .width  = px(GetScreenWidth() - SQUARE_SIZE * NS - font_height/2.0f * 2),
+    .height = SQUARE_SIZE / 2.0f,
+  };
+
+  if (CheckCollisionPointRec(GetMousePosition(), import_fen_pgn_r)) import_fen_pgn_r_thickness *= 3;
+
+  DrawRectangleRounded(import_fen_pgn_r, 0.08f, 8, button_color);
+  DrawRectangleRoundedLinesEx(import_fen_pgn_r, 0.08f, 8, import_fen_pgn_r_thickness, WHITE);
+
+  char *text = "Import";
+  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  Vector2 pos = {
+    .x = import_fen_pgn_r.x + import_fen_pgn_r.width  / 2 - text_size.x / 2,
+    .y = import_fen_pgn_r.y + import_fen_pgn_r.height / 2 - text_size.y / 2
+  };
+  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+
+  if (CheckCollisionPointRec(GetMousePosition(), import_fen_pgn_r)) {
+    if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+      loading_fen_pgn = true;
+    }
+    if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
+      loading_fen_pgn = false;
+      menu_state = ANALYSIS;
+    }
+  }
+
+  if (loading_fen_pgn) DrawRectangleRec(import_fen_pgn_r, Fade(GRAY, 0.3f));
+}
 
 // Vector v1 is dest, or head of arrow
 void draw_arrow(const Arrow* arrow)
@@ -187,7 +273,7 @@ void draw_copy_pgn_button(const Font* font)
 
   if (CheckCollisionPointRec(GetMousePosition(), pgn_button_r)) pgn_button_r_thickness *= 3;
 
-  DrawRectangleRec(pgn_button_r, BROWN);
+  DrawRectangleRec(pgn_button_r, button_color);
   DrawRectangleLinesEx(pgn_button_r, pgn_button_r_thickness, WHITE);
 
   if (CheckCollisionPointRec(GetMousePosition(), pgn_button_r)) {
@@ -223,7 +309,7 @@ void draw_copy_fen_button(const Font* font)
 
   if (CheckCollisionPointRec(GetMousePosition(), fen_button_r)) fen_button_r_thickness *= 3;
 
-  DrawRectangleRec(fen_button_r, BROWN);
+  DrawRectangleRec(fen_button_r, button_color);
   DrawRectangleLinesEx(fen_button_r, fen_button_r_thickness, WHITE);
 
   if (CheckCollisionPointRec(GetMousePosition(), fen_button_r)) {
@@ -435,13 +521,19 @@ void check_pieces_hovering(void)
 
 void set_mouse_cursor(void)
 {
-  SetMouseCursor(
-      chess_board.state.hovering_piece ||
-      dragging ||
-      CheckCollisionPointRec(GetMousePosition(), fen_button_r) ?
-      MOUSE_CURSOR_POINTING_HAND : MOUSE_CURSOR_DEFAULT
-      );
-  chess_board.state.hovering_piece = false;
+  int mouse_cursor = MOUSE_CURSOR_DEFAULT;
+
+  if (chess_board.state.hovering_piece || dragging || CheckCollisionPointRec(GetMousePosition(), fen_button_r)) {
+    mouse_cursor = MOUSE_CURSOR_POINTING_HAND;
+    chess_board.state.hovering_piece = false;
+  }
+
+  if (menu_state == MAIN) {
+    if (CheckCollisionPointRec(GetMousePosition(), paste_fen_r) || CheckCollisionPointRec(GetMousePosition(), paste_pgn_r))
+      mouse_cursor = MOUSE_CURSOR_IBEAM;
+  }
+
+  SetMouseCursor(mouse_cursor);
 }
 
 void draw_moving_piece(void)

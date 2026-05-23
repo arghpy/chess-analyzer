@@ -38,19 +38,7 @@ int main(void)
     while(!WindowShouldClose()) {
       BeginDrawing();
       {
-        ClearBackground(background_color);
-        draw_chess_board(&general_font);
-        process_keyboard_events();
-        process_mouse_events();
-        // Needs to be first such that writing can be displayed
-        // even if it's only half displayed on screen
-        draw_san_window(&general_font);
-        draw_title(&general_font);
-        draw_copy_fen_button(&general_font);
-        draw_copy_pgn_button(&general_font);
-
-        process_game_states(&big_font);
-
+        process_menu_states(&general_font, &big_font);
         set_mouse_cursor();
         if (chess_board.action_sound != NOTHING) PlaySound(game_sounds[chess_board.action_sound]);
         chess_board.action_sound = NOTHING;

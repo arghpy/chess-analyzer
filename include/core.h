@@ -12,7 +12,14 @@ typedef enum {
   CHECKMATE,
 } GameState;
 
+typedef enum {
+  MAIN,
+  ANALYSIS,
+} MenuState;
+
 extern GameState game_state;
+extern MenuState menu_state;
+void process_menu_states(const Font* general_font, const Font* big_font);
 void reset_chess_square(ChessSquare *square);
 void place_piece(void);
 void process_game_states(const Font* font);
