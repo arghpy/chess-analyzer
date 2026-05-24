@@ -22,14 +22,20 @@ bool copying_pgn = false;
 Rectangle title_r = {0};
 Rectangle san_r = {0};
 Rectangle bar_r = {0};
-Rectangle paste_fen_r = {0};
-Rectangle paste_pgn_r = {0};
-Rectangle import_fen_pgn_r = {0};
-bool loading_fen_pgn = false;
 
 Arrows drawn_arrows = {0};
 
-// float SQUARE_SIZE = 0.0f;
+typedef struct {
+  Rectangle rect;
+  char* text;
+  bool interacting;
+  bool text_pasted;
+  size_t frame_counter;
+} WindowContext;
+
+WindowContext paste_fen = {0};
+WindowContext paste_pgn = {0};
+WindowContext import_fen_pgn = {0};
 
 float px(float v)
 {
@@ -38,79 +44,133 @@ float px(float v)
 
 void draw_paste_fen_window(const Font* font)
 {
+  if (paste_fen.text == NULL) paste_fen.text = malloc(FEN_MAX_LEN * sizeof(char));
+
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
-  paste_fen_r = (Rectangle) {
+  paste_fen.rect = (Rectangle) {
     .x      = px(title_r.x + font_height/2.0f),
     .y      = px(title_r.y + title_r.height + font_height),
     .width  = px(GetScreenWidth() - SQUARE_SIZE * NS - font_height/2.0f * 2),
     .height = px(font_height * 2),
   };
-  DrawRectangleRounded(paste_fen_r, 0.12f, 8, paste_window_color);
+  DrawRectangleRounded(paste_fen.rect, 0.12f, 8, paste_window_color);
 
-  char *text = "Paste FEN";
-  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    if (CheckCollisionPointRec(GetMousePosition(), paste_fen.rect)) paste_fen.interacting = true;
+    else paste_fen.interacting = false;
+  }
+
   Vector2 pos = {
-    .x = paste_fen_r.x + paste_fen_r.width  / 2 - text_size.x / 2,
-    .y = paste_fen_r.y + paste_fen_r.height / 2 - text_size.y / 2
+    .x = paste_fen.rect.x,
+    .y = paste_fen.rect.y + paste_fen.rect.height / 2 - font_height / 2
   };
-  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+
+  if (! paste_fen.text_pasted) {
+    if (! paste_fen.interacting) {
+      paste_fen.frame_counter = 0;
+      strcpy(paste_fen.text, "Paste FEN");
+      Vector2 text_size = MeasureTextEx(*font, paste_fen.text, font->baseSize, 0);
+      pos = (Vector2) {
+        .x = paste_fen.rect.x + paste_fen.rect.width  / 2 - text_size.x / 2,
+        .y = paste_fen.rect.y + paste_fen.rect.height / 2 - text_size.y / 2
+      };
+    } else {
+      if((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_V)) {
+        const char *text = GetClipboardText();
+        if (text != NULL && strlen(text) > 0) {
+          strncpy(paste_fen.text, text, FEN_MAX_LEN);
+          paste_fen.text_pasted = true;
+          paste_fen.interacting = false;
+          paste_fen.frame_counter = 0;
+        }
+      } else {
+        if ((paste_fen.frame_counter/20)%2 == 0) strcpy(paste_fen.text, "|");
+        else strcpy(paste_fen.text, "");
+        paste_fen.frame_counter++;
+      }
+    }
+  }
+  BeginScissorMode(paste_fen.rect.x, paste_fen.rect.y, paste_fen.rect.width, paste_fen.rect.height);
+  DrawTextEx(*font, paste_fen.text, pos, font->baseSize, 0, WHITE);
+  EndScissorMode();
 }
 
 void draw_paste_pgn_window(const Font* font)
 {
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
-  paste_pgn_r = (Rectangle) {
-    .x      = px(paste_fen_r.x),
-    .y      = px(paste_fen_r.y + paste_fen_r.height + font_height/2.0f),
+  paste_pgn.rect = (Rectangle) {
+    .x      = px(paste_fen.rect.x),
+    .y      = px(paste_fen.rect.y + paste_fen.rect.height + font_height/2.0f),
     .width  = px(GetScreenWidth() - SQUARE_SIZE * NS - font_height/2.0f * 2),
     .height = px(font_height * 10),
   };
-  DrawRectangleRounded(paste_pgn_r, 0.08f, 8, paste_window_color);
+  DrawRectangleRounded(paste_pgn.rect, 0.08f, 8, paste_window_color);
 
-  char *text = "Paste PGN";
-  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  paste_pgn.text = "Paste PGN";
+  Vector2 text_size = MeasureTextEx(*font, paste_pgn.text, font->baseSize, 0);
   Vector2 pos = {
-    .x = paste_pgn_r.x + paste_pgn_r.width  / 2 - text_size.x / 2,
-    .y = paste_pgn_r.y + paste_pgn_r.height / 2 - text_size.y / 2
+    .x = paste_pgn.rect.x + paste_pgn.rect.width  / 2 - text_size.x / 2,
+    .y = paste_pgn.rect.y + paste_pgn.rect.height / 2 - text_size.y / 2
   };
-  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+  DrawTextEx(*font, paste_pgn.text, pos, font->baseSize, 0, WHITE);
 }
 
-void draw_load_fen_pgn_button(const Font* font)
+void draw_import_fen_pgn_button(const Font* font)
 {
-  float import_fen_pgn_r_thickness = 1.0f;
+  float rect_thickness = 1.0f;
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
-  import_fen_pgn_r = (Rectangle) {
-    .x      = px(paste_pgn_r.x),
-    .y      = px(paste_pgn_r.y + paste_pgn_r.height + font_height/2.0f),
+  import_fen_pgn.rect = (Rectangle) {
+    .x      = px(paste_pgn.rect.x),
+    .y      = px(paste_pgn.rect.y + paste_pgn.rect.height + font_height/2.0f),
     .width  = px(GetScreenWidth() - SQUARE_SIZE * NS - font_height/2.0f * 2),
     .height = SQUARE_SIZE / 2.0f,
   };
 
-  if (CheckCollisionPointRec(GetMousePosition(), import_fen_pgn_r)) import_fen_pgn_r_thickness *= 3;
+  if (CheckCollisionPointRec(GetMousePosition(), import_fen_pgn.rect)) rect_thickness *= 3;
 
-  DrawRectangleRounded(import_fen_pgn_r, 0.08f, 8, button_color);
-  DrawRectangleRoundedLinesEx(import_fen_pgn_r, 0.08f, 8, import_fen_pgn_r_thickness, WHITE);
+  DrawRectangleRounded(import_fen_pgn.rect, 0.08f, 8, button_color);
+  DrawRectangleRoundedLinesEx(import_fen_pgn.rect, 0.08f, 8, rect_thickness, WHITE);
 
-  char *text = "Import";
-  Vector2 text_size = MeasureTextEx(*font, text, font->baseSize, 0);
+  import_fen_pgn.text = "Import";
+  Vector2 text_size = MeasureTextEx(*font, import_fen_pgn.text, font->baseSize, 0);
   Vector2 pos = {
-    .x = import_fen_pgn_r.x + import_fen_pgn_r.width  / 2 - text_size.x / 2,
-    .y = import_fen_pgn_r.y + import_fen_pgn_r.height / 2 - text_size.y / 2
+    .x = import_fen_pgn.rect.x + import_fen_pgn.rect.width  / 2 - text_size.x / 2,
+    .y = import_fen_pgn.rect.y + import_fen_pgn.rect.height / 2 - text_size.y / 2
   };
-  DrawTextEx(*font, text, pos, font->baseSize, 0, WHITE);
+  DrawTextEx(*font, import_fen_pgn.text, pos, font->baseSize, 0, WHITE);
 
-  if (CheckCollisionPointRec(GetMousePosition(), import_fen_pgn_r)) {
+  if (CheckCollisionPointRec(GetMousePosition(), import_fen_pgn.rect)) {
     if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
-      loading_fen_pgn = true;
+      import_fen_pgn.interacting = true;
     }
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
-      loading_fen_pgn = false;
-      menu_state = ANALYSIS;
+      if (paste_fen.text != NULL) {
+        if (verify_fen_position(paste_fen.text)) {
+          load_fen_position(paste_fen.text);
+
+          // Modify existing node and load position
+          strcpy(ll_chess_move_head->value.fen, paste_fen.text);
+          ll_chess_move_head->value.move_nr = -1;
+
+          if (chess_board.color_turn == B) {
+            moving_piece.move_nr = chess_board.fullmoves;
+            strcpy(moving_piece.fen, paste_fen.text);
+            strcpy(moving_piece.san, "..");
+            moving_piece.move_nr = chess_board.fullmoves;
+            ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
+            ll_chess_move_current = ll_chess_move_tail;
+          }
+
+          free(paste_fen.text);
+          menu_state = ANALYSIS;
+        } else strcpy(paste_fen.text, "");
+        paste_fen.text_pasted = false;
+      }
+      import_fen_pgn.interacting = false;
     }
   }
 
-  if (loading_fen_pgn) DrawRectangleRec(import_fen_pgn_r, Fade(GRAY, 0.3f));
+  if (import_fen_pgn.interacting) DrawRectangleRec(import_fen_pgn.rect, Fade(GRAY, 0.3f));
 }
 
 // Vector v1 is dest, or head of arrow
@@ -225,20 +285,24 @@ char *generate_pgn(void)
   switch (game_state) {
     case REWINDING:
     case PLAYING:
-      sprintf(pgn, "\n[Result \"*\"]\n\n");
+      sprintf(pgn, "\n[Result \"*\"]\n");
       break;
     case PROMOTING:
       break;
     case DRAW:
-      sprintf(pgn, "\n[Result \"1/2-1/2\"]\n\n");
+      sprintf(pgn, "\n[Result \"1/2-1/2\"]\n");
       break;
     case CHECKMATE: {
                       int white_result = chess_board.color_turn == W ? 0 : 1;
                       int black_result = chess_board.color_turn == W ? 1 : 0;
-                      sprintf(pgn, "\n[Result \"%d-%d\"]\n\n", white_result, black_result);
+                      sprintf(pgn, "\n[Result \"%d-%d\"]\n", white_result, black_result);
                       break;
                     }
   }
+  char tmp[100] = {0};
+  sprintf(tmp, "[FEN \"%s\"]\n\n", ll_chess_move_head->value.fen);
+  strcat(pgn, tmp);
+
   ChessMoveNode *ll_n = ll_chess_move_head->next;
   while (ll_n != NULL) {
     char move[50] = {0};
@@ -337,23 +401,26 @@ void draw_san_text_moves(const Font* font, float offset)
   int spacing = 5;
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
 
-  // Skip starting position and start with white's move
+  // Skip starting position
   ChessMoveNode *ll_n = ll_chess_move_head->next;
+  // ChessMoveNode *ll_n = ll_chess_move_head->next;
   char notation[64] = {0};
   while (ll_n != NULL) {
     char tmp[64] = {0};
 
-    // Write move number
+    // Move number
     sprintf(notation, "%d.", ll_n->value.move_nr);
     size_t move_nr_len = strlen(notation);
     int base_padding   = 15;
     int padding        = base_padding - move_nr_len;
 
+    // White
     if (strcmp(ll_n->value.san, "") > 0) {
       sprintf(tmp, "%*s", padding, ll_n->value.san);
       strcat(notation, tmp);
     }
 
+    // Black
     if (ll_n->next != NULL && strcmp(ll_n->next->value.san, "") > 0) {
       sprintf(tmp, "%*s", base_padding, ll_n->next->value.san);
       strcat(notation, tmp);
@@ -529,7 +596,7 @@ void set_mouse_cursor(void)
   }
 
   if (menu_state == MAIN) {
-    if (CheckCollisionPointRec(GetMousePosition(), paste_fen_r) || CheckCollisionPointRec(GetMousePosition(), paste_pgn_r))
+    if (CheckCollisionPointRec(GetMousePosition(), paste_fen.rect) || CheckCollisionPointRec(GetMousePosition(), paste_pgn.rect))
       mouse_cursor = MOUSE_CURSOR_IBEAM;
   }
 

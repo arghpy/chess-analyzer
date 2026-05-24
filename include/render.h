@@ -25,7 +25,7 @@ extern Arrows drawn_arrows;
 
 void draw_paste_fen_window(const Font* font);
 void draw_paste_pgn_window(const Font* font);
-void draw_load_fen_pgn_button(const Font* font);
+void draw_import_fen_pgn_button(const Font* font);
 void check_pieces_hovering(void);
 bool is_dragging_piece(void);
 void draw_arrow(const Arrow* arrow);

@@ -4,6 +4,7 @@
 #include "raylib.h"
 #include "sound.h"
 #include "utils.h"
+#include "protocols/fen.h"
 
 
 #define WINDOW_FACTOR 67.5
@@ -124,7 +125,7 @@ typedef struct {
   char san[8];
   ChessPiece piece;
   GameSound sound;
-  char fen[86];
+  char fen[FEN_MAX_LEN];
   int move_nr;
 } ChessMove;
 

@@ -34,9 +34,136 @@ void add_fen_position(const char* fen)
   }
 }
 
+bool verify_fen_position(const char* fen_pos)
+{
+  char fen[FEN_MAX_LEN];
+  strcpy(fen, fen_pos);
+
+  // Get the sections
+  char *board, *color_turn, *castling, *enpassant_square, *halfmoves, *fullmoves, *end;
+  board            = strtok(fen,  " ");
+  color_turn       = strtok(NULL, " ");
+  castling         = strtok(NULL, " ");
+  enpassant_square = strtok(NULL, " ");
+  halfmoves        = strtok(NULL, " ");
+  fullmoves        = strtok(NULL, " ");
+  end              = strtok(NULL, " ");
+
+  if (end != NULL) {
+    fprintf(stderr, "Wrong FEN(too long): %s.\n", fen);
+    return false;
+  }
+
+  // Process board
+  char *rank;
+  int rank_c = 0;
+  int column_c = 0;
+  if (chess_board.board_flipped) ut_strrev(board);
+  rank = strtok(board, "/");
+
+  if (rank == NULL) {
+    fprintf(stderr, "Wrong rank notation: %s\n", board);
+    return false;
+  }
+
+  while (rank != NULL) {
+    for (size_t i = 0; i < strlen(rank); i++) {
+      if (strchr("bknpqrBKNPQR12345678", rank[i]) == NULL) {
+        fprintf(stderr, "Unrecognized character: %c\n", rank[i]);
+        return false;
+      } else {
+        if (! isdigit(rank[i])) column_c++;
+        else column_c += rank[i] - '0';
+      }
+    }
+    rank = strtok(NULL, "/");
+
+    if (column_c != NS) {
+      fprintf(stderr, "Wrong number of columns\n");
+      return false;
+    }
+    rank_c++;
+    column_c = 0;
+  }
+  if (rank_c != NS) {
+    fprintf(stderr, "Wrong number of ranks\n");
+    return false;
+  }
+
+  // Process color turn
+  if (strstr("wb", color_turn) == NULL) {
+    fprintf(stderr, "Unrecognized color turn: %s\n", color_turn);
+    return false;
+  }
+
+  // Process castling
+  for (size_t i = 0; i < strlen(castling); i++) {
+    if (castling[i] == '-') {
+      if (strlen(castling) > 1) {
+        fprintf(stderr, "Wrong castling notation: %s.\n", castling);
+        return false;
+      }
+    } else {
+      if (strchr("KQkq", castling[i]) == NULL) {
+        fprintf(stderr, "Unrecognized character: %s\n", color_turn);
+        return false;
+      }
+    }
+  }
+
+  // Process enpassant_square
+  if (strlen(enpassant_square) > 2) {
+    fprintf(stderr, "Wrong enpassant notation: %s.\n", enpassant_square);
+    return false;
+  }
+  if (enpassant_square[0] == '-') {
+    if (strlen(enpassant_square) > 1) {
+      fprintf(stderr, "Wrong enpassant notation: %s.\n", enpassant_square);
+      return false;
+    }
+  } else {
+    for (size_t i = 0; i < strlen(enpassant_square); i++) {
+      if (strchr("abcdefgh12345678", enpassant_square[i]) == NULL) {
+
+        fprintf(stderr, "Wrong enpassant notation: %s.\n", enpassant_square);
+        return false;
+      }
+    }
+  }
+
+  // Process halfmoves and fullmoves
+  bool convertable_to_int = true;
+  for (size_t i = 0; i < strlen(halfmoves); i++) {
+    if (!isdigit(halfmoves[i])) {
+      convertable_to_int = false;
+      break;
+    }
+  }
+  if (! convertable_to_int) {
+    fprintf(stderr, "Wrong halfmoves notation: %s.\n", halfmoves);
+    return false;
+  }
+
+  convertable_to_int = true;
+  for (size_t i = 0; i < strlen(fullmoves); i++) {
+    if (!isdigit(fullmoves[i])) {
+      convertable_to_int = false;
+      break;
+    }
+  }
+  if (! convertable_to_int) {
+    fprintf(stderr, "Wrong fullmoves notation: %s.\n", fullmoves);
+    return false;
+  }
+
+  return true;
+}
+
 bool load_fen_position(const char* fen_pos)
 {
-  char fen[86];
+  if (!verify_fen_position(fen_pos)) return false;
+
+  char fen[FEN_MAX_LEN];
   strcpy(fen, fen_pos);
 
   // Get the sections
@@ -240,23 +367,38 @@ bool load_fen_position(const char* fen_pos)
   }
 
   // Process halfmoves and fullmoves
-  if (!isdigit(halfmoves[0])) {
+  bool convertable_to_int = true;
+  for (size_t i = 0; i < strlen(halfmoves); i++) {
+    if (!isdigit(halfmoves[i])) {
+      convertable_to_int = false;
+      break;
+    }
+  }
+  if (! convertable_to_int) {
     fprintf(stderr, "Wrong halfmoves notation: %s.\n", halfmoves);
     return false;
   }
-  chess_board.halfmoves = halfmoves[0] - '0';
+  chess_board.halfmoves = atoi(halfmoves);
 
-  if (!isdigit(fullmoves[0])) {
+  convertable_to_int = true;
+  for (size_t i = 0; i < strlen(fullmoves); i++) {
+    if (!isdigit(fullmoves[i])) {
+      convertable_to_int = false;
+      break;
+    }
+  }
+  if (! convertable_to_int) {
     fprintf(stderr, "Wrong fullmoves notation: %s.\n", fullmoves);
     return false;
   }
-  chess_board.fullmoves = fullmoves[0] - '0';
+  chess_board.fullmoves = atoi(fullmoves);
+
   return true;
 }
 
 void generate_fen_position(char* dest)
 {
-  char fen[86] = {0};
+  char fen[FEN_MAX_LEN] = {0};
 
   // Process each rank
   int j = !chess_board.board_flipped ? 0 : NS - 1;

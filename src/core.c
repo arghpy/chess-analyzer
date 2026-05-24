@@ -17,7 +17,6 @@ void process_menu_states(const Font* general_font, const Font* big_font)
 {
   ClearBackground(background_color);
   draw_chess_board(general_font);
-  process_keyboard_events();
   process_mouse_events();
 
   switch (menu_state) {
@@ -25,10 +24,27 @@ void process_menu_states(const Font* general_font, const Font* big_font)
       draw_title(general_font);
       draw_paste_fen_window(general_font);
       draw_paste_pgn_window(general_font);
-      draw_load_fen_pgn_button(general_font);
-      check_pieces_hovering();
+      draw_import_fen_pgn_button(general_font);
+      draw_moving_piece();
+      if (chess_board.state.piece_placed && game_state != PROMOTING) {
+        menu_state = ANALYSIS;
+        verify_if_any_legal_move(chess_board.color_turn);
+
+        // Full moves
+        if (ll_chess_move_current->prev != NULL && moving_piece.piece.color == W)
+          chess_board.fullmoves += 1;
+
+        moving_piece.sound   = chess_board.action_sound;
+        moving_piece.move_nr = chess_board.fullmoves;
+        generate_fen_position(moving_piece.fen);
+        generate_san(moving_piece.san);
+        ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
+        ll_chess_move_current = ll_chess_move_tail;
+        advance_game_parameters();
+      }
       break;
     case ANALYSIS:
+      process_keyboard_events();
       // Needs to be first such that writing can be displayed
       // even if it's only half displayed on screen
       draw_san_window(general_font);
