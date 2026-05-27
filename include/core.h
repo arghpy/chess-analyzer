@@ -1,21 +1,9 @@
 #ifndef CORE_H
 #define CORE_H
 
-#include <stdbool.h>
 #include "init.h"
-
-typedef enum {
-  PLAYING,
-  PROMOTING,
-  REWINDING,
-  DRAW,
-  CHECKMATE,
-} GameState;
-
-typedef enum {
-  MAIN,
-  ANALYSIS,
-} MenuState;
+#include "types.h"
+#include <stdbool.h>
 
 extern GameState game_state;
 extern MenuState menu_state;

@@ -2,8 +2,6 @@
 #include <stdio.h>
 #include "sound.h"
 
-#define MAX_SOUND_VOLUME 1.0f
-
 Sound game_sounds[SOUNDS_COUNT] = {0};
 
 void unload_sounds(void)

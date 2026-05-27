@@ -3,24 +3,8 @@
 
 #include "raylib.h"
 #include "init.h"
+#include "types.h"
 
-#define background_color   (Color){0x18, 0x18, 0x18, 0xFF}
-#define arrow_color        (Color){0xE5, 0x9E, 0x23, 0xD9}
-#define paste_window_color (Color){0x37, 0x36, 0x33, 0xFF}
-#define button_color       BROWN
-
-// extern float SQUARE_SIZE;
-
-typedef struct {
-  Vector2 direction;
-  Vector2 src;
-  Vector2 v1;
-  Vector2 v2;
-  Vector2 v3;
-  Color color;
-} Arrow;
-
-typedef ut_da_declare(Arrow) Arrows;
 extern Arrows drawn_arrows;
 
 void draw_paste_fen_window(const Font* font);
