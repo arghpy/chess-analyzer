@@ -1,5 +1,6 @@
 #include "core.h"
 #include "protocols/fen.h"
+#include "protocols/pgn.h"
 #include "raylib.h"
 #include "input.h"
 #include "init.h"

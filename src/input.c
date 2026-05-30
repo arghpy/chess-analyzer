@@ -37,7 +37,7 @@ void process_keyboard_events(void)
         }
 
         ll_chess_move_current = ll_chess_move_current->prev;
-        load_fen_position(ll_chess_move_current->value.fen);
+        load_fen(ll_chess_move_current->value.fen);
         chess_board.action_sound = ll_chess_move_current->value.sound;
       }
     }
@@ -57,7 +57,7 @@ void process_keyboard_events(void)
         }
 
         ll_chess_move_current = ll_chess_move_current->next;
-        load_fen_position(ll_chess_move_current->value.fen);
+        load_fen(ll_chess_move_current->value.fen);
         chess_board.action_sound = ll_chess_move_current->value.sound;
       }
     }

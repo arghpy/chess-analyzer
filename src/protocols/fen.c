@@ -13,6 +13,27 @@
 
 Positions positions = {0};
 
+bool modify_initial_fen(const char* fen)
+{
+  bool ret = false;
+  ret = load_fen(fen);
+  if (ret) {
+    // Modify existing node and load position
+    strcpy(ll_chess_move_head->value.fen, fen);
+    ll_chess_move_head->value.move_nr = -1;
+
+    if (chess_board.color_turn == B) {
+      moving_piece.move_nr = chess_board.fullmoves;
+      strcpy(moving_piece.fen, fen);
+      strcpy(moving_piece.san, "..");
+      moving_piece.move_nr = chess_board.fullmoves;
+      ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
+      ll_chess_move_current = ll_chess_move_tail;
+    }
+  }
+  return ret;
+}
+
 void add_fen_position(const char* fen)
 {
   Position p = {0};
@@ -26,7 +47,9 @@ void add_fen_position(const char* fen)
       if (strcmp(p.fen_p, positions.items[i].fen_p) == 0) {
         found = true;
         positions.items[i].c++;
-        if (positions.items[i].c == 3) game_state = DRAW;
+        if (positions.items[i].c == 3) {
+          game_state = DRAW;
+        }
         if (found || (game_state == DRAW)) break;
       }
     }
@@ -34,7 +57,7 @@ void add_fen_position(const char* fen)
   }
 }
 
-bool verify_fen_position(const char* fen_pos)
+bool verify_fen(const char* fen_pos)
 {
   char fen[FEN_MAX_LEN];
   strcpy(fen, fen_pos);
@@ -69,7 +92,7 @@ bool verify_fen_position(const char* fen_pos)
   while (rank != NULL) {
     for (size_t i = 0; i < strlen(rank); i++) {
       if (strchr("bknpqrBKNPQR12345678", rank[i]) == NULL) {
-        fprintf(stderr, "Unrecognized character: %c\n", rank[i]);
+        fprintf(stderr, "FEN: unrecognized character |%c| in string |%s|\n", rank[i], rank);
         return false;
       } else {
         if (! isdigit(rank[i])) column_c++;
@@ -159,9 +182,9 @@ bool verify_fen_position(const char* fen_pos)
   return true;
 }
 
-bool load_fen_position(const char* fen_pos)
+bool load_fen(const char* fen_pos)
 {
-  if (!verify_fen_position(fen_pos)) return false;
+  if (!verify_fen(fen_pos)) return false;
 
   char fen[FEN_MAX_LEN];
   strcpy(fen, fen_pos);
@@ -367,27 +390,13 @@ bool load_fen_position(const char* fen_pos)
   }
 
   // Process halfmoves and fullmoves
-  bool convertable_to_int = true;
-  for (size_t i = 0; i < strlen(halfmoves); i++) {
-    if (!isdigit(halfmoves[i])) {
-      convertable_to_int = false;
-      break;
-    }
-  }
-  if (! convertable_to_int) {
+  if (! str_is_number(halfmoves)) {
     fprintf(stderr, "Wrong halfmoves notation: %s.\n", halfmoves);
     return false;
   }
   chess_board.halfmoves = atoi(halfmoves);
 
-  convertable_to_int = true;
-  for (size_t i = 0; i < strlen(fullmoves); i++) {
-    if (!isdigit(fullmoves[i])) {
-      convertable_to_int = false;
-      break;
-    }
-  }
-  if (! convertable_to_int) {
+  if (! str_is_number(fullmoves)) {
     fprintf(stderr, "Wrong fullmoves notation: %s.\n", fullmoves);
     return false;
   }
@@ -396,7 +405,7 @@ bool load_fen_position(const char* fen_pos)
   return true;
 }
 
-void generate_fen_position(char* dest)
+void generate_fen(char* dest)
 {
   char fen[FEN_MAX_LEN] = {0};
 

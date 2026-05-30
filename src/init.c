@@ -35,12 +35,12 @@ bool initialize_chess_board(void)
       reset_square_color(&chess_board.squares[y][x]);
 
   // Basically start the linked list
+  moving_piece.move_nr = -1;
+  strcpy(moving_piece.fen, STARTING_POSITION);
   ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
-  strcpy(ll_chess_move_head->value.fen, STARTING_POSITION);
-  ll_chess_move_head->value.move_nr = -1;
   ll_chess_move_current = ll_chess_move_tail;
 
-  return load_fen_position(STARTING_POSITION);
+  return load_fen(STARTING_POSITION);
 }
 
 void load_pawn_promotions(void)

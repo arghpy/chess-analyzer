@@ -13,6 +13,11 @@ GameState game_state = PLAYING;
 MenuState menu_state = MAIN;
 bool found_placement_square = false;
 
+bool same_chess_piece(ChessPiece a, ChessPiece b)
+{
+  return (a.type == b.type && a.color == b.color);
+}
+
 void process_menu_states(const Font* general_font, const Font* big_font)
 {
   ClearBackground(background_color);
@@ -26,7 +31,7 @@ void process_menu_states(const Font* general_font, const Font* big_font)
       draw_paste_pgn_window(general_font);
       draw_import_fen_pgn_button(general_font);
       draw_moving_piece();
-      if (chess_board.state.piece_placed && game_state != PROMOTING) {
+      if (chess_board.state.piece_placed) {
         menu_state = ANALYSIS;
         verify_if_any_legal_move(chess_board.color_turn);
 
@@ -36,7 +41,7 @@ void process_menu_states(const Font* general_font, const Font* big_font)
 
         moving_piece.sound   = chess_board.action_sound;
         moving_piece.move_nr = chess_board.fullmoves;
-        generate_fen_position(moving_piece.fen);
+        generate_fen(moving_piece.fen);
         generate_san(moving_piece.san);
         ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
         ll_chess_move_current = ll_chess_move_tail;
@@ -67,7 +72,9 @@ void advance_game_parameters(void)
     chess_board.halfmoves = 0;
   else chess_board.halfmoves += 1;
 
-  if (chess_board.halfmoves == 50) game_state = DRAW;
+  if (chess_board.halfmoves == 50) {
+    game_state = DRAW;
+  }
 
   // Castling
   chess_board.castle.castled = NO;
@@ -99,7 +106,7 @@ void process_game_states(const Font* font)
 
         moving_piece.sound   = chess_board.action_sound;
         moving_piece.move_nr = chess_board.fullmoves;
-        generate_fen_position(moving_piece.fen);
+        generate_fen(moving_piece.fen);
         generate_san(moving_piece.san);
         ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
         ll_chess_move_current = ll_chess_move_tail;
@@ -119,7 +126,7 @@ void process_game_states(const Font* font)
 
         moving_piece.sound   = chess_board.action_sound;
         moving_piece.move_nr = chess_board.fullmoves;
-        generate_fen_position(moving_piece.fen);
+        generate_fen(moving_piece.fen);
         generate_san(moving_piece.san);
         ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
         ll_chess_move_current = ll_chess_move_tail;
@@ -186,6 +193,7 @@ void place_piece(void)
         } else {
           // Needed for verifying if current player is in check
           square_ptr->piece = moving_piece.piece;
+
           if (in_check(moving_piece.piece.color)) {
             chess_board.action_sound = ILLEGAL;
             square_ptr->piece = square_piece_copy;

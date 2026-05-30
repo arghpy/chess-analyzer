@@ -8,8 +8,9 @@
 
 extern Positions positions;
 
-bool verify_fen_position(const char* fen_pos);
-bool load_fen_position(const char* fen);
-void generate_fen_position(char* dest);
+bool modify_initial_fen(const char* fen);
+bool verify_fen(const char* fen_pos);
+bool load_fen(const char* fen);
+void generate_fen(char* dest);
 
 #endif

@@ -5,6 +5,10 @@
 #define STARTING_POSITION "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
 #define FEN_MAX_LEN 86
 
+// PGN
+// // 1miB
+#define PGN_MAX_LEN 1024*1024
+
 #define WINDOW_FACTOR 67.5
 #define WINDOW_WIDTH  (WINDOW_FACTOR * 16)
 #define WINDOW_HEIGHT (WINDOW_FACTOR * 9)

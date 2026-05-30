@@ -50,8 +50,11 @@ void generate_san(char* dest)
       move[len] = upper_piece_notation;
       move[len+1] = '\0';
 
+      // I have no idea anymore what is going on here with disambiguity
       PossibleMoves ps = {0};
       char disambiguity[3] = {0};
+      reset_chess_square(moving_piece.dest);
+      moving_piece.src->piece = moving_piece.piece;
 
       // Main iterator is on column in order to prioritize column notation
       for (int x = 0; x < NS; x++) {
@@ -59,10 +62,8 @@ void generate_san(char* dest)
           ChessSquare *s = &chess_board.squares[y][x];
           ChessSquare s_copy = chess_board.squares[y][x];
 
-          if (s == moving_piece.dest) continue;
-          if (s->piece.color == moving_piece.piece.color &&
-              s->piece.type == moving_piece.piece.type &&
-              is_legal_move(s, moving_piece.dest, s->piece)) {
+          if (s == moving_piece.src) continue; // In order to not be on same square, to travel dest -> dest
+          if (same_chess_piece(s->piece, moving_piece.piece) && is_legal_move(s, moving_piece.dest, s->piece)) {
             moving_piece.piece = s->piece;
             reset_chess_square(s);
             if (!in_check(moving_piece.piece.color)) {
@@ -110,6 +111,8 @@ void generate_san(char* dest)
       }
       ut_da_free(&ps);
       strcat(move, disambiguity);
+      reset_chess_square(moving_piece.src);
+      moving_piece.dest->piece = moving_piece.piece;
     }
     if (!chess_board.state.captured) {
       strncat(move, &row[xd], 1);
@@ -131,6 +134,7 @@ void generate_san(char* dest)
       move[len+1] = '\0';
     }
     if (in_check(chess_board.color_turn)) {
+      verify_if_any_legal_move(chess_board.color_turn);
       if (game_state == CHECKMATE) strcat(move, "#");
       else strcat(move, "+");
     }

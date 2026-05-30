@@ -1,12 +1,13 @@
-#include "render.h"
-#include "raymath.h"
-#include "utils.h"
+#include "core.h"
 #include "init.h"
 #include "protocols/fen.h"
+#include "protocols/pgn.h"
 #include "protocols/san.h"
 #include "raylib.h"
-#include "core.h"
+#include "raymath.h"
+#include "render.h"
 #include "rules/general.h"
+#include "utils.h"
 #include <math.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -44,8 +45,6 @@ float px(float v)
 
 void draw_paste_fen_window(const Font* font)
 {
-  if (paste_fen.text == NULL) paste_fen.text = malloc(FEN_MAX_LEN * sizeof(char));
-
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
   paste_fen.rect = (Rectangle) {
     .x      = px(title_r.x + font_height/2.0f),
@@ -65,11 +64,12 @@ void draw_paste_fen_window(const Font* font)
     .y = paste_fen.rect.y + paste_fen.rect.height / 2 - font_height / 2
   };
 
+  char window_text[10] = {0};
   if (! paste_fen.text_pasted) {
     if (! paste_fen.interacting) {
+      sprintf(window_text, "Paste FEN");
       paste_fen.frame_counter = 0;
-      strcpy(paste_fen.text, "Paste FEN");
-      Vector2 text_size = MeasureTextEx(*font, paste_fen.text, font->baseSize, 0);
+      Vector2 text_size = MeasureTextEx(*font, window_text, font->baseSize, 0);
       pos = (Vector2) {
         .x = paste_fen.rect.x + paste_fen.rect.width  / 2 - text_size.x / 2,
         .y = paste_fen.rect.y + paste_fen.rect.height / 2 - text_size.y / 2
@@ -78,20 +78,21 @@ void draw_paste_fen_window(const Font* font)
       if((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_V)) {
         const char *text = GetClipboardText();
         if (text != NULL && strlen(text) > 0) {
+          if (paste_fen.text == NULL) paste_fen.text = calloc(FEN_MAX_LEN, sizeof(char));
           strncpy(paste_fen.text, text, FEN_MAX_LEN);
           paste_fen.text_pasted = true;
           paste_fen.interacting = false;
           paste_fen.frame_counter = 0;
         }
       } else {
-        if ((paste_fen.frame_counter/20)%2 == 0) strcpy(paste_fen.text, "|");
-        else strcpy(paste_fen.text, "");
+        if ((paste_fen.frame_counter/20)%2 == 0) strcpy(window_text, "|");
+        else strcpy(window_text, "");
         paste_fen.frame_counter++;
       }
     }
   }
   BeginScissorMode(paste_fen.rect.x, paste_fen.rect.y, paste_fen.rect.width, paste_fen.rect.height);
-  DrawTextEx(*font, paste_fen.text, pos, font->baseSize, 0, WHITE);
+  DrawTextEx(*font, paste_fen.text == NULL ? window_text : paste_fen.text, pos, font->baseSize, 0, WHITE);
   EndScissorMode();
 }
 
@@ -106,13 +107,46 @@ void draw_paste_pgn_window(const Font* font)
   };
   DrawRectangleRounded(paste_pgn.rect, 0.08f, 8, paste_window_color);
 
-  paste_pgn.text = "Paste PGN";
-  Vector2 text_size = MeasureTextEx(*font, paste_pgn.text, font->baseSize, 0);
+  if (IsMouseButtonPressed(MOUSE_LEFT_BUTTON)) {
+    if (CheckCollisionPointRec(GetMousePosition(), paste_pgn.rect)) paste_pgn.interacting = true;
+    else paste_pgn.interacting = false;
+  }
+
   Vector2 pos = {
-    .x = paste_pgn.rect.x + paste_pgn.rect.width  / 2 - text_size.x / 2,
-    .y = paste_pgn.rect.y + paste_pgn.rect.height / 2 - text_size.y / 2
+    .x = paste_pgn.rect.x,
+    .y = paste_pgn.rect.y
   };
-  DrawTextEx(*font, paste_pgn.text, pos, font->baseSize, 0, WHITE);
+
+  char window_text[10] = {0};
+  if (! paste_pgn.text_pasted) {
+    if (! paste_pgn.interacting) {
+      sprintf(window_text, "Paste PGN");
+      paste_pgn.frame_counter = 0;
+      Vector2 text_size = MeasureTextEx(*font, window_text, font->baseSize, 0);
+      pos = (Vector2) {
+        .x = paste_pgn.rect.x + paste_pgn.rect.width  / 2 - text_size.x / 2,
+        .y = paste_pgn.rect.y + paste_pgn.rect.height / 2 - text_size.y / 2
+      };
+    } else {
+      if((IsKeyDown(KEY_LEFT_CONTROL) || IsKeyDown(KEY_RIGHT_CONTROL)) && IsKeyPressed(KEY_V)) {
+        const char *text = GetClipboardText();
+        if (text != NULL && strlen(text) > 0) {
+          if (paste_pgn.text == NULL) paste_pgn.text = calloc(PGN_MAX_LEN, sizeof(char));
+          strncpy(paste_pgn.text, text, PGN_MAX_LEN);
+          paste_pgn.text_pasted = true;
+          paste_pgn.interacting = false;
+          paste_pgn.frame_counter = 0;
+        }
+      } else {
+        if ((paste_pgn.frame_counter/20)%2 == 0) strcpy(window_text, "|");
+        else strcpy(window_text, "");
+        paste_pgn.frame_counter++;
+      }
+    }
+  }
+  BeginScissorMode(paste_pgn.rect.x, paste_pgn.rect.y, paste_pgn.rect.width, paste_pgn.rect.height);
+  DrawTextEx(*font, paste_pgn.text == NULL ? window_text : paste_pgn.text, pos, font->baseSize, 0, WHITE);
+  EndScissorMode();
 }
 
 void draw_import_fen_pgn_button(const Font* font)
@@ -145,26 +179,17 @@ void draw_import_fen_pgn_button(const Font* font)
     }
     if (IsMouseButtonReleased(MOUSE_LEFT_BUTTON)) {
       if (paste_fen.text != NULL) {
-        if (verify_fen_position(paste_fen.text)) {
-          load_fen_position(paste_fen.text);
-
-          // Modify existing node and load position
-          strcpy(ll_chess_move_head->value.fen, paste_fen.text);
-          ll_chess_move_head->value.move_nr = -1;
-
-          if (chess_board.color_turn == B) {
-            moving_piece.move_nr = chess_board.fullmoves;
-            strcpy(moving_piece.fen, paste_fen.text);
-            strcpy(moving_piece.san, "..");
-            moving_piece.move_nr = chess_board.fullmoves;
-            ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
-            ll_chess_move_current = ll_chess_move_tail;
-          }
-
-          free(paste_fen.text);
-          menu_state = ANALYSIS;
-        } else strcpy(paste_fen.text, "");
+        if (modify_initial_fen(paste_fen.text)) menu_state = ANALYSIS;
+        free(paste_fen.text);
+        paste_fen.text = NULL;
         paste_fen.text_pasted = false;
+      } else {
+        if (paste_pgn.text != NULL) {
+          load_pgn(paste_pgn.text);
+          free(paste_pgn.text);
+          paste_pgn.text = NULL;
+          menu_state = ANALYSIS;
+        }
       }
       import_fen_pgn.interacting = false;
     }
@@ -403,7 +428,6 @@ void draw_san_text_moves(const Font* font, float offset)
 
   // Skip starting position
   ChessMoveNode *ll_n = ll_chess_move_head->next;
-  // ChessMoveNode *ll_n = ll_chess_move_head->next;
   char notation[64] = {0};
   while (ll_n != NULL) {
     char tmp[64] = {0};
@@ -426,15 +450,23 @@ void draw_san_text_moves(const Font* font, float offset)
       strcat(notation, tmp);
     }
 
+    int relative_move_nr = ll_chess_move_head->next->value.move_nr == 1 ?
+                           ll_n->value.move_nr - 1 :
+                           ll_n->value.move_nr - ll_chess_move_head->next->value.move_nr;
+
     Vector2 text_pos = {
       .x = san_r.x + spacing,
-      .y = san_r.y + font_height * (ll_n->value.move_nr - 1) - offset,
+      .y = san_r.y + font_height * relative_move_nr - offset,
     };
 
     if (strcmp(notation, "") > 0)
       // Don't write if not visible
       if ((text_pos.y + font_height) >= san_r.y && text_pos.y <= (san_r.y + san_r.height))
         DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);
+
+    // if (strcmp(ll_chess_move_current->value.san, ll_n->value.san)) {
+    //   DrawRectangleLines(text_pos.x, text_pos.y, MeasureTextEx(*font, notation, font->baseSize, 0).x, font_height, WHITE);
+    // }
 
     if (ll_n->next != NULL) ll_n = ll_n->next->next;
     else ll_n = NULL;
@@ -451,7 +483,11 @@ void draw_san_window(const Font *font)
   };
   float font_height = MeasureTextEx(*font, "1", font->baseSize, 0).y;
 
-  float san_text_height = font_height * ll_chess_move_tail->value.move_nr;
+  int relative_move_nr = ll_chess_move_tail->value.move_nr;
+  if (ll_chess_move_head->next->value.move_nr != 1)
+    relative_move_nr = ll_chess_move_tail->value.move_nr - ll_chess_move_head->next->value.move_nr;
+
+  float san_text_height = font_height * relative_move_nr;
 
   static float offset = 0.0f;
   static float scrollbar_target = 0.0f;
