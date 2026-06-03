@@ -459,14 +459,32 @@ void draw_san_text_moves(const Font* font, float offset)
       .y = san_r.y + font_height * relative_move_nr - offset,
     };
 
-    if (strcmp(notation, "") > 0)
-      // Don't write if not visible
-      if ((text_pos.y + font_height) >= san_r.y && text_pos.y <= (san_r.y + san_r.height))
-        DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);
 
-    // if (strcmp(ll_chess_move_current->value.san, ll_n->value.san)) {
-    //   DrawRectangleLines(text_pos.x, text_pos.y, MeasureTextEx(*font, notation, font->baseSize, 0).x, font_height, WHITE);
-    // }
+    if (strcmp(notation, "") > 0) {
+      // Don't write if not visible
+      if ((text_pos.y + font_height) >= san_r.y && text_pos.y <= (san_r.y + san_r.height)) {
+        // This is in order to prevent matching 'h4' to 'h4' and 'Qh4'
+        char tmp_san[10] = {0};
+        tmp_san[0] = ' ';
+        strcat(tmp_san, ll_chess_move_current->value.san);
+        char* current_san = strstr(notation, tmp_san);
+        if (current_san && ll_chess_move_current->value.move_nr == ll_n->value.move_nr) {
+          current_san = current_san + 1;
+          float san_length          = MeasureTextEx(*font, ll_chess_move_current->value.san, font->baseSize, 0).x;
+          float notation_length     = MeasureTextEx(*font, notation, font->baseSize, 0).x;
+          float san_position_length = MeasureTextEx(*font, current_san, font->baseSize, 0).x;
+          Rectangle r = {
+            .x = text_pos.x + notation_length - san_position_length,
+            .y = text_pos.y,
+            .width = san_length,
+            .height = font_height,
+          };
+          DrawRectangleRec(r, GRAY);
+        }
+        DrawTextEx(*font, notation, text_pos, font->baseSize, 0, WHITE);
+      }
+    }
+
 
     if (ll_n->next != NULL) ll_n = ll_n->next->next;
     else ll_n = NULL;
