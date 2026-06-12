@@ -796,7 +796,7 @@ void draw_board_coordinates(const Font *font)
 
 void draw_piece(const ChessSquare *square)
 {
-  float piece_size = SQUARE_SIZE * 0.9;
+  float piece_size = roundf(SQUARE_SIZE * 0.9);
 
   Rectangle rect = square->rect;
   Texture2D *piece_texture = &chess_pieces_texture[2*(square->piece.type - 1) + square->piece.color - 1];
@@ -808,8 +808,8 @@ void draw_piece(const ChessSquare *square)
   };
 
   Rectangle dest = {
-    rect.x + (SQUARE_SIZE / 2.0f - piece_size / 2),
-    rect.y + (SQUARE_SIZE / 2.0f - piece_size / 2),
+    roundf(rect.x + (SQUARE_SIZE / 2.0f - piece_size / 2)),
+    roundf(rect.y + (SQUARE_SIZE / 2.0f - piece_size / 2)),
     piece_size,
     piece_size
   };

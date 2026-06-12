@@ -71,7 +71,9 @@ bool load_chess_pieces(void)
       fprintf(stderr, "Texture not valid: %s:%d.\n", __FILE__, __LINE__ - 3 - TEXTURE_COUNT + i);
       return false;
     }
-    SetTextureFilter(chess_pieces_texture[i], TEXTURE_FILTER_BILINEAR);
+    GenTextureMipmaps(&chess_pieces_texture[i]);
+    SetTextureWrap(chess_pieces_texture[i], TEXTURE_WRAP_CLAMP);
+    SetTextureFilter(chess_pieces_texture[i], TEXTURE_FILTER_TRILINEAR);
   }
   return true;
 }
