@@ -1,14 +1,42 @@
-#include "input.h"
 #include "core.h"
+#include "globals.h"
+#include "init.h"
+#include "input.h"
 #include "protocols/fen.h"
 #include "protocols/san.h"
 #include "raylib.h"
 #include "raymath.h"
-#include "init.h"
 #include "render.h"
-#include <stdio.h>
 #include <stddef.h>
+#include <stdio.h>
 #include <sys/time.h>
+
+typedef struct {
+  int key;
+  bool pressing;
+  struct timeval start;
+  struct timeval end;
+} KeyPressed;
+
+float get_time_key_pressed(KeyPressed* key_pressed)
+{
+  float result = 0;
+  if (IsKeyDown(key_pressed->key) || key_pressed->pressing) {
+    if (key_pressed->pressing == false) gettimeofday(&key_pressed->start, NULL);
+    key_pressed->pressing = true;
+
+    gettimeofday(&key_pressed->end, NULL);
+    result = (key_pressed->end.tv_sec - key_pressed->start.tv_sec) * 1000000 + (key_pressed->end.tv_usec - key_pressed->start.tv_usec);
+
+    if (IsKeyReleased(key_pressed->key)) {
+      key_pressed->pressing = false;
+      key_pressed->start    = (struct timeval){0};
+      key_pressed->end      = (struct timeval){0};
+    }
+  }
+  result /= 1000000.0; // Seconds
+  return result; // Seconds
+}
 
 void process_keyboard_events(void)
 {
@@ -22,7 +50,9 @@ void process_keyboard_events(void)
   }
 
   // Cycle through moves
-  if (IsKeyPressed(KEY_LEFT)) {
+  static KeyPressed key_left_pressed = {0};
+  key_left_pressed.key = KEY_LEFT;
+  if (IsKeyPressed(KEY_LEFT) || (get_time_key_pressed(&key_left_pressed) > 0.3 && frames_passed % 10 == 0)) {
     if (ll_chess_move_current != NULL) {
       if (ll_chess_move_current->prev != NULL) {
         game_state = REWINDING;
@@ -42,7 +72,9 @@ void process_keyboard_events(void)
       }
     }
   }
-  if (IsKeyPressed(KEY_RIGHT)) {
+  static KeyPressed key_right_pressed = {0};
+  key_right_pressed.key = KEY_RIGHT;
+  if (IsKeyPressed(KEY_RIGHT) || (get_time_key_pressed(&key_right_pressed) > 0.3 && frames_passed % 10 == 0)) {
     if (ll_chess_move_current != NULL) {
       if (ll_chess_move_current->next != NULL) {
         game_state = REWINDING;
@@ -62,27 +94,6 @@ void process_keyboard_events(void)
       }
     }
   }
-}
-
-long int get_time_key_pressed(int key)
-{
-  long int result = 0;
-  static bool pressing = false;
-  if (IsMouseButtonDown(key) || pressing) {
-    static struct timeval start, end = {0};
-
-    if (pressing == false) gettimeofday(&start, NULL);
-    pressing = true;
-
-    if (IsMouseButtonReleased(key)) {
-      gettimeofday(&end, NULL);
-      result = (end.tv_sec - start.tv_sec) * 1000000 + (end.tv_usec - start.tv_usec);
-      pressing = false;
-      start    = (struct timeval){0};
-      end      = (struct timeval){0};
-    }
-  }
-  return result;
 }
 
 void process_mouse_right_button(void)

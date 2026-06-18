@@ -1,19 +1,22 @@
 #include "core.h"
+#include "globals.h"
+#include "init.h"
+#include "input.h"
 #include "protocols/fen.h"
 #include "protocols/pgn.h"
 #include "raylib.h"
-#include "input.h"
-#include "init.h"
 #include "render.h"
 #include "sound.h"
 #include <stdbool.h>
 #include <stdio.h>
 
+#define TARGET_FPS 60
+
 int main(void)
 {
   SetTraceLogLevel(LOG_ERROR);
   InitWindow(WINDOW_WIDTH, WINDOW_HEIGHT, "Chess analyzer");
-  SetTargetFPS(60);
+  SetTargetFPS(TARGET_FPS);
 
   char *font_path = "./assets/fonts/JetBrainsMono-Bold.ttf";
   Font general_font = LoadFontEx(font_path, SQUARE_SIZE * 0.3f, NULL, 0);
@@ -36,6 +39,8 @@ int main(void)
 
   if (init) {
     while(!WindowShouldClose()) {
+      if (frames_passed % TARGET_FPS == 0) frames_passed = 0;
+      frames_passed += 1;
       BeginDrawing();
       {
         process_menu_states(&general_font, &big_font);
