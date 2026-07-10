@@ -592,11 +592,29 @@ void draw_piece_on_mouse(void)
   draw_piece(&s);
 }
 
+void highlight_square(void)
+{
+  bool found = false;
+  ChessSquare square = {0};
+  for (int y = 0; y < NS; y++) {
+    for (int x = 0; x < NS; x++) {
+      square = chess_board.squares[y][x];
+      if (CheckCollisionPointCircle(GetMousePosition(), square.center_proximity.center, square.center_proximity.r)) {
+        found = true;
+        break;
+      }
+    }
+    if (found) break;
+  }
+  if (found) DrawRectangleLinesEx(square.rect, 3.0f, WHITE);
+}
+
 void draw_drag_and_place(void)
 {
   dragging = dragging ? dragging : is_dragging_piece();
 
   if (dragging) {
+    highlight_square();
     draw_piece_on_mouse();
 
     if (IsMouseButtonReleased(MOUSE_BUTTON_LEFT)) {
