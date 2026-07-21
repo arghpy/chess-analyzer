@@ -1,6 +1,7 @@
 #include "core.h"
 #include "protocols/fen.h"
 #include "protocols/san.h"
+#include "protocols/uci.h"
 #include "render.h"
 #include "raylib.h"
 #include "rules/general.h"
@@ -43,6 +44,7 @@ void process_menu_states(const Font* general_font, const Font* big_font)
         moving_piece.move_nr = chess_board.fullmoves;
         generate_fen(moving_piece.fen);
         generate_san(moving_piece.san);
+        generate_uci_move(moving_piece.uci_move);
         ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
         ll_chess_move_current = ll_chess_move_tail;
         advance_game_parameters();
@@ -108,6 +110,7 @@ void process_game_states(const Font* font)
         moving_piece.move_nr = chess_board.fullmoves;
         generate_fen(moving_piece.fen);
         generate_san(moving_piece.san);
+        generate_uci_move(moving_piece.uci_move);
         ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
         ll_chess_move_current = ll_chess_move_tail;
         advance_game_parameters();
@@ -128,6 +131,7 @@ void process_game_states(const Font* font)
         moving_piece.move_nr = chess_board.fullmoves;
         generate_fen(moving_piece.fen);
         generate_san(moving_piece.san);
+        generate_uci_move(moving_piece.uci_move);
         ut_ll_push(ChessMoveNode, ll_chess_move_head, moving_piece, ll_chess_move_tail);
         ll_chess_move_current = ll_chess_move_tail;
 

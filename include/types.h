@@ -140,6 +140,7 @@ typedef struct {
   ChessSquare *src;
   ChessSquare *dest;
   char san[8];
+  char uci_move[6];
   ChessPiece piece;
   GameSound sound;
   char fen[FEN_MAX_LEN];
