@@ -1,0 +1,20 @@
+#ifndef CORE_H
+#define CORE_H
+
+#include "init.h"
+#include "types.h"
+#include <stdbool.h>
+
+extern GameState game_state;
+extern MenuState menu_state;
+bool same_chess_piece(ChessPiece a, ChessPiece b);
+void process_menu_states(const Font* general_font, const Font* big_font);
+void reset_chess_square(ChessSquare *square);
+void place_piece(void);
+void process_game_states(const Font* font);
+void advance_game_parameters(void);
+void reset_square_color(ChessSquare *s);
+void reset_square_color_chess_move(ChessMoveNode *node);
+void change_chess_board_turn(void);
+
+#endif
